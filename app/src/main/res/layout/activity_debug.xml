@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    android:scrollIndicators="end"
+    android:scrollbars="vertical"
+    tools:ignore="UnusedAttribute">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/spacing_normal">
+
+        <TextView
+            android:id="@+id/tv_title_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/input_environment_serial"
+            android:textColor="?colorPrimary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <xjunz.tool.wechat.ui.customview.NestedEditText
+            android:id="@+id/et_serial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:background="@drawable/bg_edit_box"
+            android:gravity="top"
+            android:inputType="textMultiLine"
+            android:lines="8"
+            android:padding="@dimen/spacing_unit"
+            android:scrollbars="vertical"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            app:layout_constraintTop_toBottomOf="@id/tv_title_1"
+            tools:ignore="Autofill,LabelFor" />
+
+        <Button
+            style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="parseEnvInfo"
+            android:text="@string/parse"
+            app:layout_constraintBottom_toBottomOf="@+id/et_serial"
+            app:layout_constraintEnd_toEndOf="@+id/et_serial" />
+
+        <TextView
+            android:id="@+id/tv_title_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:gravity="top"
+            android:text="@string/environment_info_output"
+            android:textColor="?colorPrimary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/et_serial" />
+
+        <xjunz.tool.wechat.ui.customview.NestedEditText
+            android:id="@+id/et_output"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:background="@drawable/bg_edit_box"
+            android:focusable="false"
+            android:gravity="top"
+            android:lines="20"
+            android:padding="@dimen/spacing_unit"
+            android:scrollbars="vertical"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            app:layout_constraintTop_toBottomOf="@id/tv_title_2"
+            tools:ignore="Autofill,LabelFor" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.core.widget.NestedScrollView>

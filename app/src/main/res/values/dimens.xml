@@ -1,0 +1,31 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="dp_1">1dp</dimen>
+    <dimen name="dp_2">2dp</dimen>
+    <dimen name="dp_4">4dp</dimen>
+    <dimen name="dp_6">6dp</dimen>
+    <dimen name="dp_12">12dp</dimen>
+    <dimen name="spacing_unit">8dp</dimen>
+    <dimen name="spacing_normal">16dp</dimen>
+    <dimen name="spacing_large">32dp</dimen>
+    <dimen name="fab_small">40dp</dimen>
+    <dimen name="r_fab_small">20dp</dimen>
+    <dimen name="minus_r_fab_small">-20dp</dimen>
+    <dimen name="fab_medium">48dp</dimen>
+    <dimen name="fab_normal">56dp</dimen>
+    <dimen name="fab_normal_radius">28dp</dimen>
+    <dimen name="fab_normal_radius_minus">-28dp</dimen>
+    <dimen name="z_toolbar">2.5dp</dimen>
+    <dimen name="z_bottom_bar">6dp</dimen>
+    <dimen name="z_popup">3dp</dimen>
+    <dimen name="z_card">2dp</dimen>
+    <dimen name="z_dialog">10dp</dimen>
+    <dimen name="z_fab">4dp</dimen>
+    <dimen name="z_item">1.5dp</dimen>
+    <dimen name="corner_card">2dp</dimen>
+    <dimen name="corner_dialog">4dp</dimen>
+    <dimen name="corner_button">2dp</dimen>
+    <dimen name="ts_medium">20sp</dimen>
+    <dimen name="dp_48">48dp</dimen>
+    <dimen name="dp_20">20dp</dimen>
+</resources>

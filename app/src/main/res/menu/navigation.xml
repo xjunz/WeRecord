@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/item_chat"
+        android:checked="true"
+        android:icon="@drawable/ic_chat_squashed"
+        android:title="@string/chat" />
+    <item
+        android:id="@+id/item_contact"
+        android:icon="@drawable/ic_contacts_24dp"
+        android:title="@string/contacts" />
+    <item
+        android:id="@+id/item_mine"
+        android:icon="@drawable/ic_mine_24dp"
+        android:title="@string/mine" />
+</menu>

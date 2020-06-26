@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <transition
+        class="xjunz.tool.wechat.ui.transition.MorphFabToDialog"
+        android:duration="300"
+        android:interpolator="@android:interpolator/fast_out_slow_in"
+        app:endCornerRadius="@dimen/corner_card"
+        app:startColor="@color/colorAccent" />
+
+    <targets>
+        <target android:targetId="@+id/cl_filter" />
+    </targets>
+</transitionSet>

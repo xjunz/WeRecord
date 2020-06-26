@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="talker_sorts">
+        <item>按名称</item>
+        <item>按时间</item>
+        <item>按消息数量</item>
+    </string-array>
+    <string-array name="contact_sort">
+        <item>按名称</item>
+    </string-array>
+    <string-array name="category_talker">
+        <item>@string/all_bracketed</item>
+        <item>@string/friend</item>
+        <item>@string/group</item>
+        <item>@string/gzh</item>
+    </string-array>
+    <string-array name="category_contact">
+        <item>@string/all_bracketed</item>
+        <item>@string/friend</item>
+        <item>@string/deleted_friend</item>
+        <item>@string/stranger</item>
+        <item>@string/joined_group</item>
+        <item>@string/quited_group</item>
+        <item>@string/following_gzh</item>
+        <item>@string/unfollowed_gzh</item>
+        <item>@string/official</item>
+    </string-array>
+    <string-array name="orders">
+        <item>升序</item>
+        <item>降序</item>
+    </string-array>
+    <string-array name="bottom_item_captions">
+        <item>@string/chat</item>
+        <item>@string/contacts</item>
+        <item>@string/mine</item>
+    </string-array>
+    <integer-array name="bottom_item_images">
+        <item>@drawable/ic_chat_squashed</item>
+        <item>@drawable/ic_contacts_24dp</item>
+        <item>@drawable/ic_mine_24dp</item>
+    </integer-array>
+    <string name="gzh">公众号</string>
+    <string name="joined_group">加入的群聊</string>
+</resources>

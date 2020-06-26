@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="FabTransform">
+        <attr name="startColor" format="color|reference" />
+        <attr name="endColor" format="color|reference" />
+        <attr name="endCornerRadius" format="dimension|reference" />
+        <attr name="startCornerRadius" format="dimension|reference" />
+
+    </declare-styleable>
+    <declare-styleable name="FabRevealTransform">
+        <attr name="fabColor" format="color|reference" />
+        <attr name="fabIcon" format="reference" />
+    </declare-styleable>
+    <declare-styleable name="BottomBar">
+        <attr name="imageEntries" format="reference" />
+        <attr name="captionEntries" format="reference" />
+    </declare-styleable>
+</resources>

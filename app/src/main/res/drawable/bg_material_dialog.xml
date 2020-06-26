@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:inset="@dimen/spacing_large">
+    <layer-list>
+        <item>
+            <shape android:shape="rectangle">
+                <corners android:radius="@dimen/corner_dialog" />
+                <solid android:color="@android:color/white" />
+            </shape>
+        </item>
+        <item>
+            <inset android:insetTop="@dimen/dp_2">
+                <shape android:shape="rectangle">
+                    <corners android:radius="@dimen/corner_dialog" />
+                    <solid android:color="#E9E9E9" />
+                </shape>
+            </inset>
+        </item>
+        <item>
+            <inset android:insetBottom="@dimen/dp_2">
+                <shape android:shape="rectangle">
+                    <corners android:radius="@dimen/corner_dialog" />
+                    <solid android:color="#F8F8F8" />
+                </shape>
+            </inset>
+        </item>
+
+    </layer-list>
+</inset>

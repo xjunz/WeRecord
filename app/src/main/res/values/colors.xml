@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorAccent">#008577</color>
+    <color name="colorAccentWeak">#30008577</color>
+    <color name="colorAccentDark">#00574B</color>
+    <color name="colorMask">#40000000</color>
+    <color name="colorToast">#A0000000</color>
+    <color name="colorPrimary">@android:color/white</color>
+    <color name="colorPrimaryDark">#BCBCBC</color>
+    <color name="colorAccentBlind">#80C0BB</color>
+    <color name="colorTintDark">#626262</color>
+</resources>

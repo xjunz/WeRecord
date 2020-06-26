@@ -1,0 +1,126 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorControlHighlight">@color/colorAccentWeak</item>
+        <item name="android:buttonStyle">@style/Widget.AppCompat.Button.Normal</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorButtonNormal">@color/button_normal</item>
+        <item name="alertDialogTheme">@style/Theme.AppCompat.Light.Dialog.Alert.Material
+        </item>
+        <item name="android:colorBackground">@android:color/white</item>
+        <item name="colorControlNormal">?colorAccent</item>
+        <item name="colorControlActivated">?colorAccent</item>
+        <item name="android:textColorHighlight">?colorControlHighlight</item>
+        <item name="android:ambientShadowAlpha">.039</item>
+        <item name="android:spotShadowAlpha">.089</item>
+        <item name="android:navigationBarColor">?colorPrimary</item>
+    </style>
+
+    <style name="AppTheme.Main">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">?colorPrimaryDark</item>
+    </style>
+
+    <style name="AppTheme.Intro">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+    <style name="AppTheme.Main.Translucent">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@color/colorMask</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.Main.Translucent.Filter">
+        <item name="android:windowSharedElementEnterTransition">@transition/filter_shared_enter_2
+        </item>
+
+    </style>
+
+    <style name="Theme.AppCompat.Light.DialogWhenLarge.Material">
+        <item name="colorButtonNormal">@color/button_normal</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.AppCompat.Button.Normal.Flat.Small
+        </item>
+        <item name="buttonBarNegativeButtonStyle">
+            @style/Widget.AppCompat.Button.Borderless.Colored.Small
+        </item>
+        <item name="buttonBarNeutralButtonStyle">
+            @style/Widget.AppCompat.Button.Borderless.Colored.Small
+        </item>
+        <item name="android:navigationBarColor">?colorPrimaryDark</item>
+        <item name="android:windowAnimationStyle">@style/Sade</item>
+    </style>
+
+    <style name="Theme.AppCompat.Light.Dialog.Alert.Material">
+        <item name="colorButtonNormal">@color/button_normal</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="android:windowMinWidthMajor">60%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.AppCompat.Button.Normal.Flat.Small
+        </item>
+        <item name="buttonBarNegativeButtonStyle">
+            @style/Widget.AppCompat.Button.Borderless.Colored.Small
+        </item>
+        <item name="buttonBarNeutralButtonStyle">
+            @style/Widget.AppCompat.Button.Borderless.Colored.Small
+        </item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.25</item>
+        <item name="android:windowAnimationStyle">@style/Sade</item>
+        <item name="android:windowBackground">@drawable/bg_material_dialog</item>
+    </style>
+
+    <!-- normal-sized button style (for normal usage) -->
+    <style name="Widget.AppCompat.Button.Normal">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@drawable/bg_btn_normal</item>
+    </style>
+
+    <!-- flat button style -->
+    <style name="Widget.AppCompat.Button.Normal.Flat">
+        <item name="android:stateListAnimator">@animator/flat_raise</item>
+    </style>
+
+    <!-- flat small-sized button style (such as positive dialog button) -->
+    <style name="Widget.AppCompat.Button.Normal.Flat.Small">
+        <item name="android:background">@drawable/bg_btn_small</item>
+    </style>
+
+
+    <!-- borderless small-sized button style (such as negative dialog button) -->
+    <style name="Widget.AppCompat.Button.Borderless.Colored.Small">
+        <item name="android:background">@drawable/bg_btn_borderless_small</item>
+        <item name="android:textColor">?attr/colorAccent</item>
+    </style>
+
+    <!-- flat small-sized button with frame (such as negative dialog button) -->
+    <style name="Widget.AppCompat.Button.Borderless.Colored.Small.Framed">
+        <item name="android:background">@drawable/bg_btn_framed_small</item>
+    </style>
+
+    <!-- borderless button style -->
+    <style name="Widget.AppCompat.Button.Borderless.Colored.Normal">
+        <item name="android:background">@drawable/bg_btn_borderless_normal</item>
+    </style>
+
+    <style name="Widget.AppCompat.Spinner.Underlined.Filter">
+        <item name="android:popupElevation">@dimen/z_popup</item>
+    </style>
+
+
+    <!-- a "s"-cale and f-"ade" animation for window transition-->
+    <style name="Sade" parent="@android:style/Animation">
+        <item name="android:windowEnterAnimation">@anim/dialog_enter</item>
+        <item name="android:windowExitAnimation">@anim/dialog_exit</item>
+    </style>
+
+
+</resources>

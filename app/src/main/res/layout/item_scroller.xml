@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tv_text"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:background="@drawable/bg_selectable_item"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center"
+    android:padding="@dimen/dp_12"
+    android:textStyle="bold"
+    tools:text="A" />
