@@ -4,8 +4,10 @@ import androidx.annotation.NonNull;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
@@ -54,12 +56,25 @@ public class Talker extends Contact {
      * 包括三种类型：{@link Type#FRIEND}好友、{@link Type#GROUP}群聊、{@link Type#GZH}公众号
      */
     public enum Type {
-        //NOTE: 不要随意改变顺序
-        FRIEND, GROUP, GZH;
+        FRIEND(R.string.friend), GROUP(R.string.group), GZH(R.string.gzh);
+        public String caption;
+
+        Type(int captionRes) {
+            this.caption = App.getStringOf(captionRes);
+        }
+
+        public static List<String> getCaptionList() {
+            List<String> captions = new ArrayList<>();
+            for (Type type : Type.values()) {
+                captions.add(type.caption);
+            }
+            return captions;
+        }
     }
 
     /**
      * 设置排序依据和顺序，用于{@link Talker#compareTo(Contact)}
+     * 这个方法必须在每次调用{@link Talker#compareTo(Contact)}之前调用，否则可能会使用上一次的配置
      *
      * @param by          排序依据
      * @param isAscending 是否升序

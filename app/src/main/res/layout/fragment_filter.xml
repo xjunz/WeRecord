@@ -1,188 +1,222 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="@dimen/spacing_normal">
+<?xml version="1.0" encoding="utf-8"?><!--suppress AndroidUnknownAttribute -->
+<!-- android:selection 属性无法被IDE识别，但是此属性已经在AdapterViewBindingAdapter中声明，且可正常使用-->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <Space
-        android:id="@+id/space_center"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:popupElevation="@dimen/z_popup"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <data>
 
-    <TextView
-        android:id="@+id/tv_caption_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="名称"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <import type="android.text.Html" />
 
-    <Spinner
-        android:id="@+id/sp_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_unit"
-        android:layout_marginEnd="@dimen/spacing_unit"
-        android:popupElevation="@dimen/z_popup"
-        app:layout_constraintEnd_toStartOf="@+id/space_center"
-        app:layout_constraintStart_toStartOf="@id/tv_caption_name"
-        app:layout_constraintTop_toBottomOf="@+id/tv_caption_name" />
+        <import type="xjunz.tool.wechat.ui.activity.main.model.SortBy" />
 
-    <TextView
-        android:id="@+id/tv_caption_category"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="类型"
-        app:layout_constraintStart_toEndOf="@+id/space_center"
-        app:layout_constraintTop_toTopOf="@+id/tv_caption_name" />
+        <import type="xjunz.tool.wechat.ui.activity.main.databinding.Converter" />
 
-    <Spinner
-        android:id="@+id/sp_category"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_unit"
-        android:layout_marginEnd="@dimen/spacing_unit"
-        android:popupElevation="@dimen/z_popup"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/tv_caption_category"
-        app:layout_constraintTop_toBottomOf="@+id/tv_caption_category" />
+        <variable
+            name="model"
+            type="xjunz.tool.wechat.ui.activity.main.model.FilterViewModel" />
+    </data>
 
-    <TextView
-        android:id="@+id/tv_caption_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_normal"
-        android:text="时间"
-        app:layout_constraintStart_toStartOf="@+id/sp_name"
-        app:layout_constraintTop_toBottomOf="@+id/sp_name" />
-
-    <Spinner
-        android:id="@+id/sp_time"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_unit"
-        android:layout_marginEnd="@dimen/spacing_unit"
-        android:popupElevation="@dimen/z_popup"
-        app:layout_constraintEnd_toStartOf="@+id/space_center"
-        app:layout_constraintStart_toStartOf="@id/tv_caption_time"
-        app:layout_constraintTop_toBottomOf="@+id/tv_caption_time" />
-
-    <TextView
-        android:id="@+id/tv_caption_msg_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_normal"
-        android:text="消息数量"
-        app:layout_constraintStart_toEndOf="@+id/space_center"
-        app:layout_constraintTop_toBottomOf="@id/sp_category" />
-
-    <Spinner
-        android:id="@+id/sp_msg_count"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_unit"
-        android:layout_marginEnd="@dimen/spacing_unit"
-        android:popupElevation="@dimen/z_popup"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/tv_caption_msg_count"
-        app:layout_constraintTop_toBottomOf="@+id/tv_caption_msg_count" />
-
-
-    <View
-        android:id="@+id/divider_bottom"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_marginTop="@dimen/spacing_normal"
-        android:background="?android:attr/listDivider"
-        app:layout_constraintTop_toBottomOf="@+id/sp_msg_count" />
+        android:layout_height="match_parent"
+        android:padding="@dimen/spacing_normal">
 
-    <TextView
-        android:id="@+id/tv_caption_sort_by"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_normal"
-        android:text="排序"
-        app:layout_constraintStart_toStartOf="@+id/sp_time"
-        app:layout_constraintTop_toBottomOf="@+id/divider_bottom" />
+        <Space
+            android:id="@+id/space_center"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:popupElevation="@dimen/z_popup"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <Spinner
-        android:id="@+id/sp_sort_by"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_unit"
-        android:layout_marginEnd="@dimen/spacing_unit"
-        android:popupElevation="@dimen/z_popup"
-        app:layout_constraintEnd_toStartOf="@+id/space_center"
-        app:layout_constraintStart_toStartOf="@id/tv_caption_sort_by"
-        app:layout_constraintTop_toBottomOf="@+id/tv_caption_sort_by" />
+        <TextView
+            android:id="@+id/tv_caption_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/tv_caption_order_by"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_normal"
-        android:text="顺序"
-        app:layout_constraintStart_toEndOf="@+id/space_center"
-        app:layout_constraintTop_toBottomOf="@+id/divider_bottom" />
+        <Spinner
+            android:id="@+id/sp_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:layout_marginEnd="@dimen/spacing_unit"
+            android:entries="@{model.currentConfig.descriptionListMap[SortBy.NAME]}"
+            android:popupElevation="@dimen/z_popup"
+            android:selection="@={model.currentConfig.descriptionSelectionMap[SortBy.NAME]}"
+            app:layout_constraintEnd_toStartOf="@+id/space_center"
+            app:layout_constraintStart_toStartOf="@id/tv_caption_name"
+            app:layout_constraintTop_toBottomOf="@+id/tv_caption_name" />
 
-    <Spinner
-        android:id="@+id/sp_order_by"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_unit"
-        android:layout_marginEnd="@dimen/spacing_unit"
-        android:popupElevation="@dimen/z_popup"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/tv_caption_order_by"
-        app:layout_constraintTop_toBottomOf="@+id/tv_caption_order_by" />
+        <TextView
+            android:id="@+id/tv_caption_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/category"
+            app:layout_constraintStart_toEndOf="@+id/space_center"
+            app:layout_constraintTop_toTopOf="@+id/tv_caption_name" />
 
-    <View
-        android:id="@+id/divider2"
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_marginTop="@dimen/spacing_normal"
-        android:background="?android:attr/listDivider"
-        app:layout_constraintTop_toBottomOf="@+id/sp_order_by" />
+        <Spinner
+            android:id="@+id/sp_category"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:layout_marginEnd="@dimen/spacing_unit"
+            android:entries="@{model.currentConfig.categoryList}"
+            android:popupElevation="@dimen/z_popup"
+            android:selection="@={model.currentConfig.categorySelection}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tv_caption_category"
+            app:layout_constraintTop_toBottomOf="@+id/tv_caption_category" />
 
-    <TextView
-        android:id="@+id/tv_stats"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ellipsize="start"
-        android:letterSpacing=".1"
-        android:text="共88条记录 已筛选出15条"
-        app:layout_constraintBottom_toBottomOf="@+id/btn_reset_filter"
-        app:layout_constraintEnd_toStartOf="@+id/space_center"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/btn_reset_filter" />
+        <TextView
+            android:id="@+id/tv_caption_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:enabled="@{model.currentConfig.isChat}"
+            android:text="@string/time"
+            app:layout_constraintStart_toStartOf="@+id/sp_name"
+            app:layout_constraintTop_toBottomOf="@+id/sp_name" />
 
-    <Button
-        android:id="@+id/btn_reset_filter"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored.Small.Framed"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="重置"
-        app:layout_constraintEnd_toStartOf="@+id/btn_confirm_filter"
-        app:layout_constraintStart_toStartOf="@+id/space_center"
-        app:layout_constraintTop_toBottomOf="@+id/divider2" />
+        <Spinner
+            android:id="@+id/sp_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:layout_marginEnd="@dimen/spacing_unit"
+            android:enabled="@{model.currentConfig.isChat}"
+            android:entries="@{model.currentConfig.descriptionListMap[SortBy.TIMESTAMP]}"
+            android:popupElevation="@dimen/z_popup"
+            android:selection="@={model.currentConfig.descriptionSelectionMap[SortBy.TIMESTAMP]}"
+            app:layout_constraintEnd_toStartOf="@+id/space_center"
+            app:layout_constraintStart_toStartOf="@id/tv_caption_time"
+            app:layout_constraintTop_toBottomOf="@+id/tv_caption_time" />
 
-    <Button
-        android:id="@+id/btn_confirm_filter"
-        style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="确认"
-        app:layout_constraintBottom_toBottomOf="@+id/btn_reset_filter"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_stats"
-        app:layout_constraintTop_toTopOf="@+id/btn_reset_filter" />
+        <TextView
+            android:id="@+id/tv_caption_msg_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:enabled="@{model.currentConfig.isChat}"
+            android:text="@string/msg_count"
+            app:layout_constraintStart_toEndOf="@+id/space_center"
+            app:layout_constraintTop_toBottomOf="@id/sp_category" />
+
+        <Spinner
+            android:id="@+id/sp_msg_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:layout_marginEnd="@dimen/spacing_unit"
+            android:enabled="@{model.currentConfig.isChat}"
+            android:entries="@{model.currentConfig.descriptionListMap[SortBy.MSG_COUNT]}"
+            android:popupElevation="@dimen/z_popup"
+            android:selection="@={model.currentConfig.descriptionSelectionMap[SortBy.MSG_COUNT]}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tv_caption_msg_count"
+            app:layout_constraintTop_toBottomOf="@+id/tv_caption_msg_count" />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <View
+            android:id="@+id/divider_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintTop_toBottomOf="@+id/sp_msg_count" />
+
+        <TextView
+            android:id="@+id/tv_caption_sort_by"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:text="@string/sort_by"
+            app:layout_constraintStart_toStartOf="@+id/sp_time"
+            app:layout_constraintTop_toBottomOf="@+id/divider_bottom" />
+
+        <Spinner
+            android:id="@+id/sp_sort_by"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:layout_marginEnd="@dimen/spacing_unit"
+            android:entries="@{model.currentConfig.sortByList}"
+            android:popupElevation="@dimen/z_popup"
+            android:sortBy="@={model.currentConfig.sortBy}"
+            app:layout_constraintEnd_toStartOf="@+id/space_center"
+            app:layout_constraintStart_toStartOf="@id/tv_caption_sort_by"
+            app:layout_constraintTop_toBottomOf="@+id/tv_caption_sort_by" />
+
+        <TextView
+            android:id="@+id/tv_caption_order_by"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:text="@string/sort_by"
+            app:layout_constraintStart_toEndOf="@+id/space_center"
+            app:layout_constraintTop_toBottomOf="@+id/divider_bottom" />
+
+        <Spinner
+            android:id="@+id/sp_order_by"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:layout_marginEnd="@dimen/spacing_unit"
+            android:entries="@array/orders"
+            android:popupElevation="@dimen/z_popup"
+            android:selection="@={model.currentConfig.orderBy}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tv_caption_order_by"
+            app:layout_constraintTop_toBottomOf="@+id/tv_caption_order_by" />
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintTop_toBottomOf="@+id/sp_order_by" />
+
+        <TextView
+            android:id="@+id/tv_stats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="start"
+            android:letterSpacing=".1"
+            android:text="@{Html.fromHtml(@string/format_count_stats(model.currentConfig.totalCount,model.currentConfig.filteredCount))}"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_reset_filter"
+            app:layout_constraintEnd_toStartOf="@+id/space_center"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/btn_reset_filter" />
+
+        <Button
+            android:id="@+id/btn_reset_filter"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored.Small.Framed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:onClick="@{model::resetFilter}"
+            android:text="@string/reset"
+            app:layout_constraintEnd_toStartOf="@+id/btn_confirm_filter"
+            app:layout_constraintStart_toStartOf="@+id/space_center"
+            app:layout_constraintTop_toBottomOf="@+id/divider2" />
+
+        <Button
+            android:id="@+id/btn_confirm_filter"
+            style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{model::confirmFilter}"
+            android:text="@string/confirm"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_reset_filter"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_stats"
+            app:layout_constraintTop_toTopOf="@+id/btn_reset_filter" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

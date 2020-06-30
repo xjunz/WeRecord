@@ -19,24 +19,20 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.ui.activity.BaseActivity;
-import xjunz.tool.wechat.ui.activity.main.model.FilterConfiguration;
+import xjunz.tool.wechat.ui.activity.main.model.FilterConfig;
 import xjunz.tool.wechat.ui.activity.main.model.FilterViewModel;
 import xjunz.tool.wechat.ui.customview.BottomBar;
 import xjunz.tool.wechat.ui.customview.MainPanel;
+import xjunz.tool.wechat.ui.customview.MasterToast;
 import xjunz.tool.wechat.ui.transition.MorphDrawable;
 import xjunz.tool.wechat.util.AnimUtils;
 import xjunz.tool.wechat.util.UiUtils;
-
-import static xjunz.tool.wechat.ui.activity.main.model.FilterConfiguration.PAYLOAD_CONFIRM_FILTER;
-import static xjunz.tool.wechat.ui.activity.main.model.FilterConfiguration.PAYLOAD_INIT;
-
 
 public class MainActivity extends BaseActivity implements BottomBar.OnBottomBarItemClickedListener, TextWatcher {
 
@@ -49,7 +45,20 @@ public class MainActivity extends BaseActivity implements BottomBar.OnBottomBarI
     private ProgressBar mPbLoad;
     private BottomBar mBottomBar;
     private FilterViewModel mFilterModel;
+    private ChatFragment mChatFragment;
+    private ContactFragment mContactFragment;
     private MainPanel mPanel;
+    private FilterViewModel.EventHandler mFilterEventHandler = new FilterViewModel.EventHandler() {
+        @Override
+        public void confirmFilter() {
+            mPanel.closePanel();
+        }
+
+        @Override
+        public void resetFilter() {
+            MasterToast.shortToast("已重置");
+        }
+    };
 
 
     @Override
@@ -59,14 +68,7 @@ public class MainActivity extends BaseActivity implements BottomBar.OnBottomBarI
         initViews();
         initPages();
         mFilterModel = new ViewModelProvider(MainActivity.this, new ViewModelProvider.NewInstanceFactory()).get(FilterViewModel.class);
-        mFilterModel.getCurrentConfig().observe(this, new Observer<FilterConfiguration>() {
-            @Override
-            public void onChanged(FilterConfiguration configuration) {
-                if (configuration.getPayload() == PAYLOAD_CONFIRM_FILTER) {
-                    mPanel.closePanel();
-                }
-            }
-        });
+        mFilterModel.addEventHandler(mFilterEventHandler);
     }
 
 
@@ -85,11 +87,9 @@ public class MainActivity extends BaseActivity implements BottomBar.OnBottomBarI
     }
 
     private void initPages() {
-        mPages = new Fragment[3];
-        ChatFragment chatFragment = new ChatFragment();
-        mPages[0] = chatFragment;
-        mPages[1] = new ContactFragment();
-        mPages[2] = new ChatFragment();
+        mChatFragment = new ChatFragment();
+        mContactFragment = new ContactFragment();
+        mPages = new Fragment[]{mChatFragment, mContactFragment, new ContactFragment()};
         mViewPager.setAdapter(new MainFragmentAdapter(this));
     }
 
@@ -173,18 +173,23 @@ public class MainActivity extends BaseActivity implements BottomBar.OnBottomBarI
             return;
         }
         UiUtils.fadeSwitchText(mTvTitle, caption);
-        FilterConfiguration config;
+        FilterConfig config;
         if (position == 0) {
-            config = mFilterModel.getTalkerConfiguration().getValue();
+            //判断ChatFragment是否存在配置
+            config = mChatFragment.getFilterConfig();
             if (config == null) {
-                throw new IllegalStateException("ChatFragment's config is not initialized yet!");
+                //如果不存在，抛异常，因为ChatFragment是第一个显示的Fragment,配置应该已经在onCreate中初始化
+                throw new IllegalStateException("ChatFragment is not initialized! ");
             }
-            mFilterModel.config(config, PAYLOAD_INIT);
+            //存在的话，应用之
+            mFilterModel.updateCurrentConfig(config);
         } else if (position == 1) {
-            config = mFilterModel.getContactConfiguration().getValue();
+            //判断并应用配置
+            config = mContactFragment.getFilterConfig();
             if (config != null) {
-                mFilterModel.config(config, PAYLOAD_INIT);
+                mFilterModel.updateCurrentConfig(config);
             }
+            //如果不存在配置，什么也不做，因为ContactFragment可能还没有初始化
         }
         mViewPager.setCurrentItem(position);
     }

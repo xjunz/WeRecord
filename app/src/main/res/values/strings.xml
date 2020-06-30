@@ -100,9 +100,13 @@
     <string name="deleted_friend">删除的好友</string>
     <string name="unfollowed_gzh">未关注的公众号</string>
     <string name="format_count_stats"><![CDATA[共<b>%d</b>条记录 已过滤出<b>%d</b>条]]></string>
-    <string name="all_bracketed"><![CDATA[<全部>]]></string>
-    <string name="none_bracketed"><![CDATA[<无>]]></string>
+    <string name="bracketed_all"><![CDATA[<全部>]]></string>
+    <string name="bracketed_none"><![CDATA[<无>]]></string>
     <string name="last_week">上周</string>
     <string name="last_month">上个月</string>
     <string name="last_year">去年</string>
+    <string name="category">类型</string>
+    <string name="time">时间</string>
+    <string name="reset">重置</string>
+    <string name="confirm">确认</string>
 </resources>

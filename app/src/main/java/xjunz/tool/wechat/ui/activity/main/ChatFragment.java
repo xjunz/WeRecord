@@ -15,7 +15,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -40,20 +39,17 @@ import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.model.account.Talker;
 import xjunz.tool.wechat.impl.repo.TalkerRepository;
-import xjunz.tool.wechat.ui.activity.main.model.FilterConfiguration;
+import xjunz.tool.wechat.ui.activity.main.model.FilterConfig;
 import xjunz.tool.wechat.ui.activity.main.model.FilterViewModel;
 import xjunz.tool.wechat.ui.activity.main.model.SortBy;
 import xjunz.tool.wechat.ui.customview.MasterToast;
 import xjunz.tool.wechat.util.UiUtils;
 
-import static xjunz.tool.wechat.ui.activity.main.model.FilterConfiguration.PAYLOAD_CONFIRM_FILTER;
-import static xjunz.tool.wechat.ui.activity.main.model.FilterConfiguration.PAYLOAD_COUNT_CHANGED;
-import static xjunz.tool.wechat.ui.activity.main.model.FilterConfiguration.PAYLOAD_INIT;
 
 /**
  * 显示会话列表的{@link Fragment}
  */
-public class ChatFragment extends Fragment implements Observer<FilterConfiguration> {
+public class ChatFragment extends Fragment implements FilterConfig.EventHandler {
     private RecyclerView mList;
     private ChatAdapter mAdapter;
     /**
@@ -68,8 +64,7 @@ public class ChatFragment extends Fragment implements Observer<FilterConfigurati
     /**
      * 当前的过滤配置
      */
-    private FilterConfiguration mConfig;
-    private FilterViewModel mModel;
+    private FilterConfig mConfig;
     /**
      * 分割项描述列表缓存，每一次加载列表都使用此变量储存分隔项的描述
      */
@@ -80,17 +75,43 @@ public class ChatFragment extends Fragment implements Observer<FilterConfigurati
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mItemList = new ArrayList<>();
-        mModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(FilterViewModel.class);
-        mConfig = mModel.getTalkerConfiguration().getValue();
-        if (mConfig == null) {
-            mConfig = FilterConfiguration.getDefault();
-            mConfig.filterVictim = FilterConfiguration.VICTIM_TALKER;
-            mConfig.sortBy = Talker.DEFAULT_SORT_BY;
-            mConfig.ascending = Talker.DEFAULT_IS_ASCENDING;
-        }
-        mModel.getTalkerConfiguration().observe(requireActivity(), this);
+        FilterViewModel model = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(FilterViewModel.class);
+        initFilterConfig();
+        model.updateCurrentConfig(mConfig);
     }
 
+    /**
+     * 初始化过滤器配置
+     */
+    private void initFilterConfig() {
+        mConfig = new FilterConfig();
+        mConfig.isChat.set(true);
+        mConfig.sortBy.set(SortBy.TIMESTAMP);
+        List<String> captionList = Talker.Type.getCaptionList();
+        captionList.add(0, getString(R.string.bracketed_all));
+        mConfig.categoryList.addAll(captionList);
+        mConfig.sortByList.addAll(SortBy.getCaptionList());
+        mConfig.setEventHandler(this);
+    }
+
+    /**
+     * 重置过滤器配置
+     */
+    private void resetFilterConfig() {
+        mConfig.sortBy.set(SortBy.TIMESTAMP);
+        mConfig.orderBy.set(FilterConfig.ORDER_ASCENDING);
+        mConfig.categorySelection.set(0);
+        mConfig.descriptionSelectionMap.clear();
+    }
+
+
+    /**
+     * @return 当前过滤器配置
+     */
+    @Nullable
+    public FilterConfig getFilterConfig() {
+        return mConfig;
+    }
 
     @Nullable
     @Override
@@ -149,9 +170,8 @@ public class ChatFragment extends Fragment implements Observer<FilterConfigurati
      * 更新统计数据信息，即更新{@link FilterFragment}中“共XX条数据 已过滤出XX条数据”的文本
      */
     private void updateCountInfo() {
-        mConfig.totalCount = mRawDataList.size();
-        mConfig.filteredCount = mItemList.size() - mSeparatorDescCache.size();
-        mModel.config(mConfig, PAYLOAD_COUNT_CHANGED);
+        mConfig.totalCount.set(mRawDataList.size());
+        mConfig.filteredCount.set(mItemList.size() - mSeparatorDescCache.size());
     }
 
 
@@ -175,14 +195,13 @@ public class ChatFragment extends Fragment implements Observer<FilterConfigurati
             }
             //添加通配项“<全部>”和“<无>”
             if (descList.size() == 0) {
-                descList.add(getString(R.string.none_bracketed));
+                descList.add(getString(R.string.bracketed_none));
             } else {
-                descList.add(0, getString(R.string.all_bracketed));
+                descList.add(0, getString(R.string.bracketed_all));
             }
             mConfig.descriptionListMap.put(by, descList);
         }
         //以上代码执行时间5毫秒左右（90条记录）
-        mModel.config(mConfig, PAYLOAD_INIT);
     }
 
 
@@ -192,21 +211,21 @@ public class ChatFragment extends Fragment implements Observer<FilterConfigurati
     private void doFilter() {
         mSeparatorDescCache.clear();
         mItemList.clear();
-        Talker.setSortByAndOrderBy(mConfig.sortBy, mConfig.ascending);
+        Talker.setSortByAndOrderBy(mConfig.sortBy.get(), mConfig.isAscending());
         mLoadListDisposable = Flowable.fromIterable(mRawDataList).subscribeOn(Schedulers.computation()).filter(new Predicate<Talker>() {
             @Override
             public boolean test(Talker talker) {
                 //如果类型为“<全部>"或所选类型为当前Talker类型，通过第一步类型筛选
-                if (mConfig.categorySelection == 0 || talker.type == Talker.Type.values()[mConfig.categorySelection - 1]) {
+                if (mConfig.categorySelection.get() == 0 || talker.type == Talker.Type.values()[mConfig.categorySelection.get() - 1]) {
                     //对三个排序依据的条件进行筛选
                     for (SortBy by : SortBy.values()) {
-                        Integer selectionOfSortBy = mConfig.selectionMap.get(by);
+                        Integer selectionOfSortBy = mConfig.descriptionSelectionMap.get(by);
                         //如果筛选条件为“<全部>”,此排序依据直接跳过
-                        if (selectionOfSortBy != null && selectionOfSortBy == 0) {
+                        if (selectionOfSortBy == null || selectionOfSortBy == 0) {
                             continue;
                         }
                         //否则，获取该筛选条件的描述
-                        String desOfSortBy = Objects.requireNonNull(mConfig.descriptionListMap.get(by)).get(selectionOfSortBy == null ? 0 : selectionOfSortBy);
+                        String desOfSortBy = Objects.requireNonNull(mConfig.descriptionListMap.get(by)).get(selectionOfSortBy);
                         //如果筛选条件的描述和当前项描述不一致，此项不通过
                         if (!talker.describe(by).equals(desOfSortBy)) {
                             return false;
@@ -244,7 +263,7 @@ public class ChatFragment extends Fragment implements Observer<FilterConfigurati
         }).observeOn(AndroidSchedulers.mainThread()).doOnComplete(new Action() {
             @Override
             public void run() {
-                Talker.setSortByAndOrderBy(mConfig.sortBy, mConfig.ascending);
+                Talker.setSortByAndOrderBy(mConfig.sortBy.get(), mConfig.isAscending());
                 Collections.sort(mItemList);
                 mAdapter.notifyDataSetChanged();
                 updateCountInfo();
@@ -252,12 +271,16 @@ public class ChatFragment extends Fragment implements Observer<FilterConfigurati
         }).subscribe();
     }
 
+
     @Override
-    public void onChanged(FilterConfiguration configuration) {
-        mConfig = configuration;
-        if (configuration.getPayload() == PAYLOAD_CONFIRM_FILTER) {
-            doFilter();
-        }
+    public void confirmFilter() {
+        doFilter();
+    }
+
+    @Override
+    public void resetFilter() {
+        resetFilterConfig();
+        doFilter();
     }
 
 
@@ -323,7 +346,7 @@ public class ChatFragment extends Fragment implements Observer<FilterConfigurati
 
         @Override
         public int compareTo(@NotNull Item o) {
-            Talker.setSortByAndOrderBy(mConfig.sortBy, mConfig.ascending);
+            Talker.setSortByAndOrderBy(mConfig.sortBy.get(), mConfig.isAscending());
             //如果是相同类型的项，直接比较content即可
             if (this.type == o.type) {
                 return this.content.compareTo(o.content);

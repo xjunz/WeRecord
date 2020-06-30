@@ -14,7 +14,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,35 +39,61 @@ import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.repo.ContactRepository;
-import xjunz.tool.wechat.ui.activity.main.model.FilterConfiguration;
+import xjunz.tool.wechat.ui.activity.main.model.FilterConfig;
 import xjunz.tool.wechat.ui.activity.main.model.FilterViewModel;
 import xjunz.tool.wechat.ui.activity.main.model.SortBy;
 import xjunz.tool.wechat.util.UiUtils;
 
-import static xjunz.tool.wechat.ui.activity.main.model.FilterConfiguration.PAYLOAD_COUNT_CHANGED;
-import static xjunz.tool.wechat.ui.activity.main.model.FilterConfiguration.PAYLOAD_INIT;
 
-public class ContactFragment extends Fragment implements Observer<FilterConfiguration> {
-    private RecyclerView mList, mScroller;
+/**
+ * 显示联系人列表的{@link Fragment}，大体构建和{@link ChatFragment}类似，重复或类似的代码不再注释
+ *
+ * @see ChatFragment 查看相关注释
+ */
+public class ContactFragment extends Fragment implements FilterConfig.EventHandler {
+    private RecyclerView mList;
+    /**
+     * 右侧的“滑块”列表，为列表提供索引以快速访问
+     */
+    private RecyclerView mScroller;
+    private ScrollerAdapter mScrollerAdapter;
     private List<Item> mItemList;
     private List<Contact> mRawItemList;
     private ContactAdapter mMainAdapter;
-    private ScrollerAdapter mScrollerAdapter;
-    private FilterConfiguration mConfig;
-    private FilterViewModel mModel;
+    private FilterConfig mConfig;
     private List<String> mSeparatorDescCache;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(FilterViewModel.class);
-        mConfig = mModel.getContactConfiguration().getValue();
-        if (mConfig == null) {
-            mConfig = FilterConfiguration.getDefault();
-            mConfig.filterVictim = FilterConfiguration.VICTIM_CONTACT;
-        }
-        mModel.getContactConfiguration().observe(requireActivity(), this);
+        FilterViewModel model = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(FilterViewModel.class);
+        initFilterConfig();
+        model.updateCurrentConfig(mConfig);
     }
+
+    private void initFilterConfig() {
+        mConfig = new FilterConfig();
+        mConfig.isChat.set(false);
+        mConfig.sortBy.set(SortBy.NAME);
+        List<String> captionList = Contact.Type.getCaptionList();
+        captionList.add(0, getString(R.string.bracketed_all));
+        mConfig.categoryList.addAll(captionList);
+        mConfig.sortByList.add(SortBy.NAME.caption);
+        mConfig.setEventHandler(this);
+    }
+
+    private void resetFilterConfig() {
+        mConfig.orderBy.set(FilterConfig.ORDER_ASCENDING);
+        mConfig.categorySelection.set(0);
+        mConfig.descriptionSelectionMap.clear();
+    }
+
+    @Nullable
+    public FilterConfig getFilterConfig() {
+        return mConfig;
+    }
+
 
     @Nullable
     @Override
@@ -112,7 +137,7 @@ public class ContactFragment extends Fragment implements Observer<FilterConfigur
                 }, new Action() {
                     @Override
                     public void run() throws Exception {
-                        Contact.setOrderBy(mConfig.ascending);
+                        Contact.setOrderBy(mConfig.isAscending());
                         Collections.sort(mItemList);
                         //更新UI
                         mMainAdapter = new ContactAdapter();
@@ -126,9 +151,8 @@ public class ContactFragment extends Fragment implements Observer<FilterConfigur
 
 
     private void updateCountInfo() {
-        mConfig.totalCount = mRawItemList.size();
-        mConfig.filteredCount = mItemList.size() - mSeparatorDescCache.size();
-        mModel.config(mConfig, PAYLOAD_COUNT_CHANGED);
+        mConfig.totalCount.set(mRawItemList.size());
+        mConfig.filteredCount.set(mItemList.size() - mSeparatorDescCache.size());
     }
 
 
@@ -138,15 +162,13 @@ public class ContactFragment extends Fragment implements Observer<FilterConfigur
         List<String> descriptions = new ArrayList<>(mSeparatorDescCache);
         if (descriptions.size() == 0) {
             //如果为空，添加一个“<无>”
-            descriptions.add(getString(R.string.none_bracketed));
+            descriptions.add(getString(R.string.bracketed_none));
         } else {
             //否则在第一个位置插入“<全部>”
-            descriptions.add(0, getString(R.string.all_bracketed));
+            descriptions.add(0, getString(R.string.bracketed_all));
         }
         //添加进配置中
         mConfig.descriptionListMap.put(SortBy.NAME, descriptions);
-        //通知观测者数据更新（更新UI）
-        mModel.config(mConfig, PAYLOAD_INIT);
         //初始化滑块适配器
         mScrollerAdapter = new ScrollerAdapter();
         mScroller.setAdapter(mScrollerAdapter);
@@ -178,19 +200,19 @@ public class ContactFragment extends Fragment implements Observer<FilterConfigur
         });
     }
 
-    private void doFilter(final FilterConfiguration config) {
+    private void doFilter() {
         mItemList.clear();
         mSeparatorDescCache.clear();
-        if (config.categorySelection == 0) {
+        if (mConfig.categorySelection.get() == 0) {
             mRawItemList = ContactRepository.getInstance().getAll();
         } else {
-            mRawItemList = Objects.requireNonNull(ContactRepository.getInstance().getMap().get(Contact.Type.values()[config.categorySelection - 1]));
+            mRawItemList = Objects.requireNonNull(ContactRepository.getInstance().getMap().get(Contact.Type.values()[mConfig.categorySelection.get() - 1]));
         }
         final SortBy by = SortBy.NAME;
-        Integer selectionOfSortBy = config.selectionMap.get(by);
+        Integer selectionOfSortBy = mConfig.descriptionSelectionMap.get(by);
         final String desOfSortBy;
         if (selectionOfSortBy != null && selectionOfSortBy != 0) {
-            desOfSortBy = Objects.requireNonNull(config.descriptionListMap.get(by)).get(selectionOfSortBy);
+            desOfSortBy = Objects.requireNonNull(mConfig.descriptionListMap.get(by)).get(selectionOfSortBy);
         } else {
             desOfSortBy = null;
         }
@@ -224,18 +246,12 @@ public class ContactFragment extends Fragment implements Observer<FilterConfigur
                 Collections.sort(mItemList);
                 updateCountInfo();
                 mMainAdapter.notifyDataSetChanged();
-                mScrollerAdapter.reverseIndicatorSerial(!mConfig.ascending);
+                mScrollerAdapter.reverseIndicatorSerial(!mConfig.isAscending());
                 mScrollerAdapter.notifyDataSetChanged();
             }
         }).subscribe();
     }
 
-    @Override
-    public void onChanged(FilterConfiguration filterConfiguration) {
-        if (filterConfiguration.getPayload() == FilterConfiguration.PAYLOAD_CONFIRM_FILTER) {
-            doFilter(filterConfiguration);
-        }
-    }
 
     private int getFirstVisibleItemIndexOfList() {
         LinearLayoutManager llm = (LinearLayoutManager) Objects.requireNonNull(mList.getLayoutManager());
@@ -245,6 +261,17 @@ public class ContactFragment extends Fragment implements Observer<FilterConfigur
     private int getLastVisibleItemIndexOfList() {
         LinearLayoutManager llm = (LinearLayoutManager) Objects.requireNonNull(mList.getLayoutManager());
         return llm.findLastVisibleItemPosition();
+    }
+
+    @Override
+    public void confirmFilter() {
+        doFilter();
+    }
+
+    @Override
+    public void resetFilter() {
+        resetFilterConfig();
+        doFilter();
     }
 
     /**
@@ -290,7 +317,7 @@ public class ContactFragment extends Fragment implements Observer<FilterConfigur
 
         @Override
         public int compareTo(@NotNull Item o) {
-            Contact.setOrderBy(mConfig.ascending);
+            Contact.setOrderBy(mConfig.isAscending());
             if (this.type == o.type) {
                 return this.content.compareTo(o.content);
             } else {
@@ -298,7 +325,7 @@ public class ContactFragment extends Fragment implements Observer<FilterConfigur
                 if (descCompareRes == 0) {
                     return this.isSeparator() ? -1 : 1;
                 }
-                return (mConfig.ascending ? 1 : -1) * descCompareRes;
+                return (mConfig.isAscending() ? 1 : -1) * descCompareRes;
             }
         }
 
@@ -318,8 +345,6 @@ public class ContactFragment extends Fragment implements Observer<FilterConfigur
         private int spanColor;
 
         private ContactAdapter() {
-            //因为是用TypedArray获取的，比较吃资源，设为成员变量
-            //直接在构造器里初始化，防止每次用到都要获取
             spanColor = UiUtils.getAttrColor(requireContext(), R.attr.colorAccent);
         }
 
@@ -513,13 +538,13 @@ public class ContactFragment extends Fragment implements Observer<FilterConfigur
                 while (l <= r) {
                     int res = mItemList.get(m).description.compareTo(desc);
                     if (res > 0) {
-                        if (mConfig.ascending) {
+                        if (mConfig.isAscending()) {
                             r = m - 1;
                         } else {
                             l = m + 1;
                         }
                     } else if (res < 0) {
-                        if (mConfig.ascending) {
+                        if (mConfig.isAscending()) {
                             l = m + 1;
                         } else {
                             r = m - 1;

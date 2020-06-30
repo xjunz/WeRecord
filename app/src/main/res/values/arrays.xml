@@ -9,13 +9,13 @@
         <item>按名称</item>
     </string-array>
     <string-array name="category_talker">
-        <item>@string/all_bracketed</item>
+        <item>@string/bracketed_all</item>
         <item>@string/friend</item>
         <item>@string/group</item>
         <item>@string/gzh</item>
     </string-array>
     <string-array name="category_contact">
-        <item>@string/all_bracketed</item>
+        <item>@string/bracketed_all</item>
         <item>@string/friend</item>
         <item>@string/deleted_friend</item>
         <item>@string/stranger</item>

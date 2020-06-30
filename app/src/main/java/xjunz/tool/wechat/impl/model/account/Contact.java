@@ -7,6 +7,9 @@ import androidx.annotation.NonNull;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.Environment;
@@ -113,7 +116,7 @@ public class Contact extends Account implements Comparable<Contact> {
 
 
     /**
-     * 处理后的类型枚举类
+     * 处理后的Contact类型枚举类
      */
     public enum Type {
         /**
@@ -153,14 +156,19 @@ public class Contact extends Account implements Comparable<Contact> {
         /**
          * 类型的名称资源ID
          */
-        int defaultNameRes;
+        String caption;
 
-        String getDefaultName() {
-            return App.getStringOf(defaultNameRes);
+
+        Type(int captionRes) {
+            this.caption = App.getStringOf(captionRes);
         }
 
-        Type(int defaultNameRes) {
-            this.defaultNameRes = defaultNameRes;
+        public static List<String> getCaptionList() {
+            List<String> captions = new ArrayList<>();
+            for (Type type : Type.values()) {
+                captions.add(type.caption);
+            }
+            return captions;
         }
     }
 
