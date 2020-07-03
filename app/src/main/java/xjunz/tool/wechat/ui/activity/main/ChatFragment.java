@@ -9,6 +9,7 @@ import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,21 +28,16 @@ import java.util.Objects;
 
 import io.reactivex.Flowable;
 import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Action;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.R;
+import xjunz.tool.wechat.data.model.FilterConfig;
+import xjunz.tool.wechat.data.model.FilterViewModel;
+import xjunz.tool.wechat.data.model.SortBy;
 import xjunz.tool.wechat.impl.model.account.Talker;
 import xjunz.tool.wechat.impl.repo.TalkerRepository;
-import xjunz.tool.wechat.ui.activity.main.model.FilterConfig;
-import xjunz.tool.wechat.ui.activity.main.model.FilterViewModel;
-import xjunz.tool.wechat.ui.activity.main.model.SortBy;
 import xjunz.tool.wechat.ui.customview.MasterToast;
 import xjunz.tool.wechat.util.UiUtils;
 
@@ -69,6 +65,8 @@ public class ChatFragment extends Fragment implements FilterConfig.EventHandler 
      * 分割项描述列表缓存，每一次加载列表都使用此变量储存分隔项的描述
      */
     private List<String> mSeparatorDescCache;
+    private ViewStub mStubNoResult;
+    private ImageView mIvNoResult;
 
 
     @Override
@@ -118,6 +116,7 @@ public class ChatFragment extends Fragment implements FilterConfig.EventHandler 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
         mList = view.findViewById(R.id.rv_list);
+        mStubNoResult = view.findViewById(R.id.stub_no_result);
         initList();
         return view;
     }
@@ -130,40 +129,34 @@ public class ChatFragment extends Fragment implements FilterConfig.EventHandler 
         mSeparatorDescCache = new ArrayList<>();
         mRawDataList = TalkerRepository.getInstance().getAll();
         Talker.setSortByAndOrderBy(Talker.DEFAULT_SORT_BY, Talker.DEFAULT_IS_ASCENDING);
-        mLoadListDisposable = Flowable.fromIterable(mRawDataList).subscribeOn(Schedulers.computation()).map(new Function<Talker, Item>() {
-            @Override
-            public Item apply(Talker talker) {
-                //将源数据映射为列表项
-                String desc = talker.describe();
-                Item item = new Item(talker, desc);
-                //判断当前数据是否为分隔点，是的话传入一个分隔项
-                if (mSeparatorDescCache.size() == 0 || !mSeparatorDescCache.contains(desc)) {
-                    item.type = Item.TYPE_SEPARATOR;
-                    mSeparatorDescCache.add(desc);
-                }
-                return item;
+        mLoadListDisposable = Flowable.fromIterable(mRawDataList).subscribeOn(Schedulers.computation()).map(talker -> {
+            //将源数据映射为列表项
+            String desc = talker.describe();
+            Item item = new Item(talker, desc);
+            //判断当前数据是否为分隔点，是的话传入一个分隔项
+            if (mSeparatorDescCache.size() == 0 || !mSeparatorDescCache.contains(desc)) {
+                item.type = Item.TYPE_SEPARATOR;
+                mSeparatorDescCache.add(desc);
             }
-        }).doOnNext(new Consumer<Item>() {
-            @Override
-            public void accept(Item item) throws Exception {
-                //如果传来的是分隔项，先插入分隔项，再插入相同content和description的数据项
-                if (item.type == Item.TYPE_SEPARATOR) {
-                    mItemList.add(item);
-                }
-                mItemList.add(new Item(item.content, item.description, Item.TYPE_DATA));
+            return item;
+        }).doOnNext(item -> {
+            //如果传来的是分隔项，先插入分隔项，再插入相同content和description的数据项
+            if (item.type == Item.TYPE_SEPARATOR) {
+                mItemList.add(item);
             }
-        }).observeOn(AndroidSchedulers.mainThread()).doOnComplete(new Action() {
-            @Override
-            public void run() {
-                Collections.sort(mItemList);
-                //更新UI
-                mAdapter = new ChatAdapter();
-                mList.setAdapter(mAdapter);
-                updateCountInfo();
-                //获取所有分隔项
-                collectSeparatorDescListMap();
-            }
-        }).subscribe();
+            mItemList.add(new Item(item.content, item.description, Item.TYPE_DATA));
+        }).observeOn(AndroidSchedulers.mainThread()).doOnComplete(() -> {
+            showOrHideNoResultArt(mItemList.size() == 0);
+            Collections.sort(mItemList);
+            //更新UI
+            mAdapter = new ChatAdapter();
+            mList.setAdapter(mAdapter);
+            updateCountInfo();
+            //获取所有分隔项
+            collectSeparatorDescListMap();
+        }).
+
+                subscribe();
     }
 
     /**
@@ -212,62 +205,51 @@ public class ChatFragment extends Fragment implements FilterConfig.EventHandler 
         mSeparatorDescCache.clear();
         mItemList.clear();
         Talker.setSortByAndOrderBy(mConfig.sortBy.get(), mConfig.isAscending());
-        mLoadListDisposable = Flowable.fromIterable(mRawDataList).subscribeOn(Schedulers.computation()).filter(new Predicate<Talker>() {
-            @Override
-            public boolean test(Talker talker) {
-                //如果类型为“<全部>"或所选类型为当前Talker类型，通过第一步类型筛选
-                if (mConfig.categorySelection.get() == 0 || talker.type == Talker.Type.values()[mConfig.categorySelection.get() - 1]) {
-                    //对三个排序依据的条件进行筛选
-                    for (SortBy by : SortBy.values()) {
-                        Integer selectionOfSortBy = mConfig.descriptionSelectionMap.get(by);
-                        //如果筛选条件为“<全部>”,此排序依据直接跳过
-                        if (selectionOfSortBy == null || selectionOfSortBy == 0) {
-                            continue;
-                        }
-                        //否则，获取该筛选条件的描述
-                        String desOfSortBy = Objects.requireNonNull(mConfig.descriptionListMap.get(by)).get(selectionOfSortBy);
-                        //如果筛选条件的描述和当前项描述不一致，此项不通过
-                        if (!talker.describe(by).equals(desOfSortBy)) {
-                            return false;
-                        }
+        mLoadListDisposable = Flowable.fromIterable(mRawDataList).subscribeOn(Schedulers.computation()).filter(talker -> {
+            //如果类型为“<全部>"或所选类型为当前Talker类型，通过第一步类型筛选
+            if (mConfig.categorySelection.get() == 0 || talker.type == Talker.Type.values()[mConfig.categorySelection.get() - 1]) {
+                //对三个排序依据的条件进行筛选
+                for (SortBy by : SortBy.values()) {
+                    Integer selectionOfSortBy = mConfig.descriptionSelectionMap.get(by);
+                    //如果筛选条件为“<全部>”,此排序依据直接跳过
+                    if (selectionOfSortBy == null || selectionOfSortBy == 0) {
+                        continue;
                     }
-                } else {
-                    //否则不通过
-                    return false;
+                    //否则，获取该筛选条件的描述
+                    String desOfSortBy = Objects.requireNonNull(mConfig.descriptionListMap.get(by)).get(selectionOfSortBy);
+                    //如果筛选条件的描述和当前项描述不一致，此项不通过
+                    if (!talker.describe(by).equals(desOfSortBy)) {
+                        return false;
+                    }
                 }
-                //以上全满足，此项通过
-                return true;
+            } else {
+                //否则不通过
+                return false;
             }
-        }).map(new Function<Talker, Item>() {
-            @Override
-            public Item apply(Talker talker) {
-                //将源数据映射为列表项
-                String desc = talker.describe();
-                Item item = new Item(talker, desc);
-                //判断当前数据是否为分隔点，是的话传入一个分隔项
-                if (mSeparatorDescCache.size() == 0 || !mSeparatorDescCache.contains(desc)) {
-                    item.type = Item.TYPE_SEPARATOR;
-                    mSeparatorDescCache.add(desc);
-                }
-                return item;
+            //以上全满足，此项通过
+            return true;
+        }).map(talker -> {
+            //将源数据映射为列表项
+            String desc = talker.describe();
+            Item item = new Item(talker, desc);
+            //判断当前数据是否为分隔点，是的话传入一个分隔项
+            if (mSeparatorDescCache.size() == 0 || !mSeparatorDescCache.contains(desc)) {
+                item.type = Item.TYPE_SEPARATOR;
+                mSeparatorDescCache.add(desc);
             }
-        }).doOnNext(new Consumer<Item>() {
-            @Override
-            public void accept(Item item) throws Exception {
-                //如果传来的是分隔项，先插入分隔项，再插入相同content和description的数据项
-                if (item.type == Item.TYPE_SEPARATOR) {
-                    mItemList.add(item);
-                }
-                mItemList.add(new Item(item.content, item.description, Item.TYPE_DATA));
+            return item;
+        }).doOnNext(item -> {
+            //如果传来的是分隔项，先插入分隔项，再插入相同content和description的数据项
+            if (item.type == Item.TYPE_SEPARATOR) {
+                mItemList.add(item);
             }
-        }).observeOn(AndroidSchedulers.mainThread()).doOnComplete(new Action() {
-            @Override
-            public void run() {
-                Talker.setSortByAndOrderBy(mConfig.sortBy.get(), mConfig.isAscending());
-                Collections.sort(mItemList);
-                mAdapter.notifyDataSetChanged();
-                updateCountInfo();
-            }
+            mItemList.add(new Item(item.content, item.description, Item.TYPE_DATA));
+        }).observeOn(AndroidSchedulers.mainThread()).doOnComplete(() -> {
+            showOrHideNoResultArt(mItemList.size() == 0);
+            Talker.setSortByAndOrderBy(mConfig.sortBy.get(), mConfig.isAscending());
+            Collections.sort(mItemList);
+            mAdapter.notifyDataSetChanged();
+            updateCountInfo();
         }).subscribe();
     }
 
@@ -283,6 +265,27 @@ public class ChatFragment extends Fragment implements FilterConfig.EventHandler 
         doFilter();
     }
 
+    @Override
+    public void onSearch(String keyword) {
+
+    }
+
+    /**
+     * 显示或隐藏“没有结果”的占位图
+     *
+     * @param toShow 是否显示
+     */
+    private void showOrHideNoResultArt(boolean toShow) {
+        if (mIvNoResult == null) {
+            mIvNoResult = (ImageView) mStubNoResult.inflate();
+        }
+        if (toShow) {
+            mIvNoResult.setAlpha(0f);
+            mIvNoResult.animate().alpha(1f).withStartAction(() -> mIvNoResult.setVisibility(View.VISIBLE)).start();
+        } else {
+            mIvNoResult.setVisibility(View.GONE);
+        }
+    }
 
     /**
      * 列表项目的抽象类，定义了列表项目的各种属性
@@ -438,27 +441,16 @@ public class ChatFragment extends Fragment implements FilterConfig.EventHandler 
                         //设置记录数
                         holder.tvMsgCount.setText(Html.fromHtml(getString(R.string.format_total_records, talker.messageCount)));
                         //异步设置头像
-                        Disposable disposable = Single.create(new SingleOnSubscribe<Bitmap>() {
-                            @Override
-                            public void subscribe(SingleEmitter<Bitmap> emitter) throws Exception {
-                                Bitmap avatar = talker.getAvatar();
-                                if (avatar == null) {
-                                    emitter.onError(null);
-                                } else {
-                                    emitter.onSuccess(talker.getAvatar());
-                                }
+                        Disposable disposable = Single.create((SingleOnSubscribe<Bitmap>) emitter -> {
+                            Bitmap avatar = talker.getAvatar();
+                            if (avatar == null) {
+                                emitter.onError(null);
+                            } else {
+                                emitter.onSuccess(talker.getAvatar());
                             }
-                        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new Consumer<Bitmap>() {
-                            @Override
-                            public void accept(Bitmap bitmap) throws Exception {
-                                holder.ivAvatar.setImageBitmap(bitmap);
-                            }
-                        }, new Consumer<Throwable>() {
-                            @Override
-                            public void accept(Throwable throwable) throws Exception {
-                                holder.ivAvatar.setImageResource(R.drawable.avatar_default);
-                            }
-                        });
+                        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
+                                .subscribe(bitmap -> holder.ivAvatar.setImageBitmap(bitmap),
+                                        throwable -> holder.ivAvatar.setImageResource(R.drawable.avatar_default));
                         //设置是否被选中
                         holder.itemView.setSelected(item.isSelected);
                         //设置下分割线可视性
@@ -498,12 +490,7 @@ public class ChatFragment extends Fragment implements FilterConfig.EventHandler 
                 ivAvatar = itemView.findViewById(R.id.iv_avatar);
                 tvSeparator = itemView.findViewById(R.id.tv_separator);
                 bottomDivider = itemView.findViewById(R.id.divider_bottom);
-                itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        MasterToast.shortToast("敬请期待!");
-                    }
-                });
+                itemView.setOnClickListener(v -> MasterToast.shortToast("敬请期待!"));
             }
         }
 

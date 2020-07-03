@@ -16,12 +16,14 @@ import androidx.annotation.Nullable;
 import xjunz.tool.wechat.R;
 
 /**
- * 一个非常简单的BottomBar实现
+ * 一个非常简单的BottomBar，{@link BottomBar#mCurrentCaption}和{@link BottomBar#mSelection}两个字段支持数据绑定
  */
 public class BottomBar extends LinearLayout {
-    private OnBottomBarItemClickedListener mListener;
+    private OnItemSelectListener mListener;
     private CharSequence[] mCaptionEntries;
     private ViewGroup[] mItemViewList;
+    private CharSequence mCurrentCaption;
+    private int mSelection = -1;
 
     public BottomBar(@NonNull Context context) {
         super(context);
@@ -39,45 +41,65 @@ public class BottomBar extends LinearLayout {
             imageEntriesRes[i] = ta2.getResourceId(i, View.NO_ID);
         }
         ta2.recycle();
-        setOrientation(HORIZONTAL);
-        setGravity(Gravity.CENTER_VERTICAL);
+        this.setOrientation(HORIZONTAL);
+        this.setGravity(Gravity.CENTER_VERTICAL);
         mItemViewList = new ViewGroup[imageEntriesRes.length];
         for (int i = 0; i < imageEntriesRes.length; i++) {
-            final ViewGroup child = (ViewGroup) ((Activity) getContext()).getLayoutInflater().inflate(R.layout.item_bottom_bar, this, false);
+            ViewGroup child = (ViewGroup) ((Activity) getContext()).getLayoutInflater().inflate(R.layout.item_bottom_bar, this, false);
             mItemViewList[i] = child;
-            final ImageView image = (ImageView) child.getChildAt(0);
+            child.setTag(i);
+            ImageView image = (ImageView) child.getChildAt(0);
             image.setImageResource(imageEntriesRes[i]);
+            image.setContentDescription(mCaptionEntries[i]);
             addView(child);
-            final int index = i;
-            if (i == 0) {
-                child.setSelected(true);
-            }
-            mItemViewList[i].setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mListener != null) {
-                        mListener.onItemClicked(index, mCaptionEntries[index], mItemViewList[index].isSelected());
-                    }
-                    for (int i = 0; i < mItemViewList.length; i++) {
-                        ViewGroup child = mItemViewList[i];
-                        child.setSelected(i == index);
-                    }
-                }
-            });
+            mItemViewList[i].setOnClickListener(view -> setSelection((int) view.getTag()));
         }
     }
+
 
     public BottomBar(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
-    public void setOnBottomBarItemClickedListener(@Nullable OnBottomBarItemClickedListener listener) {
+    public void setOnItemSelectListener(@Nullable OnItemSelectListener listener) {
         mListener = listener;
     }
 
-    public interface OnBottomBarItemClickedListener {
-        void onItemClicked(int position, CharSequence caption, boolean unchanged);
+    /**
+     * 设置当前选中项为{@param index}
+     *
+     * @param index 欲选中项的索引
+     */
+
+    public void setSelection(int index) {
+        if (index != mSelection) {
+            mSelection = index;
+            mCurrentCaption = mCaptionEntries[index];
+            for (int i = 0; i < mItemViewList.length; i++) {
+                mItemViewList[i].setSelected(i == index);
+            }
+            if (mListener != null) {
+                mListener.onItemSelect(index, mCurrentCaption, false);
+            }
+        } else {
+            if (mListener != null) {
+                mListener.onItemSelect(index, mCurrentCaption, true);
+            }
+        }
+
     }
 
+    public int getSelection() {
+        return mSelection;
+    }
+
+
+    public interface OnItemSelectListener {
+        void onItemSelect(int position, CharSequence caption, boolean unchanged);
+    }
+
+    public CharSequence getCurrentCaption() {
+        return mCurrentCaption;
+    }
 
 }

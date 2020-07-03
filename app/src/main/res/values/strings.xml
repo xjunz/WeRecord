@@ -31,8 +31,8 @@
     <string name="mine">我的</string>
     <string name="search">搜索</string>
     <string name="filter">筛选</string>
-    <string name="sort_by">排序</string>
-    <string name="order_by">顺序</string>
+    <string name="sort_by">排序依据</string>
+    <string name="order_by">排序方式</string>
     <string name="quick_access">快速访问</string>
     <string name="caption_availability">您已完成了所有的准备工作，现在检测此应用是否能在您的设备上正常使用。</string>
     <string name="checking">正在检查…</string>
@@ -93,7 +93,7 @@
     <string name="copyright">Copyright © 2020 <b>XJUNZ</b> \n All rights reserved.</string>
     <string name="name">名称</string>
     <string name="last_msg_time">最后聊天时间</string>
-    <string name="msg_count">消息记录数量</string>
+    <string name="msg_count">消息数量</string>
     <string name="saved_group">保存的群聊</string>
     <string name="quited_group">退出的群聊</string>
     <string name="friend">好友</string>
@@ -109,4 +109,5 @@
     <string name="time">时间</string>
     <string name="reset">重置</string>
     <string name="confirm">确认</string>
+    <string name="reset_completed">已重置</string>
 </resources>

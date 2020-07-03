@@ -11,8 +11,8 @@ import java.util.List;
 
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
+import xjunz.tool.wechat.data.model.SortBy;
 import xjunz.tool.wechat.impl.repo.TalkerRepository;
-import xjunz.tool.wechat.ui.activity.main.model.SortBy;
 import xjunz.tool.wechat.util.UniUtils;
 
 import static xjunz.tool.wechat.util.UniUtils.arabicDigit2HanDigit;

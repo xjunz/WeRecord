@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.ui.activity.main.model;
+package xjunz.tool.wechat.data.model;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -12,8 +12,8 @@ import androidx.databinding.ObservableList;
 import java.util.List;
 
 /**
- * 定义各种筛选相关配置的实体类，这些配置会被会被显示在{@link xjunz.tool.wechat.ui.activity.main.FilterFragment}中
- * 因为实现了数据绑定，所有字段都继承自{@link java.util.Observable}
+ * 定义各种筛选相关配置的实体类，这些配置会被会被显示在{@link xjunz.tool.wechat.ui.activity.main.FilterFragment}中。
+ * </br>因为实现了数据绑定，所有字段都继承自{@link java.util.Observable}
  */
 public class FilterConfig {
     /**
@@ -86,6 +86,8 @@ public class FilterConfig {
         void confirmFilter();
 
         void resetFilter();
+
+        void onSearch(String keyword);
     }
 
     public void setEventHandler(@NonNull EventHandler handler) {

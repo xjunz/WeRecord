@@ -4,10 +4,12 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,22 +29,19 @@ import java.util.Objects;
 
 import io.reactivex.Flowable;
 import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Action;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.R;
+import xjunz.tool.wechat.data.model.FilterConfig;
+import xjunz.tool.wechat.data.model.FilterViewModel;
+import xjunz.tool.wechat.data.model.SortBy;
 import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.repo.ContactRepository;
-import xjunz.tool.wechat.ui.activity.main.model.FilterConfig;
-import xjunz.tool.wechat.ui.activity.main.model.FilterViewModel;
-import xjunz.tool.wechat.ui.activity.main.model.SortBy;
 import xjunz.tool.wechat.util.UiUtils;
+import xjunz.tool.wechat.util.UniUtils;
 
 
 /**
@@ -62,12 +61,16 @@ public class ContactFragment extends Fragment implements FilterConfig.EventHandl
     private ContactAdapter mMainAdapter;
     private FilterConfig mConfig;
     private List<String> mSeparatorDescCache;
-
+    private ViewStub mStubNoResult;
+    private ImageView mIvNoResult;
+    private CompositeDisposable mDisposables;
+    private String mKeyword;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         FilterViewModel model = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(FilterViewModel.class);
+        mDisposables = new CompositeDisposable();
         initFilterConfig();
         model.updateCurrentConfig(mConfig);
     }
@@ -101,6 +104,7 @@ public class ContactFragment extends Fragment implements FilterConfig.EventHandl
         View root = getLayoutInflater().inflate(R.layout.fragment_contact, container, false);
         mList = root.findViewById(R.id.rv_list);
         mScroller = root.findViewById(R.id.rv_scroller);
+        mStubNoResult = root.findViewById(R.id.stub_no_result);
         loadList();
         return root;
     }
@@ -108,45 +112,35 @@ public class ContactFragment extends Fragment implements FilterConfig.EventHandl
     private void loadList() {
         mItemList = new ArrayList<>();
         mSeparatorDescCache = new ArrayList<>();
-        mRawItemList = Objects.requireNonNull(ContactRepository.getInstance().getAll());
+        mRawItemList = ContactRepository.getInstance().getAll();
         Disposable disposable = Flowable.fromIterable(mRawItemList).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread())
-                .map(new Function<Contact, Item>() {
-                    @Override
-                    public Item apply(Contact contact) {
-                        String desc = contact.describe();
-                        Item item = new Item(contact, desc, Item.TYPE_DATA);
-                        if (mSeparatorDescCache.size() == 0 || !mSeparatorDescCache.contains(desc)) {
-                            item.type = Item.TYPE_SEPARATOR;
-                            mSeparatorDescCache.add(desc);
-                        }
-                        return item;
+                .map(contact -> {
+                    String desc = contact.describe();
+                    Item item = new Item(contact, desc, Item.TYPE_DATA);
+                    if (mSeparatorDescCache.size() == 0 || !mSeparatorDescCache.contains(desc)) {
+                        item.type = Item.TYPE_SEPARATOR;
+                        mSeparatorDescCache.add(desc);
                     }
-                }).subscribe(new Consumer<Item>() {
-                    @Override
-                    public void accept(Item item) throws Exception {
-                        if (item.type == Item.TYPE_SEPARATOR) {
-                            mItemList.add(item);
-                        }
-                        mItemList.add(new Item(item.content, item.description, Item.TYPE_DATA));
+                    return item;
+                }).subscribe(item -> {
+                    if (item.type == Item.TYPE_SEPARATOR) {
+                        mItemList.add(item);
                     }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        //异常处理
-                    }
-                }, new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        Contact.setOrderBy(mConfig.isAscending());
-                        Collections.sort(mItemList);
-                        //更新UI
-                        mMainAdapter = new ContactAdapter();
-                        mList.setAdapter(mMainAdapter);
-                        updateCountInfo();
-                        //获取所有分隔项
-                        collectSeparatorDescList();
-                    }
+                    mItemList.add(new Item(item.content, item.description, Item.TYPE_DATA));
+                }, throwable -> {
+                    //异常处理
+                }, () -> {
+                    showOrHideNoResultArt(mItemList.size() == 0);
+                    Contact.setOrderBy(mConfig.isAscending());
+                    Collections.sort(mItemList);
+                    //更新UI
+                    mMainAdapter = new ContactAdapter();
+                    mList.setAdapter(mMainAdapter);
+                    updateCountInfo();
+                    //获取所有分隔项
+                    collectSeparatorDescList();
                 });
+        mDisposables.add(disposable);
     }
 
 
@@ -172,14 +166,11 @@ public class ContactFragment extends Fragment implements FilterConfig.EventHandl
         //初始化滑块适配器
         mScrollerAdapter = new ScrollerAdapter();
         mScroller.setAdapter(mScrollerAdapter);
-        mScroller.post(new Runnable() {
-            @Override
-            public void run() {
-                LinearLayoutManager llm = (LinearLayoutManager) Objects.requireNonNull(mList.getLayoutManager());
-                int first = llm.findFirstCompletelyVisibleItemPosition();
-                if (first >= 0) {
-                    mScrollerAdapter.setSelectedItemIndex(mScrollerAdapter.indicatorSerial.indexOf(mItemList.get(first).description));
-                }
+        mScroller.post(() -> {
+            LinearLayoutManager llm = (LinearLayoutManager) Objects.requireNonNull(mList.getLayoutManager());
+            int first = llm.findFirstCompletelyVisibleItemPosition();
+            if (first >= 0) {
+                mScrollerAdapter.setSelectedItemIndex(mScrollerAdapter.indicatorSerial.indexOf(mItemList.get(first).description));
             }
         });
         mList.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -206,7 +197,10 @@ public class ContactFragment extends Fragment implements FilterConfig.EventHandl
         if (mConfig.categorySelection.get() == 0) {
             mRawItemList = ContactRepository.getInstance().getAll();
         } else {
-            mRawItemList = Objects.requireNonNull(ContactRepository.getInstance().getMap().get(Contact.Type.values()[mConfig.categorySelection.get() - 1]));
+            mRawItemList = ContactRepository.getInstance().getMap().get(Contact.Type.values()[mConfig.categorySelection.get() - 1]);
+            if (mRawItemList == null) {
+                mRawItemList = new ArrayList<>();
+            }
         }
         final SortBy by = SortBy.NAME;
         Integer selectionOfSortBy = mConfig.descriptionSelectionMap.get(by);
@@ -216,42 +210,58 @@ public class ContactFragment extends Fragment implements FilterConfig.EventHandl
         } else {
             desOfSortBy = null;
         }
-        Disposable disposable = Flowable.fromIterable(mRawItemList).subscribeOn(Schedulers.computation()).filter(new Predicate<Contact>() {
-            @Override
-            public boolean test(Contact contact) {
-                return desOfSortBy == null || contact.describe(by).equals(desOfSortBy);
-            }
-        }).map(new Function<Contact, Item>() {
-            @Override
-            public Item apply(Contact contact) {
-                String desc = contact.describe();
-                Item item = new Item(contact, desc, Item.TYPE_DATA);
-                if (mSeparatorDescCache.size() == 0 || !mSeparatorDescCache.contains(desc)) {
-                    item.type = Item.TYPE_SEPARATOR;
-                    mSeparatorDescCache.add(desc);
+
+        Disposable disposable = Flowable.fromIterable(mRawItemList).subscribeOn(Schedulers.computation()).filter(contact -> desOfSortBy == null || contact.describe(by).equals(desOfSortBy)).map(contact -> new Item(contact, contact.describe(), Item.TYPE_DATA)).filter(item -> {
+            if (TextUtils.isEmpty(mKeyword)) {
+                return true;
+            } else {
+                String name = item.content.getName();
+                if (mKeyword.length() > name.length()) {
+                    return false;
                 }
-                return item;
-            }
-        }).doOnNext(new Consumer<Item>() {
-            @Override
-            public void accept(Item item) {
-                if (item.type == Item.TYPE_SEPARATOR) {
-                    mItemList.add(item);
+                boolean hasKeyWord = false;
+                int index;
+                if ((index = name.indexOf(mKeyword)) >= 0) {
+                    hasKeyWord = true;
+                    item.spanStartIndex = index;
+                    item.spanLength = mKeyword.length();
+                } else if ((index = UniUtils.getPinYinAbbr(name).toUpperCase().indexOf(mKeyword.toUpperCase())) >= 0) {
+                    hasKeyWord = true;
+                    item.spanStartIndex = index;
+                    item.spanLength = mKeyword.length();
                 }
-                mItemList.add(new Item(item.content, item.description, Item.TYPE_DATA));
+                return hasKeyWord;
             }
-        }).observeOn(AndroidSchedulers.mainThread()).doOnComplete(new Action() {
-            @Override
-            public void run() {
-                Collections.sort(mItemList);
-                updateCountInfo();
-                mMainAdapter.notifyDataSetChanged();
-                mScrollerAdapter.reverseIndicatorSerial(!mConfig.isAscending());
-                mScrollerAdapter.notifyDataSetChanged();
+        }).doOnNext(item -> {
+            if (mSeparatorDescCache.size() == 0 || !mSeparatorDescCache.contains(item.description)) {
+                mItemList.add(new Item(item.content, item.description, Item.TYPE_SEPARATOR));
+                mSeparatorDescCache.add(item.description);
             }
+            mItemList.add(item);
+        }).observeOn(AndroidSchedulers.mainThread()).doOnComplete(() -> {
+            showOrHideNoResultArt(mItemList.size() == 0);
+            Contact.setOrderBy(mConfig.isAscending());
+            Collections.sort(mItemList);
+            updateCountInfo();
+            mMainAdapter.notifyDataSetChanged();
+            mScrollerAdapter.reverseIndicatorSerial(!mConfig.isAscending());
+            mScrollerAdapter.notifyDataSetChanged();
         }).subscribe();
+        mDisposables.add(disposable);
     }
 
+
+    private void showOrHideNoResultArt(boolean toShow) {
+        if (mIvNoResult == null) {
+            mIvNoResult = (ImageView) mStubNoResult.inflate();
+        }
+        if (toShow) {
+            mIvNoResult.setAlpha(0f);
+            mIvNoResult.animate().alpha(1f).withStartAction(() -> mIvNoResult.setVisibility(View.VISIBLE)).start();
+        } else {
+            mIvNoResult.setVisibility(View.GONE);
+        }
+    }
 
     private int getFirstVisibleItemIndexOfList() {
         LinearLayoutManager llm = (LinearLayoutManager) Objects.requireNonNull(mList.getLayoutManager());
@@ -271,6 +281,12 @@ public class ContactFragment extends Fragment implements FilterConfig.EventHandl
     @Override
     public void resetFilter() {
         resetFilterConfig();
+        doFilter();
+    }
+
+    @Override
+    public void onSearch(String keyword) {
+        mKeyword = keyword;
         doFilter();
     }
 
@@ -391,27 +407,15 @@ public class ContactFragment extends Fragment implements FilterConfig.EventHandl
                             holder.tvName.setText(content.getName());
                         }
                         //异步设置头像
-                        Disposable disposable = Single.create(new SingleOnSubscribe<Bitmap>() {
-                            @Override
-                            public void subscribe(SingleEmitter<Bitmap> emitter) throws Exception {
-                                Bitmap avatar = content.getAvatar();
-                                if (avatar == null) {
-                                    emitter.onError(null);
-                                } else {
-                                    emitter.onSuccess(avatar);
-                                }
+                        Disposable disposable = Single.create((SingleOnSubscribe<Bitmap>) emitter -> {
+                            Bitmap avatar = content.getAvatar();
+                            if (avatar == null) {
+                                emitter.onError(new RuntimeException("This contact has no local avatar"));
+                            } else {
+                                emitter.onSuccess(avatar);
                             }
-                        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new Consumer<Bitmap>() {
-                            @Override
-                            public void accept(Bitmap bitmap) {
-                                holder.ivAvatar.setImageBitmap(bitmap);
-                            }
-                        }, new Consumer<Throwable>() {
-                            @Override
-                            public void accept(Throwable throwable) {
-                                holder.ivAvatar.setImageResource(R.drawable.avatar_default);
-                            }
-                        });
+                        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io())
+                                .subscribe(bitmap -> holder.ivAvatar.setImageBitmap(bitmap), throwable -> holder.ivAvatar.setImageResource(R.drawable.avatar_default));
                     } else {
                         //设置不可见
                         holder.itemView.setVisibility(View.GONE);
@@ -568,44 +572,47 @@ public class ContactFragment extends Fragment implements FilterConfig.EventHandl
             public ScrollerViewHolder(@NonNull View itemView) {
                 super(itemView);
                 tvText = itemView.findViewById(R.id.tv_text);
-                tvText.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        int posOfClickedItem = getAdapterPosition();
-                        String descOfClickedItem = indicatorSerial.get(posOfClickedItem);
-                        int targetIndex = binarySearch(descOfClickedItem);
-                        if (targetIndex < 0) {
-                            throw new RuntimeException("Index of the item scrolling to not found but expected to exist! ");
+                tvText.setOnClickListener(v -> {
+                    int posOfClickedItem = getAdapterPosition();
+                    String descOfClickedItem = indicatorSerial.get(posOfClickedItem);
+                    int targetIndex = binarySearch(descOfClickedItem);
+                    if (targetIndex < 0) {
+                        throw new RuntimeException("Index of the item scrolling to not found but expected to exist! ");
+                    }
+                    int firstVisibleItemOfMainList = getFirstVisibleItemIndexOfList();
+                    int lastVisibleItemOfMainList = getLastVisibleItemIndexOfList();
+                    //如果目标Item可见，直接提醒一下
+                    if (targetIndex <= lastVisibleItemOfMainList && targetIndex >= firstVisibleItemOfMainList) {
+                        mMainAdapter.notifyItemChanged(targetIndex + 1, true);
+                    } else {
+                        //如果是目标Item在当前列表下面，调整目标Item后移一个，保证可以看到数据项
+                        if (targetIndex > lastVisibleItemOfMainList) {
+                            targetIndex += 1;
                         }
-                        int firstVisibleItemOfMainList = getFirstVisibleItemIndexOfList();
-                        int lastVisibleItemOfMainList = getLastVisibleItemIndexOfList();
-                        //如果目标Item可见，直接提醒一下
-                        if (targetIndex <= lastVisibleItemOfMainList && targetIndex >= firstVisibleItemOfMainList) {
-                            mMainAdapter.notifyItemChanged(targetIndex + 1, true);
+                        //和当前Item距离太远直接跳转，不要滑动了，太慢
+                        if (Math.abs(firstVisibleItemOfMainList - targetIndex) > 2 * (lastVisibleItemOfMainList - firstVisibleItemOfMainList)) {
+                            mList.scrollToPosition(targetIndex);
                         } else {
-                            //如果是目标Item在当前列表下面，调整目标Item后移一个，保证可以看到数据项
-                            if (targetIndex > lastVisibleItemOfMainList) {
-                                targetIndex += 1;
-                            }
-                            //和当前Item距离太远直接跳转，不要滑动了，太慢
-                            if (Math.abs(firstVisibleItemOfMainList - targetIndex) > 2 * (lastVisibleItemOfMainList - firstVisibleItemOfMainList)) {
-                                mList.scrollToPosition(targetIndex);
-                            } else {
-                                mList.smoothScrollToPosition(targetIndex);
-                            }
+                            mList.smoothScrollToPosition(targetIndex);
                         }
+                    }
 
-                        LinearLayoutManager llm = (LinearLayoutManager) Objects.requireNonNull(mScroller.getLayoutManager());
-                        int f = llm.findFirstVisibleItemPosition();
-                        int l = llm.findLastVisibleItemPosition();
-                        if (posOfClickedItem == l && posOfClickedItem != getItemCount() - 1) {
-                            mScroller.smoothScrollToPosition(posOfClickedItem + 1);
-                        } else if (posOfClickedItem == f && f != 0) {
-                            mScroller.smoothScrollToPosition(posOfClickedItem - 1);
-                        }
+                    LinearLayoutManager llm = (LinearLayoutManager) Objects.requireNonNull(mScroller.getLayoutManager());
+                    int f = llm.findFirstVisibleItemPosition();
+                    int l = llm.findLastVisibleItemPosition();
+                    if (posOfClickedItem == l && posOfClickedItem != getItemCount() - 1) {
+                        mScroller.smoothScrollToPosition(posOfClickedItem + 1);
+                    } else if (posOfClickedItem == f && f != 0) {
+                        mScroller.smoothScrollToPosition(posOfClickedItem - 1);
                     }
                 });
             }
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mDisposables.dispose();
     }
 }

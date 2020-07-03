@@ -64,6 +64,11 @@ public class UiUtils {
 
     public static void fadeSwitchText(@NonNull final TextView target, final Object text) {
         if (target.getWidth() == 0 || target.getHeight() == 0) {
+            if (text instanceof Integer) {
+                target.setText((Integer) text);
+            } else if (text instanceof CharSequence) {
+                target.setText((CharSequence) text);
+            }
             return;
         }
 

@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.lang.reflect.Method;
 
+import io.reactivex.Completable;
+import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.Environment;
 import xjunz.tool.wechat.util.UiUtils;
@@ -48,18 +50,22 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressWarnings("JavaReflectionMemberAccess")
     public static void showIme(View view) {
-        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService
-                (Context.INPUT_METHOD_SERVICE);
-        // the public methods don't seem to work for me, so try reflection.
-        try {
-            Method showSoftInputUnchecked = InputMethodManager.class.getMethod(
-                    "showSoftInputUnchecked", int.class, ResultReceiver.class);
-            showSoftInputUnchecked.setAccessible(true);
-            showSoftInputUnchecked.invoke(imm, 0, null);
-        } catch (Exception e) {
-            // ho hum
-        }
+        Completable.create(emitter -> {
+            InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService
+                    (Context.INPUT_METHOD_SERVICE);
+            // the public methods don't seem to work for me, so try reflection.
+            try {
+                Method showSoftInputUnchecked = InputMethodManager.class.getMethod(
+                        "showSoftInputUnchecked", int.class, ResultReceiver.class);
+                showSoftInputUnchecked.setAccessible(true);
+                showSoftInputUnchecked.invoke(imm, 0, null);
+            } catch (Exception e) {
+                // ho hum
+            }
+        }).subscribeOn(Schedulers.newThread()).subscribe();
+
     }
 
     public Environment getEnvironment() {

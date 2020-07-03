@@ -1,158 +1,153 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xjunz.tool.wechat.ui.customview.MainPanel xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_panel"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <RelativeLayout
+    <data>
+
+        <variable
+            name="activity"
+            type="xjunz.tool.wechat.ui.activity.main.MainActivity" />
+    </data>
+
+    <xjunz.tool.wechat.ui.customview.MainPanel
+        android:id="@+id/main_panel"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/top_bar"
-        android:layout_marginTop="?actionBarSize">
+        android:layout_height="match_parent">
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/vp_main"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/bottom_bar" />
+            android:layout_below="@+id/top_bar"
+            android:layout_marginTop="?actionBarSize">
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/vp_main"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/main_bottom_bar"
+                android:currentItem="@={activity.mCurrentPageIndex}" />
 
 
-        <xjunz.tool.wechat.ui.customview.BottomBar
-            android:id="@+id/bottom_bar"
-            app:imageEntries="@array/bottom_item_images"
-            app:captionEntries="@array/bottom_item_captions"
+            <xjunz.tool.wechat.ui.customview.BottomBar
+                android:id="@+id/main_bottom_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:background="?colorPrimary"
+                android:elevation="@dimen/z_bottom_bar"
+                android:minHeight="?actionBarSize"
+                android:onItemSelect="@{activity::onItemSelect}"
+                android:selection="@={activity.mCurrentPageIndex}"
+                app:captionEntries="@array/bottom_item_captions"
+                app:imageEntries="@array/bottom_item_images" />
+
+            <View
+                android:id="@+id/mask"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorMask"
+                android:clickable="true"
+                android:elevation="@dimen/z_bottom_bar"
+                android:focusable="true"
+                android:visibility="gone" />
+        </RelativeLayout>
+
+
+        <LinearLayout
+            android:id="@+id/ll_curtain"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:background="?colorPrimary"
-            android:elevation="@dimen/z_bottom_bar"
-            android:minHeight="?actionBarSize" />
+            android:elevation="@dimen/z_toolbar"
+            android:orientation="vertical">
 
-        <View
-            android:id="@+id/mask"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorMask"
-            android:clickable="true"
-            android:elevation="@dimen/z_bottom_bar"
-            android:focusable="true"
-            android:visibility="gone" />
-    </RelativeLayout>
-
-    <ImageButton
-        android:id="@+id/ib_test"
-        android:layout_width="@dimen/fab_normal"
-        android:layout_height="@dimen/fab_normal"
-        android:layout_above="@id/bottom_bar"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="@dimen/dp_48"
-        android:layout_marginBottom="@dimen/spacing_large"
-        android:background="@drawable/bg_fab"
-        android:elevation="@dimen/z_fab"
-        android:onClick="testTransition"
-        android:src="@drawable/ic_filter_24dp"
-        android:transitionName="@string/tn_filter"
-        android:visibility="gone" />
-
-
-    <LinearLayout
-        android:id="@+id/ll_curtain"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?colorPrimary"
-        android:elevation="@dimen/z_toolbar"
-        android:orientation="vertical">
-
-        <fragment
-            android:id="@+id/fl_filter"
-            class="xjunz.tool.wechat.ui.activity.main.FilterFragment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?android:colorBackground" />
-
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/top_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="?actionBarSize">
-
-            <TextView
-                android:id="@+id/tv_top_bar_title"
-                android:layout_width="wrap_content"
+            <fragment
+                android:id="@+id/fl_filter"
+                class="xjunz.tool.wechat.ui.activity.main.FilterFragment"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_normal"
-                android:letterSpacing=".1"
-                android:text="会话"
-                android:textColor="?colorAccent"
-                android:textSize="@dimen/ts_medium"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:background="?android:colorBackground" />
 
-            <EditText
-                android:id="@+id/et_search"
-                android:layout_width="0dp"
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/top_bar"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_unit"
-                android:layout_marginEnd="@dimen/spacing_unit"
-                android:autofillHints="name"
-                android:background="@null"
-                android:enabled="false"
-                android:importantForAutofill="no"
-                android:inputType="text"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/pb_load"
-                app:layout_constraintStart_toEndOf="@+id/tv_top_bar_title"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="LabelFor,UnusedAttribute" />
+                android:minHeight="?actionBarSize">
 
-            <ProgressBar
-                android:id="@+id/pb_load"
-                style="@android:style/Widget.Material.ProgressBar.Small.Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/spacing_normal"
-                android:minWidth="@dimen/dp_20"
-                android:minHeight="@dimen/dp_20"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/ib_search"
-                app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:id="@+id/tv_top_bar_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_normal"
+                    android:letterSpacing=".1"
+                    android:textColor="?colorAccent"
+                    android:textSize="@dimen/ts_medium"
+                    android:title="@{activity.mTitle}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageButton
-                android:id="@+id/ib_search"
-                android:layout_width="@dimen/fab_small"
-                android:layout_height="@dimen/fab_small"
-                android:layout_marginEnd="@dimen/spacing_unit"
-                android:background="?android:selectableItemBackgroundBorderless"
-                android:contentDescription="@string/search"
-                android:onClick="enterSearchMode"
-                android:src="@drawable/ic_search_24dp"
-                android:tint="?colorButtonNormal"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/ib_filter"
-                app:layout_constraintTop_toTopOf="parent" />
+                <EditText
+                    android:id="@+id/et_search"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_unit"
+                    android:layout_marginEnd="@dimen/spacing_unit"
+                    android:autofillHints="name"
+                    android:background="@null"
+                    android:enabled="@{activity.mIsInSearchMode}"
+                    android:importantForAutofill="no"
+                    android:inputType="text"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/pb_load"
+                    app:layout_constraintStart_toEndOf="@+id/tv_top_bar_title"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageButton
-                android:id="@+id/ib_filter"
-                android:layout_width="@dimen/fab_small"
-                android:layout_height="@dimen/fab_small"
-                android:layout_marginEnd="@dimen/spacing_normal"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/filter"
-                android:onClick="showFilterPanel"
-                android:src="@drawable/ic_filter_24dp"
-                android:tint="?colorButtonNormal"
-                android:transitionName="@string/tn_filter"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </LinearLayout>
-</xjunz.tool.wechat.ui.customview.MainPanel>
+                <ProgressBar
+                    android:id="@+id/pb_load"
+                    style="@android:style/Widget.Material.ProgressBar.Small.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/spacing_normal"
+                    android:minWidth="@dimen/dp_20"
+                    android:minHeight="@dimen/dp_20"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/ib_search"
+                    app:layout_constraintTop_toTopOf="parent" />
 
+                <ImageButton
+                    android:id="@+id/ib_search"
+                    android:layout_width="@dimen/fab_small"
+                    android:layout_height="@dimen/fab_small"
+                    android:layout_marginEnd="@dimen/spacing_unit"
+                    android:background="?android:selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/search"
+                    android:onClick="@{activity::enterSearchMode}"
+                    android:searchMode="@={activity.mIsInSearchMode}"
+                    android:src="@drawable/ic_search_24dp"
+                    android:tint="?colorButtonNormal"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/ib_filter"
+                    app:layout_constraintTop_toTopOf="parent" />
 
+                <ImageButton
+                    android:id="@+id/ib_filter"
+                    android:layout_width="@dimen/fab_small"
+                    android:layout_height="@dimen/fab_small"
+                    android:layout_marginEnd="@dimen/spacing_normal"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/filter"
+                    android:onClick="showFilterPanel"
+                    android:src="@drawable/ic_filter_24dp"
+                    android:tint="?colorButtonNormal"
+                    android:transitionName="@string/tn_filter"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+    </xjunz.tool.wechat.ui.customview.MainPanel>
+</layout>

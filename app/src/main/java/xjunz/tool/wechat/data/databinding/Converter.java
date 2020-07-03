@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.ui.activity.main.databinding;
+package xjunz.tool.wechat.data.databinding;
 
 import androidx.databinding.BindingConversion;
 

@@ -7,6 +7,7 @@
     android:background="?attr/selectableItemBackgroundBorderless"
     android:clickable="true"
     android:focusable="true"
+    android:descendantFocusability="afterDescendants"
     android:orientation="vertical">
 
     <ImageView
@@ -14,7 +15,7 @@
         android:id="@+id/iv_bottom_item"
         android:layout_width="28dp"
         android:layout_height="28dp"
-        android:tint="@color/bottom_item_image"
+        android:tint="@color/bottom_bar_image_tint"
         tools:ignore="ContentDescription" />
 
 </FrameLayout>

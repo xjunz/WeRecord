@@ -71,12 +71,7 @@ public class MainPanel extends RelativeLayout {
         mHandler = findViewById(R.id.top_bar);
         mFilter = findViewById(R.id.fl_filter);
         mMask = findViewById(R.id.mask);
-        mMask.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                closePanel();
-            }
-        });
+        mMask.setOnClickListener(v -> closePanel());
     }
 
     private void init() {
@@ -85,7 +80,7 @@ public class MainPanel extends RelativeLayout {
         this.addOnPanelSlideListener(new OnPanelSlideListener() {
 
             @Override
-            public void onPanelSlideFinished(boolean isOpen, View target) {
+            public void onPanelSlideFinished(boolean isOpen) {
                 for (int i = 0; i < mHandler.getChildCount(); i++) {
                     mHandler.getChildAt(i).setClickable(!isOpen);
                 }
@@ -95,7 +90,7 @@ public class MainPanel extends RelativeLayout {
             }
 
             @Override
-            public void onPanelSlide(float fraction, View target) {
+            public void onPanelSlide(float fraction) {
                 mHandler.setAlpha(1 - fraction);
                 mFilter.setAlpha(fraction);
                 mMask.setAlpha(fraction);
@@ -105,7 +100,7 @@ public class MainPanel extends RelativeLayout {
 
 
             @Override
-            public void onPanelSlideStart(boolean isToOpen, View target) {
+            public void onPanelSlideStart(boolean isToOpen) {
                 if (isToOpen) {
                     mMask.setAlpha(0);
                     mMask.setVisibility(VISIBLE);
@@ -148,7 +143,7 @@ public class MainPanel extends RelativeLayout {
     }
 
     private ViewDragHelper.Callback mCallback = new ViewDragHelper.Callback() {
-        private View mCapturedView;
+        private int mFormerState = ViewDragHelper.STATE_IDLE;
 
         @Override
         public boolean tryCaptureView(@NonNull View child, int pointerId) {
@@ -158,7 +153,6 @@ public class MainPanel extends RelativeLayout {
         @Override
         public void onViewCaptured(@NonNull View capturedChild, int activePointerId) {
             super.onViewCaptured(capturedChild, activePointerId);
-            this.mCapturedView = capturedChild;
             mReadyToUser = true;
         }
 
@@ -170,16 +164,17 @@ public class MainPanel extends RelativeLayout {
         @Override
         public void onViewDragStateChanged(int state) {
             super.onViewDragStateChanged(state);
-            if (state == ViewDragHelper.STATE_DRAGGING) {
+            if (mFormerState == ViewDragHelper.STATE_IDLE && (state == ViewDragHelper.STATE_DRAGGING || state == ViewDragHelper.STATE_SETTLING)) {
                 int top = mCurtain.getTop();
                 for (OnPanelSlideListener listener : mListenerList) {
-                    listener.onPanelSlideStart(mMaxTop - top > top - mMinTop, mCapturedView);
+                    listener.onPanelSlideStart(mMaxTop - top > top - mMinTop);
                 }
             } else if (state == ViewDragHelper.STATE_IDLE) {
                 for (OnPanelSlideListener listener : mListenerList) {
-                    listener.onPanelSlideFinished(mCurtain.getTop() == mMaxTop, mCapturedView);
+                    listener.onPanelSlideFinished(mCurtain.getTop() == mMaxTop);
                 }
             }
+            mFormerState = state;
         }
 
         @Override
@@ -187,7 +182,7 @@ public class MainPanel extends RelativeLayout {
             super.onViewPositionChanged(changedView, left, top, dx, dy);
             float fraction = (float) (top - mMinTop) / (mMaxTop - mMinTop);
             for (OnPanelSlideListener listener : mListenerList) {
-                listener.onPanelSlide(fraction, changedView);
+                listener.onPanelSlide(fraction);
             }
         }
 
@@ -214,10 +209,10 @@ public class MainPanel extends RelativeLayout {
     };
 
     public interface OnPanelSlideListener {
-        void onPanelSlideFinished(boolean isOpen, View target);
+        void onPanelSlideFinished(boolean isOpen);
 
-        void onPanelSlide(float fraction, View target);
+        void onPanelSlide(float fraction);
 
-        void onPanelSlideStart(boolean isToOpen, View target);
+        void onPanelSlideStart(boolean isToOpen);
     }
 }

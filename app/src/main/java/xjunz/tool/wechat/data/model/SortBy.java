@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.ui.activity.main.model;
+package xjunz.tool.wechat.data.model;
 
 import java.util.ArrayList;
 import java.util.List;

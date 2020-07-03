@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.ui.activity.main.databinding;
+package xjunz.tool.wechat.data.databinding;
 
 import android.view.View;
 import android.widget.AdapterView;
@@ -13,16 +13,17 @@ import androidx.databinding.InverseBindingListener;
 import java.util.Arrays;
 import java.util.List;
 
-import xjunz.tool.wechat.ui.activity.main.model.SortBy;
+import xjunz.tool.wechat.data.model.SortBy;
 
 /**
- * {@link xjunz.tool.wechat.ui.activity.main.model.FilterConfig}实体类相关的自定义{@link BindingAdapter}声明类
+ * {@link xjunz.tool.wechat.data.model.FilterConfig}实体类相关的自定义{@link BindingAdapter}声明类
  */
-public class FilterConfigBindingAdapter {
+//TODO: 将'android:'改为'filter:'
+public class FilterFragmentBindingAdapter {
 
     /**
      * 为自定义属性{@code android:sortBy}设置自定义{@link BindingAdapter}
-     * 实现通过改变{@link xjunz.tool.wechat.ui.activity.main.model.FilterConfig#sortBy}改变{@link Spinner}的{@code selection}
+     * 实现通过改变{@link xjunz.tool.wechat.data.model.FilterConfig#sortBy}改变{@link Spinner}的{@code selection}
      *
      * @param spinner 当前{@link Spinner}
      * @param what    当前{@link Spinner}的{@code android:sortBy}属性设置的值
@@ -35,7 +36,7 @@ public class FilterConfigBindingAdapter {
 
     /**
      * 为自定义属性{@code android:sortBy}设置自定义{@link InverseBindingAdapter}
-     * 实现通过改变{@link Spinner}的{@code selection}改变{@link xjunz.tool.wechat.ui.activity.main.model.FilterConfig#sortBy}
+     * 实现通过改变{@link Spinner}的{@code selection}改变{@link xjunz.tool.wechat.data.model.FilterConfig#sortBy}
      *
      * @param spinner 当前{@link Spinner}
      * @return 根据当前{@link Spinner}的{@code selection}获取到的{@link SortBy}

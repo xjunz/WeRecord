@@ -7,13 +7,11 @@
 
         <import type="android.text.Html" />
 
-        <import type="xjunz.tool.wechat.ui.activity.main.model.SortBy" />
-
-        <import type="xjunz.tool.wechat.ui.activity.main.databinding.Converter" />
+        <import type="xjunz.tool.wechat.data.model.SortBy" />
 
         <variable
             name="model"
-            type="xjunz.tool.wechat.ui.activity.main.model.FilterViewModel" />
+            type="xjunz.tool.wechat.data.model.FilterViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -156,7 +154,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_normal"
-            android:text="@string/sort_by"
+            android:text="@string/order_by"
             app:layout_constraintStart_toEndOf="@+id/space_center"
             app:layout_constraintTop_toBottomOf="@+id/divider_bottom" />
 
@@ -200,7 +198,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_normal"
-            android:onClick="@{model::resetFilter}"
+            android:onClick="@{()->model.resetFilter()}"
             android:text="@string/reset"
             app:layout_constraintEnd_toStartOf="@+id/btn_confirm_filter"
             app:layout_constraintStart_toStartOf="@+id/space_center"
@@ -211,7 +209,7 @@
             style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{model::confirmFilter}"
+            android:onClick="@{()->model.confirmFilter()}"
             android:text="@string/confirm"
             app:layout_constraintBottom_toBottomOf="@+id/btn_reset_filter"
             app:layout_constraintEnd_toEndOf="parent"

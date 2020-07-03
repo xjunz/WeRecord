@@ -9,4 +9,5 @@
     <color name="colorPrimaryDark">#BCBCBC</color>
     <color name="colorAccentBlind">#80C0BB</color>
     <color name="colorTintDark">#626262</color>
+    <color name="colorTintDarkDisabled">#BEBEBE</color>
 </resources>

@@ -25,8 +25,8 @@ public class ContactRepository extends LifecyclePerceptiveRepository {
         return mMap;
     }
 
-    public @NonNull
-    List<Contact> getAll() {
+    @NonNull
+    public List<Contact> getAll() {
         if (mAll == null) {
             throw new RuntimeException("Please call queryAll() first. ");
         }

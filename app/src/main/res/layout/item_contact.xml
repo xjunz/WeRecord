@@ -11,6 +11,7 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/iv_avatar"
+        tools:src="@tools:sample/avatars"
         android:layout_width="@dimen/fab_medium"
         android:layout_height="@dimen/fab_medium"
         android:layout_marginStart="@dimen/spacing_normal"

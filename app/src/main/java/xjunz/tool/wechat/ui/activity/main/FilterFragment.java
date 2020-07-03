@@ -12,8 +12,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import xjunz.tool.wechat.R;
+import xjunz.tool.wechat.data.model.FilterViewModel;
 import xjunz.tool.wechat.databinding.FragmentFilterBinding;
-import xjunz.tool.wechat.ui.activity.main.model.FilterViewModel;
 
 public class FilterFragment extends Fragment {
     private FilterViewModel mModel;

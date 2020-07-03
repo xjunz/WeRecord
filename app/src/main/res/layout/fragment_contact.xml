@@ -1,24 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <ViewStub
+        android:id="@+id/stub_no_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:inflatedId="@+id/iv_no_result"
+        android:layout="@layout/stub_no_result"
+        android:src="@mipmap/art_no_result" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_contact" />
 
-    <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_scroller"
-        android:elevation="@dimen/z_card"
-        android:background="@drawable/bg_cornered_card"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_scroller"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        xmlns:tools="http://schemas.android.com/tools"
-        tools:listitem="@layout/item_scroller"
+        android:background="@drawable/bg_cornered_card"
+        android:elevation="@dimen/z_card"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:itemCount="38"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        tools:listitem="@layout/item_scroller" />
+
+    <ImageButton
+        android:layout_width="@dimen/fab_normal"
+        android:layout_height="@dimen/fab_normal"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="@dimen/spacing_unit"
+        android:layout_marginEnd="@dimen/spacing_large"
+        android:layout_marginBottom="@dimen/spacing_large"
+        android:background="@drawable/bg_fab"
+        android:elevation="@dimen/z_fab"
+        android:src="@drawable/ic_export_24dp"
+        android:tint="@android:color/white" />
 </RelativeLayout>
