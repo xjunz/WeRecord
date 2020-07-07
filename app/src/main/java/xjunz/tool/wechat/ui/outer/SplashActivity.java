@@ -7,13 +7,10 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 
 import io.reactivex.Completable;
-import io.reactivex.CompletableEmitter;
 import io.reactivex.CompletableObserver;
-import io.reactivex.CompletableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
@@ -58,15 +55,12 @@ public class SplashActivity extends BaseActivity implements CompletableObserver 
 
     @Override
     public void onComplete() {
-        mQueryDisposable = Completable.create(new CompletableOnSubscribe() {
-            @Override
-            public void subscribe(CompletableEmitter emitter) throws Exception {
-                //查询所有聊天记录
-                TalkerRepository.getInstance().queryAll();
-                //查询所有联系人信息
-                ContactRepository.getInstance().queryAll();
-                emitter.onComplete();
-            }
+        mQueryDisposable = Completable.create(emitter -> {
+            //查询所有聊天记录
+            TalkerRepository.getInstance().queryAll();
+            //查询所有联系人信息
+            ContactRepository.getInstance().queryAll();
+            emitter.onComplete();
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action() {
             @Override
             public void run() {
@@ -75,12 +69,7 @@ public class SplashActivity extends BaseActivity implements CompletableObserver 
                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
             }
-        }, new Consumer<Throwable>() {
-            @Override
-            public void accept(Throwable throwable) throws Exception {
-                throwable.printStackTrace();
-            }
-        });
+        }, Throwable::printStackTrace);
 
     }
 
@@ -92,12 +81,7 @@ public class SplashActivity extends BaseActivity implements CompletableObserver 
             public void onClick(DialogInterface dialog, int which) {
                 recreate();
             }
-        }).setNegativeButton(R.string.exit, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                finish();
-            }
-        }).setCancelable(false).show();
+        }).setNegativeButton(R.string.exit, (dialog, which) -> finish()).setCancelable(false).show();
     }
 
     @Override

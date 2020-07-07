@@ -38,7 +38,6 @@ public class ContactRepository extends AccountRepository<Contact> {
     }
 
     public static ContactRepository getInstance() {
-        sInstance = sInstance == null ? new ContactRepository() : sInstance;
-        return sInstance;
+       return sInstance = sInstance == null ? new ContactRepository() : sInstance;
     }
 }

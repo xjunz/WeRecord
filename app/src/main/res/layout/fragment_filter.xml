@@ -186,7 +186,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="start"
-            android:letterSpacing=".1"
+            android:letterSpacing=".05"
             android:text="@{Html.fromHtml(@string/format_count_stats(model.currentConfig.totalCount,model.currentConfig.filteredCount))}"
             app:layout_constraintBottom_toBottomOf="@+id/btn_reset_filter"
             app:layout_constraintEnd_toStartOf="@+id/space_center"

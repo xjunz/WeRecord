@@ -83,6 +83,10 @@ public class PageConfig {
      */
     public ObservableField<String> searchKeyword = new ObservableField<>();
     /**
+     * 筛选是否确认
+     */
+    public boolean filterConfirmed = true;
+    /**
      * 事件处理者，响应{@link FilterFragment} 发出的筛选命令
      */
     private EventHandler mEventHandler;
@@ -109,11 +113,23 @@ public class PageConfig {
      * 如果想要响应全局事件，使用{@link PageViewModel#addEventHandler(PageViewModel.EventHandler)}
      */
     public interface EventHandler {
-        void confirmFilter();
+        /**
+         * 确认筛选
+         */
+        void onConfirmFilter();
 
-        void resetFilter();
+        /**
+         * 重置筛选
+         */
+        void onResetFilter();
 
-        void onSearch();
+        /**
+         * 搜索内容
+         *
+         * @param keyword 关键词
+         */
+        void onSearch(@NonNull String keyword);
+
     }
 
     public void setEventHandler(@NonNull EventHandler handler) {
@@ -127,4 +143,5 @@ public class PageConfig {
         }
         return mEventHandler;
     }
+
 }

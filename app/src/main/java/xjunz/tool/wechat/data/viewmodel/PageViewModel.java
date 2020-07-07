@@ -28,9 +28,13 @@ public class PageViewModel extends ObservableViewModel {
     private List<EventHandler> mHandlerList = new ArrayList<>();
 
     public interface EventHandler {
-        void confirmFilter();
+        void onConfirmFilter();
 
-        void resetFilter();
+        void onResetFilter();
+
+        void onCancelFilter();
+
+        void onPrepareFilter();
     }
 
     public void addEventHandler(@NonNull EventHandler handler) {
@@ -41,9 +45,10 @@ public class PageViewModel extends ObservableViewModel {
      * 下发筛选确认事件
      */
     public void notifyFilterConfirmed() {
-        mCurrentConfig.getEventHandler().confirmFilter();
+        mCurrentConfig.filterConfirmed = true;
+        mCurrentConfig.getEventHandler().onConfirmFilter();
         for (EventHandler handler : mHandlerList) {
-            handler.confirmFilter();
+            handler.onConfirmFilter();
         }
     }
 
@@ -51,9 +56,10 @@ public class PageViewModel extends ObservableViewModel {
      * 下发筛选重置事件
      */
     public void notifyFilterReset() {
-        mCurrentConfig.getEventHandler().resetFilter();
+        mCurrentConfig.filterConfirmed = true;
+        mCurrentConfig.getEventHandler().onResetFilter();
         for (EventHandler handler : mHandlerList) {
-            handler.resetFilter();
+            handler.onResetFilter();
         }
     }
 
@@ -61,9 +67,25 @@ public class PageViewModel extends ObservableViewModel {
      * 下发搜索事件
      */
     public void notifySearch(Editable editable) {
-        mCurrentConfig.getEventHandler().onSearch();
+        mCurrentConfig.getEventHandler().onSearch(editable.toString());
     }
 
+
+    /**
+     * 下发筛选取消事件（直接关闭，未点确认也未点重置）
+     */
+    public void notifyCancelFilter() {
+        for (EventHandler handler : mHandlerList) {
+            handler.onCancelFilter();
+        }
+    }
+
+    public void notifyPrepareFilter() {
+        mCurrentConfig.filterConfirmed = false;
+        for (EventHandler handler : mHandlerList) {
+            handler.onPrepareFilter();
+        }
+    }
 
     /**
      * 设置当前配置并通知UI更新

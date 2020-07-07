@@ -36,6 +36,7 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
      */
     private RecyclerView mScroller;
     private ScrollerAdapter mScrollerAdapter;
+    private ContactAdapter mAdapter;
 
     @NotNull
     @Override
@@ -110,7 +111,7 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
 
     @Override
     public ContactAdapter getAdapter() {
-        return new ContactAdapter();
+        return mAdapter = mAdapter == null ? new ContactAdapter() : mAdapter;
     }
 
 
@@ -156,11 +157,21 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
 
     private int getLastVisibleItemIndexOfList(RecyclerView recyclerView, boolean completelyVisible) {
         LinearLayoutManager llm = (LinearLayoutManager) Objects.requireNonNull(recyclerView.getLayoutManager());
-        return completelyVisible ? llm.findFirstCompletelyVisibleItemPosition() : llm.findLastVisibleItemPosition();
+        return completelyVisible ? llm.findLastCompletelyVisibleItemPosition() : llm.findLastVisibleItemPosition();
     }
 
 
     private class ContactAdapter extends ListPageAdapter<ListPageViewHolder> {
+
+        @Override
+        public void onBindViewHolder(@NonNull ListPageViewHolder holder, int position, @NonNull List<Object> payloads) {
+            if (payloads.size() != 0) {
+                holder.itemView.setPressed(true);
+                holder.itemView.setPressed(false);
+            } else {
+                super.onBindViewHolder(holder, position, payloads);
+            }
+        }
 
         @NonNull
         @Override
@@ -302,7 +313,8 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
                     int lastVisibleItemOfMainList = getLastVisibleItemIndexOfList(mList, false);
                     //如果目标Item可见，直接提醒一下
                     if (targetIndex <= lastVisibleItemOfMainList && targetIndex >= firstVisibleItemOfMainList) {
-                        getAdapter().notifyItemChanged(targetIndex + 1, true);
+                        mList.smoothScrollToPosition(targetIndex + 1);
+                        mAdapter.notifyItemChanged(targetIndex + 1, true);
                     } else {
                         //如果是目标Item在当前列表下面，调整目标Item后移一个，保证可以看到数据项
                         if (targetIndex > lastVisibleItemOfMainList) {

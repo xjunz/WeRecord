@@ -123,5 +123,6 @@
     <string name="reset_filter">重置</string>
     <string name="confirm_filter">确认</string>
     <string name="reset_completed">已重置</string>
+    <string name="msg_filter_config_unchanged">筛选配置没有改变</string>
 
 </resources>

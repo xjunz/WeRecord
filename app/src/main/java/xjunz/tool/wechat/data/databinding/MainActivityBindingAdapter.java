@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.BindingMethod;
 import androidx.databinding.BindingMethods;
@@ -19,6 +20,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.ui.customview.BottomBar;
+import xjunz.tool.wechat.ui.customview.MainPanel;
 import xjunz.tool.wechat.util.AnimUtils;
 import xjunz.tool.wechat.util.UiUtils;
 
@@ -114,5 +116,29 @@ public class MainActivityBindingAdapter {
                 view.animate().translationY(0).setInterpolator(AnimUtils.getFastOutSlowInInterpolator()).start();
             }
         }
+    }
+
+    @BindingAdapter(value = {"android:onPanelClose", "android:onPanelOpen"}, requireAll = false)
+    public static void setOnPanelCloseListener(MainPanel mainPanel, @NonNull Runnable closeListener, @NonNull Runnable openListener) {
+        mainPanel.addOnPanelSlideListener(new MainPanel.OnPanelSlideListener() {
+            @Override
+            public void onPanelSlideFinished(boolean isOpen) {
+                if (!isOpen) {
+                    closeListener.run();
+                } else {
+                    openListener.run();
+                }
+            }
+
+            @Override
+            public void onPanelSlide(float fraction) {
+
+            }
+
+            @Override
+            public void onPanelSlideStart(boolean isToOpen) {
+
+            }
+        });
     }
 }

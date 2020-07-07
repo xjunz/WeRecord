@@ -40,13 +40,23 @@ public class MainActivity extends BaseActivity {
     private ActivityMainBinding mBinding;
     private PageViewModel.EventHandler mFilterEventHandler = new PageViewModel.EventHandler() {
         @Override
-        public void confirmFilter() {
+        public void onConfirmFilter() {
             mBinding.mainPanel.closePanel();
         }
 
         @Override
-        public void resetFilter() {
+        public void onResetFilter() {
             MasterToast.shortToast(R.string.reset_completed);
+        }
+
+        @Override
+        public void onCancelFilter() {
+            mBinding.mainPanel.closePanel();
+        }
+
+        @Override
+        public void onPrepareFilter() {
+
         }
     };
 
@@ -68,6 +78,7 @@ public class MainActivity extends BaseActivity {
         mContactFragment = new ContactFragment();
         mPages = new PageFragment[]{mChatFragment, mContactFragment, new ContactFragment()};
         mBinding.vpMain.setAdapter(new MainFragmentAdapter(this));
+
     }
 
 

@@ -1,11 +1,12 @@
 package xjunz.tool.wechat.ui.main.fragment;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
@@ -53,9 +54,11 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
     private ViewStub mStubNoResult;
     private ImageView mIvNoResult;
     private PageConfig mConfig = new PageConfig();
+    private PageConfig mClonedConfig;
     protected List<String> mCurrentDescList = new ArrayList<>();
     private String mFilterConfigIdentifierCache;
     private CompositeDisposable mDisposables = new CompositeDisposable();
+    private PageViewModel mModel;
 
     /**
      * 获取当前的布局资源ID
@@ -83,8 +86,8 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initPageConfig(mConfig);
-        PageViewModel model = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(PageViewModel.class);
-        model.updateCurrentConfig(mConfig);
+        mModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(PageViewModel.class);
+        mModel.updateCurrentConfig(mConfig);
     }
 
     @NonNull
@@ -202,10 +205,9 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
     }
 
     @Override
-    public void confirmFilter() {
-        //TODO:移除此提示
+    public void onConfirmFilter() {
         if (!hasFilterConfigChanged()) {
-            MasterToast.shortToast("筛选配置没有改变");
+            MasterToast.shortToast(R.string.msg_filter_config_unchanged);
         } else {
             Contact.Type selectedType = getTypeList()[mConfig.typeSelection.get()];
             mDisposables.add(filter(selectedType == null ? getRepo().getAll() : getRepo().get(selectedType)).subscribe(this::updateList));
@@ -214,33 +216,27 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
 
 
     @Override
-    public void onSearch() {
-        //获取当前搜索关键字
-        String keyword = mConfig.searchKeyword.get();
-        //如果当前关键字为空，直接设置当前数据列表为筛选后的列表
-        if (TextUtils.isEmpty(keyword)) {
-            updateList(mFilteredItemList);
+    public void onSearch(@NotNull String keyword) {
+        //如果关键字不为空且筛选配置改变了
+        if (hasFilterConfigChanged()) {
+            //则先筛选再搜索
+            Disposable disposable = filter(getRawDataList()).subscribe(items -> {
+                mFilteredItemList = items;
+                mDisposables.add(search(items, keyword).subscribe(this::updateList));
+            });
+            mDisposables.add(disposable);
         } else {
-            //如果关键字不为空且筛选配置改变了
-            if (hasFilterConfigChanged()) {
-                //则先筛选再搜索
-                Disposable disposable = filter(getRawDataList()).subscribe(items -> {
-                    mFilteredItemList = items;
-                    mDisposables.add(search(items, keyword).subscribe(this::updateList));
-                });
-                mDisposables.add(disposable);
-            } else {
-                //否则，直接搜索筛选后的数据
-                mDisposables.add(search(mFilteredItemList, keyword).subscribe(this::updateList));
-            }
+            //否则，直接搜索筛选后的数据
+            mDisposables.add(search(mFilteredItemList, keyword).subscribe(this::updateList));
         }
     }
 
     @Override
-    public void resetFilter() {
+    public void onResetFilter() {
         resetFilterConfig(mConfig);
-        confirmFilter();
+        onConfirmFilter();
     }
+
 
     /**
      * 获取所有分隔项，作为筛选依据，同时在{@link FilterFragment}中的{@link android.widget.Spinner}中显示
@@ -415,27 +411,19 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
     public abstract class ListPageAdapter<S extends ListPageViewHolder> extends RecyclerView.Adapter<S> {
         private int foregroundSpanColor;
         private int backgroundSpanColor;
+        private Drawable defaultAvatar;
 
         public ListPageAdapter() {
             foregroundSpanColor = UiUtils.getAttrColor(requireContext(), R.attr.colorAccent);
             backgroundSpanColor = UiUtils.getAttrColor(requireContext(), R.attr.colorControlHighlight);
+            defaultAvatar = getResources().getDrawable(R.mipmap.avatar_default);
         }
-
 
         @Override
         public int getItemViewType(int position) {
             return mItemList.get(position).type;
         }
 
-        @Override
-        public void onBindViewHolder(@NonNull S holder, int position, @NonNull List<Object> payloads) {
-            if (payloads.size() != 0) {
-                holder.itemView.setPressed(true);
-                holder.itemView.setPressed(false);
-            } else {
-                super.onBindViewHolder(holder, position, payloads);
-            }
-        }
 
         @Override
         public void onBindViewHolder(@NonNull S holder, int position) {
@@ -460,14 +448,14 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
                             holder.tvName.setText(content.getName());
                         }
                         //异步设置头像
-                        Disposable disposable = Single.create((SingleOnSubscribe<Bitmap>) emitter -> {
+                        Disposable disposable = Single.create((SingleOnSubscribe<Drawable>) emitter -> {
                             Bitmap avatar = content.getAvatar();
                             if (avatar == null) {
-                                emitter.onError(new RuntimeException("This contact has no local avatar"));
+                                emitter.onSuccess(defaultAvatar);
                             } else {
-                                emitter.onSuccess(avatar);
+                                emitter.onSuccess(new BitmapDrawable(getResources(), avatar));
                             }
-                        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(bitmap -> holder.ivAvatar.setImageBitmap(bitmap), throwable -> holder.ivAvatar.setImageResource(R.drawable.avatar_default));
+                        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(drawable -> holder.ivAvatar.setImageDrawable(drawable));
                         mDisposables.add(disposable);
                     } else {
                         //设置不可见

@@ -13,8 +13,7 @@ public class TalkerRepository extends AccountRepository<Talker> {
     private static TalkerRepository sInstance;
 
     public static TalkerRepository getInstance() {
-        sInstance = sInstance == null ? new TalkerRepository() : sInstance;
-        return sInstance;
+        return sInstance = sInstance == null ? new TalkerRepository() : sInstance;
     }
 
     /**

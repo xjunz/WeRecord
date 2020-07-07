@@ -2,9 +2,7 @@ package xjunz.tool.wechat.impl.model.account;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.LruCache;
 
-import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
 
 import org.apaches.commons.codec.digest.DigestUtils;
@@ -14,6 +12,7 @@ import java.io.File;
 import java.io.Serializable;
 
 import xjunz.tool.wechat.impl.Environment;
+import xjunz.tool.wechat.impl.repo.AvatarRepository;
 import xjunz.tool.wechat.util.ShellUtils;
 
 
@@ -29,12 +28,6 @@ public abstract class Account implements Serializable {
      * 微信号，是微信账号或有的唯一标识
      */
     public String alias;
-    private static final LruCache<String, Bitmap> avatarBitmapCache = new LruCache<String, Bitmap>(10 * 1024 * 1024) {
-        @Override
-        protected int sizeOf(String key, Bitmap value) {
-            return value.getByteCount();
-        }
-    };
     private transient String originalAvatarPath;
     private transient String backupAvatarPath;
     /**
@@ -47,6 +40,7 @@ public abstract class Account implements Serializable {
      * 当前用户的UIN，是当前用户的唯一标识
      */
     private String ownerUin;
+    private boolean hasLocalAvatar = true;
 
     String getPathIdentifier() {
         return pathIdentifier;
@@ -70,7 +64,6 @@ public abstract class Account implements Serializable {
      *
      * @return 是否为个人用户号
      */
-    @Keep
     protected boolean isUserUnnecessary() {
         return id.startsWith("wxid_");
     }
@@ -106,7 +99,7 @@ public abstract class Account implements Serializable {
                 + "user_" + idMd5 + ".png";
     }
 
-    boolean empty(String str) {
+    protected boolean empty(String str) {
         return str == null || str.length() == 0;
     }
 
@@ -119,29 +112,32 @@ public abstract class Account implements Serializable {
         return ownerUin;
     }
 
-    public Bitmap decodeAvatar() {
-        Bitmap bitmap;
+    @Nullable
+    private Bitmap decodeAvatar() {
         File backup = new File(backupAvatarPath);
         if (!backup.exists()) {
             ShellUtils.cpNoError(originalAvatarPath, backupAvatarPath);
         }
-        bitmap = BitmapFactory.decodeFile(backupAvatarPath);
-        if (bitmap == null) {
-            return null;
-        }
-        synchronized (avatarBitmapCache) {
-            avatarBitmapCache.put(id, bitmap);
-        }
+        Bitmap bitmap = BitmapFactory.decodeFile(backupAvatarPath);
+        this.hasLocalAvatar = bitmap != null;
         return bitmap;
     }
 
 
+    @Nullable
     public Bitmap getAvatar() {
-        Bitmap bitmap = avatarBitmapCache.get(id);
-        if (bitmap == null) {
-            bitmap = decodeAvatar();
+        if (hasLocalAvatar) {
+            Bitmap bitmap = AvatarRepository.getInstance().getAvatarOf(id);
+            if (bitmap == null) {
+                bitmap = decodeAvatar();
+                if (bitmap != null) {
+                    AvatarRepository.getInstance().putAvatarOf(id, bitmap);
+                }
+            }
+            return bitmap;
+        } else {
+            return null;
         }
-        return bitmap;
     }
 
 

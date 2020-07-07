@@ -26,6 +26,7 @@ import xjunz.tool.wechat.ui.customview.MasterToast;
  */
 public class ChatFragment extends ListPageFragment<Talker> {
 
+    private ChatAdapter mAdapter;
 
     @Override
     public int getLayoutResource() {
@@ -61,7 +62,7 @@ public class ChatFragment extends ListPageFragment<Talker> {
 
     @Override
     public ChatAdapter getAdapter() {
-        return new ChatAdapter();
+        return mAdapter = mAdapter == null ? new ChatAdapter() : mAdapter;
     }
 
     @Override

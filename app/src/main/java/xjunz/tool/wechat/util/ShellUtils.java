@@ -26,14 +26,11 @@ public class ShellUtils {
      */
     public static void cp(String srcPath, String tarPath, String msgWhenFail) throws ShellException, IOException {
         File backup = new File(tarPath);
-        if (!backup.exists()) {
-            if (!backup.createNewFile()) {
-                throw new IllegalStateException("Create file <" + tarPath + "> failed");
+        if (backup.createNewFile()) {
+            CommandResult result = Shell.SU.run("cp " + srcPath + " " + tarPath);
+            if (!result.isSuccessful()) {
+                throw new ShellException(formatError(result, msgWhenFail));
             }
-        }
-        CommandResult result = Shell.SU.run("cp " + srcPath + " " + tarPath);
-        if (!result.isSuccessful()) {
-            throw new ShellException(formatError(result, msgWhenFail));
         }
     }
 
@@ -45,16 +42,13 @@ public class ShellUtils {
      */
     public static void cpNoError(String srcPath, String tarPath) {
         File backup = new File(tarPath);
-        if (!backup.exists()) {
-            try {
-                if (!backup.createNewFile()) {
-                    throw new IOException("Create file <" + tarPath + "> failed");
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        try {
+            if (backup.createNewFile()) {
+                Shell.SU.run("cp " + srcPath + " " + tarPath);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        Shell.SU.run("cp " + srcPath + " " + tarPath);
     }
 
     /**
