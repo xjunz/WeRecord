@@ -5,14 +5,12 @@ import android.text.TextUtils;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
-import xjunz.tool.wechat.data.model.SortBy;
+import xjunz.tool.wechat.data.viewmodel.SortBy;
 import xjunz.tool.wechat.impl.Environment;
 import xjunz.tool.wechat.impl.repo.ContactRepository;
 import xjunz.tool.wechat.util.UniUtils;
@@ -26,13 +24,15 @@ public class Contact extends Account implements Comparable<Contact> {
      */
     public int rawType;
     /**
-     * 处理后的枚举类型
+     * 当前{@link Contact}的精确类型，适用于所有联系人
+     *
+     * @see Contact#judgeType()
      */
     public Type type;
     /**
-     * rawType: 微信官方账号
+     * rawType: 服务号
      */
-    protected static final int RAW_TYPE_OFFICIAL = 33;
+    protected static final int RAW_TYPE_SERVICE = 33;
     /**
      * rawType: 陌生人
      */
@@ -53,17 +53,17 @@ public class Contact extends Account implements Comparable<Contact> {
      */
     protected static final int RAW_TYPE_UNSAVED_GROUP = 2;
     /**
-     * 从数据库中查询得到的昵称拼音缩写
-     */
-    public String nicknamePyAbbr;
-    /**
-     * 从数据库中查询得到的备注拼音缩写
-     */
-    public String remarkPyAbbr;
-    /**
      * 处理得到的用于排序的名称拼音缩写
+     *
+     * @see Contact#getComparatorPyAbbr()
      */
     private String comparatorPyAbbr;
+    /**
+     * 名称的拼音缩写
+     *
+     * @see Contact#getNamePyAttr()
+     */
+    private String pyAbbr;
 
     public Contact() {
         super(Environment.getInstance().getCurrentUin());
@@ -81,78 +81,77 @@ public class Contact extends Account implements Comparable<Contact> {
 
 
     /**
-     * 获取用于排序的名称拼音缩写，名称的优先级为备注、昵称、微信号、微信ID
+     * 获取用于排序的名称拼音缩写，名称的优先级为备注、昵称、微信号、微信ID。
      * 首字母ASCII码小于‘0’或者大于‘9’且小于‘A’的字符前会加上"#",代表符号开头的名称，
      * 大于‘z’的字符前会加上"?",代表其他类型的字符开头的名称（非符号、数字、字母），
-     * 这样它们就会被分类在一起进行排序
+     * 这样它们就会被分类在一起进行排序。
      *
      * @return 用于排序的名称拼音缩写
      */
     protected String getComparatorPyAbbr() {
         if (comparatorPyAbbr == null) {
-            if (!empty(remark)) {
-                comparatorPyAbbr = remarkPyAbbr;
-            } else {
-                if (!empty(nicknamePyAbbr)) {
-                    comparatorPyAbbr = nicknamePyAbbr;
-                } else {
-                    comparatorPyAbbr = UniUtils.getPinYinAbbr(getName());
-                }
-            }
+            comparatorPyAbbr = getNamePyAttr();
             char first = comparatorPyAbbr.charAt(0);
             if (first < '0' || (first > '9' && first < 'A') || (first > 'Z' && first < 'a')) {
                 comparatorPyAbbr = "#" + comparatorPyAbbr;
             } else if (first > 'z') {
                 comparatorPyAbbr = "?" + comparatorPyAbbr;
             }
+            comparatorPyAbbr = comparatorPyAbbr.toUpperCase();
         }
-        return comparatorPyAbbr.toUpperCase();
+        return comparatorPyAbbr;
+    }
+
+    public String getNamePyAttr() {
+        if (pyAbbr == null) {
+            pyAbbr = UniUtils.getPinYinAbbr(getName());
+        }
+        return pyAbbr;
     }
 
     @Override
-    public int compareTo(@NotNull Contact o) {
+    public int compareTo(@NonNull Contact o) {
         return (sAscending ? 1 : -1) * getComparatorPyAbbr().compareTo(o.getComparatorPyAbbr());
     }
 
 
     /**
      * 处理后的Contact类型枚举类
+     * <br/>规则句法:[{@link Contact#rawType}等于XX]([逻辑运算符][{@link Contact#id}满足的条件])
      */
     public enum Type {
         /**
-         * 注意：请勿随意更改顺序！更改后同步更改R.array.category_contact
-         * 未定义的根据id,分类到保存的联系人中
          * 好友: （1||3）&& !endsWith("@chatroom")&&!startWith("gh_")
          */
-        FRIEND(R.string.friend),
+        FRIEND(R.string.type_friend),
         /**
          * 删除的好友: 0 && !endsWith("@chatroom")&&!startWith("gh_")
          */
-        DELETED_FRIEND(R.string.deleted_friend),
+        DELETED_FRIEND(R.string.type_deleted_friend),
         /**
          * 陌生人: 4
          */
-        STRANGER(R.string.stranger),
+        STRANGER(R.string.type_stranger),
         /**
          * 加入的群聊:2||（ 3 && endsWith("_chatroom")）
          */
-        JOINED_GROUP(R.string.saved_group),
+        JOINED_GROUP(R.string.type_joined_group),
         /**
          * 退出的群聊: 0 && endsWith("chatroom")
          */
-        QUITED_GROUP(R.string.quited_group),
+        QUITED_GROUP(R.string.type_quited_group),
         /**
          * 关注的公众号: （1||3）&& startsWith("gh_")
          */
-        FOLLOWING_GZH(R.string.following_gzh),
+        FOLLOWING_GZH(R.string.type_following_gzh),
         /**
          * 取消关注的公众号: 0 && startsWith("gh_")
          */
-        UNFOLLOWED_GZH(R.string.unfollowed_gzh),
+        UNFOLLOWED_GZH(R.string.type_unfollowed_gzh),
         /**
          * 微信官方账号: 33
          */
-        OFFICIAL(R.string.official);
+        SERVICE(R.string.type_service);
         /**
          * 类型的名称资源ID
          */
@@ -163,9 +162,9 @@ public class Contact extends Account implements Comparable<Contact> {
             this.caption = App.getStringOf(captionRes);
         }
 
-        public static List<String> getCaptionList() {
+        public static List<String> getCaptionList(Type... types) {
             List<String> captions = new ArrayList<>();
-            for (Type type : Type.values()) {
+            for (Type type : types) {
                 captions.add(type.caption);
             }
             return captions;
@@ -173,10 +172,8 @@ public class Contact extends Account implements Comparable<Contact> {
     }
 
     /**
-     * 获取某特定排序规则下的描述，描述的用途在于为数据分类
-     * 相同描述的数据可视为一类，方便区分和筛选
-     * 例如，当排序规则为{@link SortBy#NAME}时，即按名称排序时，
-     * 此时的描述为当前联系人名称的拼音缩写首字母
+     * 获取某特定排序规则下的描述，描述的用途在于为数据分类,相同描述的数据可视为一类，方便区分和筛选。
+     * 例如，当排序规则为{@link SortBy#NAME}时，即按名称排序时，此时的描述为当前联系人名称的拼音缩写首字母。
      *
      * @param sortBy 指定排序规则
      * @return 返回当前对象的描述
@@ -197,15 +194,13 @@ public class Contact extends Account implements Comparable<Contact> {
     }
 
     /**
-     * 获取当前{@code Contact}对象的类型，主要根据{@link Contact#rawType}进行判断
-     * 具体判断规则见{@link Type}的注释
-     * 此方法应当被{@link ContactRepository#queryAll()}中被调用，获取当前对象的类型
-     * 直接访问{@link Contact#type}即可
+     * 获取当前{@code Contact}对象的类型，主要根据{@link Contact#rawType}进行判断，直观的判断规则见{@link Type}的注释
+     * <br/>此方法应当被{@link ContactRepository#queryAll()}中被调用，获取当前对象的类型直接访问{@link Contact#type}即可
      */
     public void judgeType() {
         switch (rawType) {
-            case RAW_TYPE_OFFICIAL:
-                this.type = Type.OFFICIAL;
+            case RAW_TYPE_SERVICE:
+                this.type = Type.SERVICE;
                 break;
             case RAW_TYPE_DELETED:
                 if (isGZH()) {

@@ -8,22 +8,23 @@
     <string-array name="contact_sort">
         <item>按名称</item>
     </string-array>
-    <string-array name="category_talker">
+    <string-array name="type_talker">
         <item>@string/bracketed_all</item>
-        <item>@string/friend</item>
-        <item>@string/group</item>
-        <item>@string/gzh</item>
+        <item>@string/type_friend</item>
+        <item>@string/type_group</item>
+        <item>@string/type_gzh</item>
+        <item>@string/type_service</item>
     </string-array>
-    <string-array name="category_contact">
+    <string-array name="type_contact">
         <item>@string/bracketed_all</item>
-        <item>@string/friend</item>
-        <item>@string/deleted_friend</item>
-        <item>@string/stranger</item>
-        <item>@string/joined_group</item>
-        <item>@string/quited_group</item>
-        <item>@string/following_gzh</item>
-        <item>@string/unfollowed_gzh</item>
-        <item>@string/official</item>
+        <item>@string/type_friend</item>
+        <item>@string/type_deleted_friend</item>
+        <item>@string/type_stranger</item>
+        <item>@string/type_joined_group</item>
+        <item>@string/type_quited_group</item>
+        <item>@string/type_following_gzh</item>
+        <item>@string/type_unfollowed_gzh</item>
+        <item>@string/type_official</item>
     </string-array>
     <string-array name="orders">
         <item>升序</item>
@@ -31,7 +32,7 @@
     </string-array>
     <string-array name="bottom_item_captions">
         <item>@string/chat</item>
-        <item>@string/contacts</item>
+        <item>@string/contact</item>
         <item>@string/mine</item>
     </string-array>
     <integer-array name="bottom_item_images">
@@ -39,6 +40,4 @@
         <item>@drawable/ic_contacts_24dp</item>
         <item>@drawable/ic_mine_24dp</item>
     </integer-array>
-    <string name="gzh">公众号</string>
-    <string name="joined_group">加入的群聊</string>
 </resources>

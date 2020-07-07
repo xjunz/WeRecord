@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.ui.activity.intro;
+package xjunz.tool.wechat.ui.intro.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

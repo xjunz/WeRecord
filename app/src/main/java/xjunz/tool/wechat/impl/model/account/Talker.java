@@ -4,23 +4,22 @@ import androidx.annotation.NonNull;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
-import xjunz.tool.wechat.data.model.SortBy;
-import xjunz.tool.wechat.impl.repo.TalkerRepository;
+import xjunz.tool.wechat.data.viewmodel.SortBy;
 import xjunz.tool.wechat.util.UniUtils;
 
 import static xjunz.tool.wechat.util.UniUtils.arabicDigit2HanDigit;
 
 /**
- * Talker是什么？{@link Contact} and a {@code Talker}的区别是什么?
+ * Talker是什么？{@link Contact}和{@code Talker}的区别是什么?
  * <p>继承自微信的设定，有当前用户参与的会话（群聊、私聊）都可以称为{@code Talker}。本质上，可以查询到聊天记录的会话主体就叫所谓{@code Talker}
- * 如果没有聊天记录，就退化为{@code Contact}。 所有Talker的信息都可以在"rconversation"表中查询到，详见{@link xjunz.tool.wechat.impl.repo.TalkerRepository}</p>
+ * 如果没有聊天记录，就退化为{@code Contact}。 所有Talker的信息都可以在"rconversation"表中查询到。
+ *
+ * @see xjunz.tool.wechat.impl.repo.TalkerRepository </p>
  */
 
 public class Talker extends Contact {
@@ -33,44 +32,21 @@ public class Talker extends Contact {
      */
     public int messageCount;
     /**
-     * 上次聊天时间，是对{@link Talker#lastMsgTimestamp}的{@code 格式化}
-     * 详见{@link Talker#setLastMsgTimestamp(long)}
-     */
-    public String lastMessageTime;
-    /**
      * 上次聊天的时间戳，精确到毫秒
      */
-    private long lastMsgTimestamp;
-    /**
-     * 当前{@code Talker}的类型
-     */
-    public Type type;
+    public long lastMsgTimestamp;
     /**
      * 考虑到时间描述的获取可能比较耗时，我们建立一个缓存变量
-     * 如果这个变量不为空，直接返回即可,详见{@link Talker#describe(SortBy)}
+     * 如果这个变量不为空，直接返回即可,
+     *
+     * @see Talker#describe(SortBy)
      */
     private String timestampDes;
-
     /**
-     * {@code Talker}的枚举类
-     * 包括三种类型：{@link Type#FRIEND}好友、{@link Type#GROUP}群聊、{@link Type#GZH}公众号
+     * 格式化后的时间戳，如: 2019/3/1
      */
-    public enum Type {
-        FRIEND(R.string.friend), GROUP(R.string.group), GZH(R.string.gzh);
-        public String caption;
+    public String formatTimestamp;
 
-        Type(int captionRes) {
-            this.caption = App.getStringOf(captionRes);
-        }
-
-        public static List<String> getCaptionList() {
-            List<String> captions = new ArrayList<>();
-            for (Type type : Type.values()) {
-                captions.add(type.caption);
-            }
-            return captions;
-        }
-    }
 
     /**
      * 设置排序依据和顺序，用于{@link Talker#compareTo(Contact)}
@@ -84,29 +60,6 @@ public class Talker extends Contact {
         sAscending = isAscending;
     }
 
-    public void setLastMsgTimestamp(long timestamp) {
-        this.lastMsgTimestamp = timestamp;
-        this.lastMessageTime = UniUtils.formatDate(timestamp);
-    }
-
-    public long getLastMsgTimestamp() {
-        return lastMsgTimestamp;
-    }
-
-    /**
-     * 判断当前Talker的类型，此方法应该在{@link TalkerRepository#queryAll()} 中调用，
-     * 获取当前{@code Talker}类型直接访问{@link Talker#type}即可
-     */
-    @Override
-    public void judgeType() {
-        if (isGroup()) {
-            this.type = Type.GROUP;
-        } else if (isGZH()) {
-            this.type = Type.GZH;
-        } else {
-            this.type = Type.FRIEND;
-        }
-    }
 
 
     /**
@@ -124,16 +77,16 @@ public class Talker extends Contact {
                 String comparator = getComparatorPyAbbr();
                 return comparator.substring(0, 1);
             case MSG_COUNT:
-                if (messageCount <= 10) {
-                    return "<10";
+                if (messageCount < 10) {
+                    return "1~10";
                 } else if (messageCount <= 50) {
-                    return "<50";
+                    return "10~50";
                 } else if (messageCount <= 100) {
-                    return "<100";
+                    return "50~100";
                 } else if (messageCount <= 500) {
-                    return "<500";
+                    return "100~500";
                 } else if (messageCount <= 1000) {
-                    return "<1000";
+                    return "500~1000";
                 } else {
                     return ">1000";
                 }
@@ -150,26 +103,36 @@ public class Talker extends Contact {
                         int monthGap = now.get(Calendar.MONTH) - lastMsg.get(Calendar.MONTH);
                         if (dayGap == 0) {
                             timestampDes = App.getStringOf(R.string.today);
+                            formatTimestamp = App.getStringOf(R.string.format_h_m, lastMsg.get(Calendar.HOUR_OF_DAY), lastMsg.get(Calendar.MINUTE));
                         } else if (dayGap == 1) {
                             timestampDes = App.getStringOf(R.string.yesterday);
+                            formatTimestamp = timestampDes;
                         } else if (weekGap == 0) {
                             timestampDes = App.getStringOf(R.string.format_days_ago, arabicDigit2HanDigit(dayGap));
+                            formatTimestamp = timestampDes;
                         } else if (monthGap == 0) {
                             if (weekGap == 1) {
                                 timestampDes = App.getStringOf(R.string.last_week);
+                                formatTimestamp = App.getStringOf(R.string.format_week_of_day, UniUtils.dayOfWeek2Han(lastMsg.get(Calendar.DAY_OF_WEEK)));
+                            } else {
+                                timestampDes = App.getStringOf(R.string.format_weeks_ago, arabicDigit2HanDigit(weekGap));
+                                formatTimestamp = App.getStringOf(R.string.format_m_d, lastMsg.get(Calendar.MONTH) + 1, lastMsg.get(Calendar.DAY_OF_MONTH));
                             }
-                            timestampDes = App.getStringOf(R.string.format_weeks_ago, arabicDigit2HanDigit(weekGap));
                         } else {
                             if (monthGap == 1) {
                                 timestampDes = App.getStringOf(R.string.last_month);
+                            } else {
+                                timestampDes = App.getStringOf(R.string.format_months_ago, arabicDigit2HanDigit(monthGap));
                             }
-                            timestampDes = App.getStringOf(R.string.format_months_ago, arabicDigit2HanDigit(monthGap));
+                            formatTimestamp = App.getStringOf(R.string.format_m_d, lastMsg.get(Calendar.MONTH) + 1, lastMsg.get(Calendar.DAY_OF_MONTH));
                         }
                     } else {
                         if (yearGap == 1) {
                             timestampDes = App.getStringOf(R.string.last_year);
+                        } else {
+                            timestampDes = App.getStringOf(R.string.format_years_ago, arabicDigit2HanDigit(yearGap));
                         }
-                        timestampDes = App.getStringOf(R.string.format_years_ago, arabicDigit2HanDigit(yearGap));
+                        formatTimestamp = App.getStringOf(R.string.format_y_m_d, lastMsg.get(Calendar.YEAR), (lastMsg.get(Calendar.MONTH) + 1), lastMsg.get(Calendar.DAY_OF_MONTH));
                     }
                 }
                 return timestampDes;
@@ -205,5 +168,16 @@ public class Talker extends Contact {
             return (sAscending ? 1 : -1) * super.compareTo(o);
         }
         return 0;
+    }
+
+    @NotNull
+    @Override
+    public String toString() {
+        return "Talker{" +
+                "remark='" + remark + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", alias='" + alias + '\'' +
+                ", id='" + id + '\'' +
+                '}';
     }
 }

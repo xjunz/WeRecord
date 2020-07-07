@@ -4,9 +4,15 @@
 
     <data>
 
+        <import type="android.view.View" />
+
+        <variable
+            name="model"
+            type="xjunz.tool.wechat.data.viewmodel.PageViewModel" />
+
         <variable
             name="activity"
-            type="xjunz.tool.wechat.ui.activity.main.MainActivity" />
+            type="xjunz.tool.wechat.ui.main.MainActivity" />
     </data>
 
     <xjunz.tool.wechat.ui.customview.MainPanel
@@ -24,7 +30,7 @@
                 android:id="@+id/vp_main"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@+id/main_bottom_bar"
+                android:userInputEnabled="@{!model.currentConfig.isInSearchMode}"
                 android:currentItem="@={activity.mCurrentPageIndex}" />
 
 
@@ -36,6 +42,7 @@
                 android:background="?colorPrimary"
                 android:elevation="@dimen/z_bottom_bar"
                 android:minHeight="?actionBarSize"
+                android:hide="@{model.currentConfig.isInSearchMode}"
                 android:onItemSelect="@{activity::onItemSelect}"
                 android:selection="@={activity.mCurrentPageIndex}"
                 app:captionEntries="@array/bottom_item_captions"
@@ -63,7 +70,7 @@
 
             <fragment
                 android:id="@+id/fl_filter"
-                class="xjunz.tool.wechat.ui.activity.main.FilterFragment"
+                class="xjunz.tool.wechat.ui.main.fragment.FilterFragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?android:colorBackground" />
@@ -75,6 +82,7 @@
                 android:layout_height="wrap_content"
                 android:minHeight="?actionBarSize">
 
+
                 <TextView
                     android:id="@+id/tv_top_bar_title"
                     android:layout_width="wrap_content"
@@ -83,7 +91,7 @@
                     android:letterSpacing=".1"
                     android:textColor="?colorAccent"
                     android:textSize="@dimen/ts_medium"
-                    android:title="@{activity.mTitle}"
+                    android:title="@{model.currentConfig.isInSearchMode?@string/search:model.currentConfig.caption}"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -94,11 +102,15 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/spacing_unit"
                     android:layout_marginEnd="@dimen/spacing_unit"
+                    android:afterTextChanged="@{model::notifySearch}"
                     android:autofillHints="name"
                     android:background="@null"
-                    android:enabled="@{activity.mIsInSearchMode}"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:enabled="@{model.currentConfig.isInSearchMode}"
                     android:importantForAutofill="no"
                     android:inputType="text"
+                    android:text="@={model.currentConfig.searchKeyword}"
+                    android:visible="@{model.currentConfig.isInSearchMode}"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/pb_load"
                     app:layout_constraintStart_toEndOf="@+id/tv_top_bar_title"
@@ -125,7 +137,7 @@
                     android:background="?android:selectableItemBackgroundBorderless"
                     android:contentDescription="@string/search"
                     android:onClick="@{activity::enterSearchMode}"
-                    android:searchMode="@={activity.mIsInSearchMode}"
+                    android:searchMode="@={model.currentConfig.isInSearchMode}"
                     android:src="@drawable/ic_search_24dp"
                     android:tint="?colorButtonNormal"
                     app:layout_constraintBottom_toBottomOf="parent"

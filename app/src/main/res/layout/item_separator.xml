@@ -42,6 +42,7 @@
         android:id="@+id/divider_bottom"
         android:layout_width="match_parent"
         android:layout_height="1px"
+        android:alpha="0.5"
         android:layout_below="@+id/ib_shutter"
         android:background="?android:listDivider" />
 </RelativeLayout>

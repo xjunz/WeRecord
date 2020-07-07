@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.ui.activity.intro;
+package xjunz.tool.wechat.ui.intro.fragment;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -19,7 +19,7 @@ import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.BuildConfig;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.Environment;
-import xjunz.tool.wechat.ui.activity.outer.DebugActivity;
+import xjunz.tool.wechat.ui.outer.DebugActivity;
 import xjunz.tool.wechat.util.UiUtils;
 import xjunz.tool.wechat.util.UniUtils;
 
@@ -77,13 +77,10 @@ public class IntroAvailabilityFragment extends IntroFragment implements View.OnC
                         }
                     });
             if (BuildConfig.DEBUG) {
-                builder.setNegativeButton(R.string.debug, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent i = new Intent(requireActivity(), DebugActivity.class);
-                        i.putExtra(DebugActivity.EXTRA_ENV_SERIAL, log);
-                        startActivity(i);
-                    }
+                builder.setNegativeButton(R.string.debug, (dialog, which) -> {
+                    Intent i = new Intent(requireActivity(), DebugActivity.class);
+                    i.putExtra(DebugActivity.EXTRA_ENV_SERIAL, log);
+                    startActivity(i);
                 });
             }
             builder.show();

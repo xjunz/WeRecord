@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.data.model;
+package xjunz.tool.wechat.data.viewmodel;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -10,12 +10,19 @@ import androidx.databinding.ObservableInt;
 import androidx.databinding.ObservableList;
 
 import java.util.List;
+import java.util.Objects;
+
+import xjunz.tool.wechat.ui.main.fragment.ChatFragment;
+import xjunz.tool.wechat.ui.main.fragment.FilterFragment;
 
 /**
- * 定义各种筛选相关配置的实体类，这些配置会被会被显示在{@link xjunz.tool.wechat.ui.activity.main.FilterFragment}中。
- * </br>因为实现了数据绑定，所有字段都继承自{@link java.util.Observable}
+ * 定义主界面的{@code Page}（页面）的相关配置和信息的实体类，这些配置会被会被显示在UI之中。为了实现数据绑定，某些字段继承自{@link java.util.Observable}
  */
-public class FilterConfig {
+public class PageConfig {
+    /**
+     * 当前页面的描述
+     */
+    public String caption;
     /**
      * 顺序标签：升序
      */
@@ -25,10 +32,11 @@ public class FilterConfig {
      */
     @Keep
     public static final int ORDER_DESCENDING = 1;
+
     /**
      * 候选筛选类型列表
      */
-    public ObservableList<String> categoryList = new ObservableArrayList<>();
+    public ObservableList<String> typeList = new ObservableArrayList<>();
     /**
      * 候选排序方式列表
      */
@@ -36,10 +44,11 @@ public class FilterConfig {
     /**
      * 类型筛选{@link android.widget.Spinner}所选中的索引
      */
-    public ObservableInt categorySelection = new ObservableInt(0);
+    public ObservableInt typeSelection = new ObservableInt(0);
     /**
      * 排序依据
      */
+    @NonNull
     public ObservableField<SortBy> sortBy = new ObservableField<>(SortBy.NAME);
     /**
      * 排序顺序
@@ -62,11 +71,19 @@ public class FilterConfig {
      */
     public ObservableArrayMap<SortBy, List<String>> descriptionListMap = new ObservableArrayMap<>();
     /**
-     * 当前配置是否为{@link xjunz.tool.wechat.ui.activity.main.ChatFragment}的配置
+     * 当前配置是否为{@link ChatFragment}的配置
      */
     public ObservableBoolean isChat = new ObservableBoolean(true);
     /**
-     * 事件处理者，响应{@link xjunz.tool.wechat.ui.activity.main.FilterFragment} 发出的筛选命令
+     * 是否处于搜索模式
+     */
+    public ObservableBoolean isInSearchMode = new ObservableBoolean();
+    /**
+     * 搜索关键词
+     */
+    public ObservableField<String> searchKeyword = new ObservableField<>();
+    /**
+     * 事件处理者，响应{@link FilterFragment} 发出的筛选命令
      */
     private EventHandler mEventHandler;
 
@@ -77,17 +94,26 @@ public class FilterConfig {
         return orderBy.get() == ORDER_ASCENDING;
     }
 
+    /**
+     * 获取当前排序依据，此返回值不为空
+     *
+     * @return 当前排序依据
+     */
+    @NonNull
+    public SortBy getCurrentSortBy() {
+        return Objects.requireNonNull(sortBy.get());
+    }
 
     /**
-     * 过滤事件处理器，只有当{@link FilterViewModel#getCurrentConfig()}为当前对象时，接口才会被调用。
-     * 如果想要响应全局事件，使用{@link FilterViewModel#addEventHandler(FilterViewModel.EventHandler)}
+     * 筛选事件处理器，只有当{@link PageViewModel#getCurrentConfig()}为当前对象时，接口才会被调用。
+     * 如果想要响应全局事件，使用{@link PageViewModel#addEventHandler(PageViewModel.EventHandler)}
      */
     public interface EventHandler {
         void confirmFilter();
 
         void resetFilter();
 
-        void onSearch(String keyword);
+        void onSearch();
     }
 
     public void setEventHandler(@NonNull EventHandler handler) {

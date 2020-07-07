@@ -1,12 +1,10 @@
-package xjunz.tool.wechat.ui.activity;
+package xjunz.tool.wechat.ui.outer;
 
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-
-import com.github.promeg.pinyinhelper.Pinyin;
 
 import io.reactivex.Completable;
 import io.reactivex.CompletableEmitter;
@@ -22,8 +20,9 @@ import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.Environment;
 import xjunz.tool.wechat.impl.repo.ContactRepository;
 import xjunz.tool.wechat.impl.repo.TalkerRepository;
-import xjunz.tool.wechat.ui.activity.intro.IntroActivity;
-import xjunz.tool.wechat.ui.activity.main.MainActivity;
+import xjunz.tool.wechat.ui.BaseActivity;
+import xjunz.tool.wechat.ui.intro.IntroActivity;
+import xjunz.tool.wechat.ui.main.MainActivity;
 import xjunz.tool.wechat.util.UiUtils;
 
 /**
@@ -43,8 +42,6 @@ public class SplashActivity extends BaseActivity implements CompletableObserver 
             return;
         }
         setContentView(R.layout.activity_splash);
-        //初始化拼音库
-        Pinyin.init(null);
         //初始化环境
         Environment env = getEnvironment();
         if (!env.initialized()) {

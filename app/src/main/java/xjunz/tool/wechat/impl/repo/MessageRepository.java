@@ -6,7 +6,6 @@ import net.sqlcipher.Cursor;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import xjunz.tool.wechat.impl.model.message.Message;
@@ -28,12 +27,7 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
             return sMessageCache.get(talkerId);
         } else {
             List<Message> messages = messageDao.queryMessagesByTalker(talkerId);
-            Collections.sort(messages, new Comparator<Message>() {
-                @Override
-                public int compare(Message o1, Message o2) {
-                    return Long.compare(o1.getCreateTimeStamp(), o2.getCreateTimeStamp());
-                }
-            });
+            Collections.sort(messages, (o1, o2) -> Long.compare(o1.getCreateTimeStamp(), o2.getCreateTimeStamp()));
             synchronized (sMessageCache) {
                 sMessageCache.put(talkerId, messages);
             }

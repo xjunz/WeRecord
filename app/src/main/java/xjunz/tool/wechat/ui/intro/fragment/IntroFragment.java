@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.ui.activity.intro;
+package xjunz.tool.wechat.ui.intro.fragment;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
@@ -23,13 +23,13 @@ public abstract class IntroFragment extends Fragment {
     public abstract @StringRes
     int getTitleResource();
 
-    boolean isThisStepDone() {
+    public boolean isThisStepDone() {
         return mIsDone;
     }
 
     public abstract int getStepIndex();
 
-    static void setOnStepDoneListener(OnStepDoneListener listener) {
+    public static void setOnStepDoneListener(OnStepDoneListener listener) {
         sListener = listener;
     }
 }

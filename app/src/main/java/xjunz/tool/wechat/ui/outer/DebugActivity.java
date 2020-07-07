@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.ui.activity.outer;
+package xjunz.tool.wechat.ui.outer;
 
 import android.os.Bundle;
 import android.text.Html;
@@ -12,7 +12,7 @@ import java.util.Objects;
 
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.Environment;
-import xjunz.tool.wechat.ui.activity.BaseActivity;
+import xjunz.tool.wechat.ui.BaseActivity;
 import xjunz.tool.wechat.util.UiUtils;
 import xjunz.tool.wechat.util.UniUtils;
 

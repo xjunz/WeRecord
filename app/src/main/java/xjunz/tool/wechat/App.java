@@ -9,6 +9,8 @@ import android.content.pm.PackageManager;
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
 
+import com.github.promeg.pinyinhelper.Pinyin;
+
 import net.sqlcipher.database.SQLiteDatabase;
 
 import org.apaches.commons.codec.digest.DigestUtils;
@@ -40,7 +42,10 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        //初始化Cipher SQL
         SQLiteDatabase.loadLibs(this);
+        //初始化拼音库
+        Pinyin.init(null);
         sApplicationContext = new WeakReference<>(getApplicationContext());
         gSharedPrefs = getApplicationContext().getSharedPreferences(DATA_SHARED_PREFS_NAME, Context.MODE_PRIVATE);
         gSharedPrefsManager = new SharedPrefsManager();

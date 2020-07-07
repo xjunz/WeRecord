@@ -16,6 +16,8 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_list"
+        android:clipToPadding="false"
+        android:paddingBottom="?android:attr/actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -23,6 +25,8 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_scroller"
+        android:clipToPadding="false"
+        android:paddingBottom="?android:attr/actionBarSize"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
@@ -34,6 +38,7 @@
         tools:listitem="@layout/item_scroller" />
 
     <ImageButton
+        android:visibility="gone"
         android:layout_width="@dimen/fab_normal"
         android:layout_height="@dimen/fab_normal"
         android:layout_alignParentEnd="true"

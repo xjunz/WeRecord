@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.ui.activity.intro;
+package xjunz.tool.wechat.ui.intro.fragment;
 
 import android.content.Context;
 import android.os.Bundle;

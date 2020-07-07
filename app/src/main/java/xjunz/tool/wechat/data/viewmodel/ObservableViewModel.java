@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.data.model;
+package xjunz.tool.wechat.data.viewmodel;
 
 import androidx.databinding.Observable;
 import androidx.databinding.PropertyChangeRegistry;

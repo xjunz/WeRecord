@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.ui.activity;
+package xjunz.tool.wechat.ui;
 
 import android.content.Context;
 import android.os.Build;
@@ -34,13 +34,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
-    public boolean shouldDrawStatusBarScrim() {
-        return true;
-    }
-
-    public boolean shouldHideNavigation() {
-        return false;
-    }
 
 
     public static void hideIme(View view) {

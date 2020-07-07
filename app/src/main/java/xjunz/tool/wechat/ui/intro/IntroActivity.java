@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.ui.activity.intro;
+package xjunz.tool.wechat.ui.intro;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -23,8 +23,13 @@ import java.io.InputStream;
 
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
-import xjunz.tool.wechat.ui.activity.BaseActivity;
-import xjunz.tool.wechat.ui.activity.SplashActivity;
+import xjunz.tool.wechat.ui.BaseActivity;
+import xjunz.tool.wechat.ui.intro.fragment.IntroAvailabilityFragment;
+import xjunz.tool.wechat.ui.intro.fragment.IntroFragment;
+import xjunz.tool.wechat.ui.intro.fragment.IntroPermissionFragment;
+import xjunz.tool.wechat.ui.intro.fragment.IntroSuFragment;
+import xjunz.tool.wechat.ui.intro.fragment.IntroWelcomeFragment;
+import xjunz.tool.wechat.ui.outer.SplashActivity;
 
 public class IntroActivity extends BaseActivity implements IntroFragment.OnStepDoneListener {
     private ViewPager2 mViewPager;

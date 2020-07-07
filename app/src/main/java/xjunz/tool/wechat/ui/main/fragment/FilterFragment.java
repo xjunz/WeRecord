@@ -1,4 +1,4 @@
-package xjunz.tool.wechat.ui.activity.main;
+package xjunz.tool.wechat.ui.main.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,16 +12,16 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import xjunz.tool.wechat.R;
-import xjunz.tool.wechat.data.model.FilterViewModel;
+import xjunz.tool.wechat.data.viewmodel.PageViewModel;
 import xjunz.tool.wechat.databinding.FragmentFilterBinding;
 
 public class FilterFragment extends Fragment {
-    private FilterViewModel mModel;
+    private PageViewModel mModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(FilterViewModel.class);
+        mModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(PageViewModel.class);
     }
 
 

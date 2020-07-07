@@ -18,7 +18,7 @@ import xjunz.tool.wechat.util.ShellUtils;
 
 
 /**
- * 微信账号的抽象类
+ * 微信账号（个人用户、群聊、公众号）的抽象类
  */
 public abstract class Account implements Serializable {
     /**
@@ -35,8 +35,8 @@ public abstract class Account implements Serializable {
             return value.getByteCount();
         }
     };
-    private String originalAvatarPath;
-    private String backupAvatarPath;
+    private transient String originalAvatarPath;
+    private transient String backupAvatarPath;
     /**
      * 微信ID，通常的形式是"wxid_xxxxx"，是微信账号必有的唯一标识
      */
@@ -57,15 +57,34 @@ public abstract class Account implements Serializable {
     }
 
 
+    /**
+     * @return 当前账号是否为公众号
+     */
     protected boolean isGZH() {
         return id.startsWith("gh_");
     }
 
+    /**
+     * 判断当前账号是否为个人用户号，此方法是充分不必要判断，
+     * 充要判断请使用{@link Account#isUser()}
+     *
+     * @return 是否为个人用户号
+     */
     @Keep
-    protected boolean mayUser() {
+    protected boolean isUserUnnecessary() {
         return id.startsWith("wxid_");
     }
 
+    /**
+     * @return 当前账号是否为个人用户号
+     */
+    public boolean isUser() {
+        return !isGZH() && !isGroup();
+    }
+
+    /**
+     * @return 当前账号是否为群聊号
+     */
     protected boolean isGroup() {
         return id.endsWith("@chatroom");
     }
