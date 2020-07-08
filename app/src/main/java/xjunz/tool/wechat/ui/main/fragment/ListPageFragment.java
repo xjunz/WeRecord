@@ -9,6 +9,7 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -47,21 +49,53 @@ import xjunz.tool.wechat.ui.customview.MasterToast;
 import xjunz.tool.wechat.util.UiUtils;
 
 public abstract class ListPageFragment<T extends Contact> extends PageFragment implements PageConfig.EventHandler {
+    /**
+     * 当前显示的数据列表
+     */
     protected List<Item> mItemList;
+    /**
+     * 筛选后的数据列表（用于搜索）
+     */
     private List<Item> mFilteredItemList;
+    /**
+     * 显示数据的{@link RecyclerView}
+     */
     protected RecyclerView mList;
+    /**
+     * {@link ListPageFragment#mList}的{@link androidx.recyclerview.widget.RecyclerView.Adapter}
+     */
     private ListPageAdapter<?> mAdapter;
+    /**
+     * {@link ListPageFragment#mIvNoResult}的{@link ViewStub}，用于懒加载
+     */
     private ViewStub mStubNoResult;
+    /**
+     * 当数据为空时，显示占位图的{@link ImageView}
+     *
+     * @see R.mipmap#art_no_result
+     */
     private ImageView mIvNoResult;
+    /**
+     * 当前页面的配置信息
+     */
     private PageConfig mConfig = new PageConfig();
-    private PageConfig mClonedConfig;
+    /**
+     * 当前数据所有分隔项的描述集合
+     */
     protected List<String> mCurrentDescList = new ArrayList<>();
+    /**
+     * 原始配置信息描述符的缓存，用于判断配置是否发生变化
+     *
+     * @see ListPageFragment#hasFilterConfigChanged()
+     */
     private String mFilterConfigIdentifierCache;
+    /**
+     * 管理{@link Disposable}的集合
+     */
     private CompositeDisposable mDisposables = new CompositeDisposable();
-    private PageViewModel mModel;
 
     /**
-     * 获取当前的布局资源ID
+     * 获取当前的主布局资源ID
      */
     public abstract int getLayoutResource();
 
@@ -70,23 +104,41 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
      */
     public abstract SortBy[] getSortByList();
 
+    /**
+     * 获取类型列表
+     */
     public abstract Contact.Type[] getTypeList();
 
+    /**
+     * 初始化配置
+     *
+     * @param config 当前配置
+     */
     public abstract void initPageConfig(PageConfig config);
 
-    public abstract void setSortByAndOrderBy(SortBy sortBy, boolean isAscending);
-
+    /**
+     * 获取{@link ListPageFragment#mList}的适配器
+     */
     public abstract ListPageAdapter<?> getAdapter();
 
+    /**
+     * 重置配置
+     *
+     * @param config 当前配置
+     */
     public abstract void resetFilterConfig(PageConfig config);
 
+    /**
+     * 获取数据的{@code Repository}
+     */
     public abstract AccountRepository<T> getRepo();
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initPageConfig(mConfig);
-        mModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(PageViewModel.class);
+        PageViewModel mModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(PageViewModel.class);
         mModel.updateCurrentConfig(mConfig);
     }
 
@@ -106,6 +158,15 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
         return mConfig;
     }
 
+
+    /**
+     * 判断配置信息是否改变
+     * <p>从用户打开筛选面板到进行筛选配置修改到点击“确认”按钮，
+     * 我们无法得知用户是否修改了配置，因此通过此方法判断配置是否改变，
+     * 以减少不必要的数据刷新。</p>
+     *
+     * @return 配置是否改变
+     */
     private boolean hasFilterConfigChanged() {
         String currentId = mConfig.typeSelection.get() +
                 mConfig.descriptionSelectionMap.toString() +
@@ -119,16 +180,23 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
         }
     }
 
+    /**
+     * 根据当前所选{@link xjunz.tool.wechat.impl.model.account.Contact.Type}获取原始数据列表
+     *
+     * @return 原始数据列表
+     */
     private List<T> getRawDataList() {
         Contact.Type selectedType = getTypeList()[mConfig.typeSelection.get()];
         return selectedType == null ? getRepo().getAll() : getRepo().get(selectedType);
     }
 
+    /**
+     * 初始化列表
+     */
     private void initList() {
-        setSortByAndOrderBy(mConfig.getCurrentSortBy(), mConfig.isAscending());
         Disposable disposable = Flowable.fromIterable(getRawDataList()).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread())
                 .flatMap((Function<T, Publisher<Item>>) t -> subscriber -> {
-                    String description = t.describe();
+                    String description = t.describe(mConfig.getCurrentSortBy());
                     if (!mCurrentDescList.contains(description)) {
                         subscriber.onNext(new Item(t, description, Item.TYPE_SEPARATOR));
                         mCurrentDescList.add(description);
@@ -151,8 +219,13 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
         mDisposables.add(disposable);
     }
 
+    /**
+     * 筛选数据，返回包含筛选后的数据的{@link Single}，以便自定义订阅逻辑。
+     *
+     * @param dataList 欲筛选的原始数据
+     * @return 包含筛选数据的{@link Single}
+     */
     private Single<List<Item>> filter(List<T> dataList) {
-        setSortByAndOrderBy(mConfig.getCurrentSortBy(), mConfig.isAscending());
         mCurrentDescList.clear();
         return Flowable.fromIterable(dataList)
                 .filter(t -> {
@@ -167,7 +240,7 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
                     }
                     return true;
                 }).flatMap((Function<T, Publisher<Item>>) t -> subscriber -> {
-                    String description = t.describe();
+                    String description = t.describe(mConfig.getCurrentSortBy());
                     if (!mCurrentDescList.contains(description)) {
                         subscriber.onNext(new Item(t, description, Item.TYPE_SEPARATOR));
                         mCurrentDescList.add(description);
@@ -177,8 +250,14 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
                 }).toSortedList();
     }
 
+    /**
+     * 搜索数据，返回包含搜索后的数据的{@link Single}，方便自定义订阅逻辑。
+     *
+     * @param itemList 欲搜索的原始数据
+     * @param keyword  搜索关键词
+     * @return 包含搜索后数据的{@link Single}
+     */
     private Single<List<Item>> search(List<Item> itemList, @NonNull String keyword) {
-        setSortByAndOrderBy(mConfig.getCurrentSortBy(), mConfig.isAscending());
         mCurrentDescList.clear();
         return Flowable.fromIterable(itemList).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread())
                 .filter(Item::isData)
@@ -204,17 +283,31 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
                 .toSortedList();
     }
 
+    /**
+     * 确认筛选事件的回调
+     * <p>判断当前配置是否发生改变以决定是否进行筛选</p>
+     */
     @Override
     public void onConfirmFilter() {
         if (!hasFilterConfigChanged()) {
             MasterToast.shortToast(R.string.msg_filter_config_unchanged);
         } else {
             Contact.Type selectedType = getTypeList()[mConfig.typeSelection.get()];
-            mDisposables.add(filter(selectedType == null ? getRepo().getAll() : getRepo().get(selectedType)).subscribe(this::updateList));
+            mDisposables.add(filter(selectedType == null ? getRepo().getAll() : getRepo().get(selectedType)).subscribe(newItemList -> {
+                mFilteredItemList = newItemList;
+                updateList(newItemList);
+            }));
         }
     }
 
 
+    /**
+     * 搜索事件的回调
+     * <p>判断当前配置是否发生改变：如果改变，先筛选，再搜索；如果未改变，
+     * 直接对{@link ListPageFragment#mFilteredItemList}进行搜索</p>
+     *
+     * @param keyword 关键词
+     */
     @Override
     public void onSearch(@NotNull String keyword) {
         //如果关键字不为空且筛选配置改变了
@@ -231,6 +324,9 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
         }
     }
 
+    /**
+     * 重置筛选事件回调
+     */
     @Override
     public void onResetFilter() {
         resetFilterConfig(mConfig);
@@ -239,34 +335,33 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
 
 
     /**
-     * 获取所有分隔项，作为筛选依据，同时在{@link FilterFragment}中的{@link android.widget.Spinner}中显示
+     * 并行获取所有分隔项，作为筛选依据，同时在{@link FilterFragment}中的{@link android.widget.Spinner}中显示。
      */
-    //TODO:用并行实现
     protected void collectSeparatorDescListMap() {
         List<T> all = getRepo().getAll();
-        //初始化Map
-        for (SortBy by : getSortByList()) {
-            List<String> descList = new ArrayList<>();
-            //配置排序信息
-            setSortByAndOrderBy(by, true);
-            //对数据进行排序
-            Collections.sort(all);
-            //获取描述列表
-            for (T t : all) {
-                String des = t.describe();
-                if (!descList.contains(des)) {
-                    descList.add(des);
-                }
-            }
-            //添加通配项“<全部>”和“<无>”
-            if (descList.size() == 0) {
-                descList.add(getString(R.string.bracketed_none));
-            } else {
-                descList.add(0, getString(R.string.bracketed_all));
-            }
-            mConfig.descriptionListMap.put(by, descList);
-        }
-        //以上代码执行时间5毫秒左右（90条记录）
+        CopyOnWriteArrayList<T> syncAll = new CopyOnWriteArrayList<>(all);
+        Disposable disposable = Flowable.fromArray(getSortByList()).parallel().runOn(Schedulers.newThread())
+                .map(sortBy -> {
+                    List<String> descList = new ArrayList<>();
+                    //对数据进行排序
+                    Collections.sort(syncAll, (o1, o2) -> o1.compareTo(o2, sortBy, true));
+                    //获取描述列表
+                    for (T t : syncAll) {
+                        String des = t.describe(sortBy);
+                        if (!descList.contains(des)) {
+                            descList.add(des);
+                        }
+                    }
+                    //添加通配项“<全部>”和“<无>”
+                    if (descList.size() == 0) {
+                        descList.add(getString(R.string.bracketed_none));
+                    } else {
+                        descList.add(0, getString(R.string.bracketed_all));
+                    }
+                    return new Pair<>(sortBy, descList);
+                }).sequential().observeOn(AndroidSchedulers.mainThread())
+                .subscribe(sortByListPair -> mConfig.descriptionListMap.put(sortByListPair.first, sortByListPair.second));
+        mDisposables.add(disposable);
     }
 
 
@@ -328,7 +423,13 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
          * 数据项标识，数据项的信息会显示在列表之中
          */
         static final int TYPE_DATA = 0x1100;
-        //类型
+
+        /**
+         * 数据类型
+         *
+         * @see Item#TYPE_SEPARATOR
+         * @see Item#TYPE_DATA
+         */
         int type;
         /**
          * 当前项所包含的内容
@@ -343,11 +444,17 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
          * <p>对于类型为{@link Item#TYPE_SEPARATOR}的项而言，描述会被显示在列表中作为不同分组的数据之间的分隔</p>
          */
         String description;
-        //Span文字的参数
+        /**
+         * Span文字的参数
+         */
         int spanStartIndex, spanLength;
-        //是否被选中
+        /**
+         * 是否被选中
+         */
         boolean isSelected;
-        //是否可见（默认可见）
+        /**
+         * 是否可见（默认可见）
+         */
         boolean isVisible = true;
 
 
@@ -375,10 +482,9 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
 
         @Override
         public int compareTo(@NotNull Item o) {
-            setSortByAndOrderBy(mConfig.sortBy.get(), mConfig.isAscending());
             //如果是相同类型的项，直接比较content即可
             if (this.type == o.type) {
-                return this.content.compareTo(o.content);
+                return this.content.compareTo(o.content, mConfig.getCurrentSortBy(), mConfig.isAscending());
             } else {
                 //如果是不同类型的项，先比较描述是否相等，如果描述相等，说明这两项属于同一分组，分隔项应当小于数据项(无论当前配置是否为升序)；
                 //如果描述不等，说明这两组不属于同一分组，再比较content确定顺序。
@@ -388,7 +494,7 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
                 if (descCompareRes == 0) {
                     return this.isSeparator() ? -1 : 1;
                 } else {
-                    return this.content.compareTo(o.content);
+                    return this.content.compareTo(o.content, mConfig.getCurrentSortBy(), mConfig.isAscending());
                 }
             }
         }
@@ -435,9 +541,12 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
                     //如果可见，初始化内容
                     if (item.isVisible) {
                         holder.itemView.setVisibility(View.VISIBLE);
-                        //设置名称，如果存在，设置关键字高亮
+                        //设置是否被选中
+                        holder.itemView.setSelected(item.isSelected);
+                        //设置名称
                         int startIndex = item.spanStartIndex;
                         if (mConfig.isInSearchMode.get() && startIndex >= 0) {
+                            //如果存在，设置关键字高亮
                             ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(foregroundSpanColor);
                             BackgroundColorSpan backgroundColorSpan = new BackgroundColorSpan(backgroundSpanColor);
                             SpannableString span = new SpannableString(content.getName());

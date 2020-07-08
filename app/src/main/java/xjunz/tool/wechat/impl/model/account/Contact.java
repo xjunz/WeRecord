@@ -15,9 +15,8 @@ import xjunz.tool.wechat.impl.Environment;
 import xjunz.tool.wechat.impl.repo.ContactRepository;
 import xjunz.tool.wechat.util.UniUtils;
 
-public class Contact extends Account implements Comparable<Contact> {
+public class Contact extends Account {
     public static final boolean DEFAULT_IS_ASCENDING = true;
-    private static boolean sAscending = DEFAULT_IS_ASCENDING;
     public String remark;
     /**
      * 从数据库查询得到的type字段
@@ -69,16 +68,6 @@ public class Contact extends Account implements Comparable<Contact> {
         super(Environment.getInstance().getCurrentUin());
     }
 
-    /**
-     * 设置排序顺序（是否升序）
-     * 用于{@link Contact#compareTo(Contact)}
-     *
-     * @param ascending 是否升序
-     */
-    public static void setOrderBy(boolean ascending) {
-        sAscending = ascending;
-    }
-
 
     /**
      * 获取用于排序的名称拼音缩写，名称的优先级为备注、昵称、微信号、微信ID。
@@ -109,11 +98,10 @@ public class Contact extends Account implements Comparable<Contact> {
         return pyAbbr;
     }
 
-    @Override
-    public int compareTo(@NonNull Contact o) {
-        return (sAscending ? 1 : -1) * getComparatorPyAbbr().compareTo(o.getComparatorPyAbbr());
-    }
 
+    public int compareTo(@NonNull Contact o, SortBy by, boolean isAscending) {
+        return (isAscending ? 1 : -1) * getComparatorPyAbbr().compareTo(o.getComparatorPyAbbr());
+    }
 
     /**
      * 处理后的Contact类型枚举类
@@ -186,12 +174,6 @@ public class Contact extends Account implements Comparable<Contact> {
         throw new IllegalArgumentException("Contact can be described with SortBy.NAME only! ");
     }
 
-    /**
-     * @return 返回默认描述
-     */
-    public String describe() {
-        return describe(SortBy.NAME);
-    }
 
     /**
      * 获取当前{@code Contact}对象的类型，主要根据{@link Contact#rawType}进行判断，直观的判断规则见{@link Type}的注释

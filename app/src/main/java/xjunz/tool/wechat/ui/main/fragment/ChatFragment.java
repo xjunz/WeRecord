@@ -55,10 +55,6 @@ public class ChatFragment extends ListPageFragment<Talker> {
         config.setEventHandler(this);
     }
 
-    @Override
-    public void setSortByAndOrderBy(SortBy sortBy, boolean isAscending) {
-        Talker.setSortByAndOrderBy(sortBy, isAscending);
-    }
 
     @Override
     public ChatAdapter getAdapter() {
@@ -107,7 +103,14 @@ public class ChatFragment extends ListPageFragment<Talker> {
                 super(itemView);
                 tvMsgCount = itemView.findViewById(R.id.tv_msg_count);
                 tvTime = itemView.findViewById(R.id.tv_time);
-                itemView.setOnClickListener(v -> MasterToast.shortToast("敬请期待!"));
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (getItemViewType() == Item.TYPE_DATA) {
+                            MasterToast.shortToast("....");
+                        }
+                    }
+                });
             }
         }
     }

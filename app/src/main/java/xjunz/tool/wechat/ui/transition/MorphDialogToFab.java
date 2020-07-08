@@ -134,8 +134,7 @@ public class MorphDialogToFab extends ChangeBounds {
             for (int i = 0; i < vg.getChildCount(); i++) {
                 View v = vg.getChildAt(i);
                 v.setVisibility(View.GONE);
-
-                //TODO: This clips the children to the final FAB size, so we only see the small part animate
+                // This clips the children to the final FAB size, so we only see the small part animate
                 v.animate()
                         .alpha(0f)
                         .translationY(v.getHeight() / 3f)

@@ -25,8 +25,6 @@ import static xjunz.tool.wechat.util.UniUtils.arabicDigit2HanDigit;
 public class Talker extends Contact {
     public static final SortBy DEFAULT_SORT_BY = SortBy.TIMESTAMP;
     public static final boolean DEFAULT_IS_ASCENDING = true;
-    private static SortBy sSortBy = DEFAULT_SORT_BY;
-    private static boolean sAscending = DEFAULT_IS_ASCENDING;
     /**
      * 聊天消息数量
      */
@@ -46,20 +44,6 @@ public class Talker extends Contact {
      * 格式化后的时间戳，如: 2019/3/1
      */
     public String formatTimestamp;
-
-
-    /**
-     * 设置排序依据和顺序，用于{@link Talker#compareTo(Contact)}
-     * 这个方法必须在每次调用{@link Talker#compareTo(Contact)}之前调用，否则可能会使用上一次的配置
-     *
-     * @param by          排序依据
-     * @param isAscending 是否升序
-     */
-    public static void setSortByAndOrderBy(SortBy by, boolean isAscending) {
-        sSortBy = by;
-        sAscending = isAscending;
-    }
-
 
 
     /**
@@ -106,7 +90,7 @@ public class Talker extends Contact {
                             formatTimestamp = App.getStringOf(R.string.format_h_m, lastMsg.get(Calendar.HOUR_OF_DAY), lastMsg.get(Calendar.MINUTE));
                         } else if (dayGap == 1) {
                             timestampDes = App.getStringOf(R.string.yesterday);
-                            formatTimestamp = timestampDes;
+                            formatTimestamp = timestampDes + App.getStringOf(R.string.format_h_m, lastMsg.get(Calendar.HOUR_OF_DAY), lastMsg.get(Calendar.MINUTE));
                         } else if (weekGap == 0) {
                             timestampDes = App.getStringOf(R.string.format_days_ago, arabicDigit2HanDigit(dayGap));
                             formatTimestamp = timestampDes;
@@ -141,31 +125,22 @@ public class Talker extends Contact {
         return "-";
     }
 
-    /**
-     * 返回当前{@link Talker#sSortBy}下的描述
-     *
-     * @return 描述
-     */
-    @Override
-    public String describe() {
-        return describe(sSortBy);
-    }
 
     @Override
-    public int compareTo(@NotNull Contact o) {
+    public int compareTo(@NonNull Contact o, SortBy by, boolean isAscending) {
         if (o instanceof Talker) {
             Talker talker = (Talker) o;
-            switch (sSortBy) {
+            switch (by) {
                 case NAME:
-                    return (sAscending ? 1 : -1) * getComparatorPyAbbr().compareTo(o.getComparatorPyAbbr());
+                    return (isAscending ? 1 : -1) * getComparatorPyAbbr().compareTo(o.getComparatorPyAbbr());
                 case MSG_COUNT:
-                    return (sAscending ? 1 : -1) * Integer.compare(messageCount, talker.messageCount);
+                    return (isAscending ? 1 : -1) * Integer.compare(messageCount, talker.messageCount);
                 case TIMESTAMP:
                     //时间戳越大离现在越近
-                    return (sAscending ? -1 : 1) * Long.compare(lastMsgTimestamp, talker.lastMsgTimestamp);
+                    return (isAscending ? -1 : 1) * Long.compare(lastMsgTimestamp, talker.lastMsgTimestamp);
             }
         } else {
-            return (sAscending ? 1 : -1) * super.compareTo(o);
+            return super.compareTo(o, by, isAscending);
         }
         return 0;
     }

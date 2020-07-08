@@ -15,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.data.viewmodel.PageViewModel;
 import xjunz.tool.wechat.databinding.FragmentFilterBinding;
-import xjunz.tool.wechat.ui.customview.MasterToast;
 
 public class FilterFragment extends Fragment implements PageViewModel.EventHandler {
     private PageViewModel mModel;
@@ -56,7 +55,6 @@ public class FilterFragment extends Fragment implements PageViewModel.EventHandl
      */
     @Override
     public void onCancelFilter() {
-        MasterToast.shortToast("取消筛选");
         for (int i = 0; i < mSelection.length; i++) {
             mSpinnerList[i].setSelection(mSelection[i]);
         }
@@ -72,7 +70,6 @@ public class FilterFragment extends Fragment implements PageViewModel.EventHandl
      */
     @Override
     public void onPrepareFilter() {
-        MasterToast.shortToast("准备筛选");
         for (int i = 0; i < mSpinnerList.length; i++) {
             mSelection[i] = mSpinnerList[i].getSelectedItemPosition();
         }

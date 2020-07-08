@@ -104,10 +104,6 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
         config.setEventHandler(this);
     }
 
-    @Override
-    public void setSortByAndOrderBy(SortBy sortBy, boolean isAscending) {
-        Contact.setOrderBy(isAscending);
-    }
 
     @Override
     public ContactAdapter getAdapter() {
