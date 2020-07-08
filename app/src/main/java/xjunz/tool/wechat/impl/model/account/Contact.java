@@ -17,6 +17,9 @@ import xjunz.tool.wechat.util.UniUtils;
 
 public class Contact extends Account {
     public static final boolean DEFAULT_IS_ASCENDING = true;
+    /**
+     * 为此联系人设置的备注
+     */
     public String remark;
     /**
      * 从数据库查询得到的type字段
@@ -143,7 +146,7 @@ public class Contact extends Account {
         /**
          * 类型的名称资源ID
          */
-        String caption;
+        public String caption;
 
 
         Type(int captionRes) {

@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="contact"
+            type="xjunz.tool.wechat.impl.model.account.Contact" />
+
+        <variable
+            name="talker"
+            type="xjunz.tool.wechat.impl.model.account.Talker" />
+
+        <import type="android.text.TextUtils" />
+
+        <import type="xjunz.tool.wechat.util.UniUtils" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/panel_detail"
+        android:transitionGroup="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginHorizontal="@dimen/spacing_large"
+        android:background="@drawable/bg_cornered_card"
+        android:clipChildren="false"
+        android:elevation="@dimen/z_dialog"
+        android:padding="@dimen/spacing_normal">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/iv_avatar"
+            android:transitionName="@string/tn_avatar"
+            android:layout_width="@dimen/fab_normal"
+            android:layout_height="@dimen/fab_normal"
+            android:layout_marginTop="@dimen/dp_2"
+            android:src="@{contact.avatar}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_name"
+            tools:src="@tools:sample/avatars" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/divider_thickness"
+            android:layout_marginTop="16dp"
+            android:background="?android:listDivider"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tag_type" />
+
+        <Space
+            android:id="@+id/space_center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tag_type"
+            style="@style/TextAppearance.AppCompat.Caption.Tag"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:text="@{contact.type.caption}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/tv_name"
+            app:layout_constraintTop_toBottomOf="@+id/tv_name"
+            tools:text="陌生人" />
+
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:copyable="@{true}"
+            android:ellipsize="end"
+            android:text="@{contact.name}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/iv_avatar"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@tools:sample/first_names" />
+
+        <TextView
+            android:id="@+id/tv_caption_wx_id"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/wx_id"
+            app:layout_constraintEnd_toStartOf="@+id/space_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/divider" />
+
+        <TextView
+            android:id="@+id/tv_caption_wx_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/wx_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tv_caption_wx_id"
+            app:layout_constraintTop_toTopOf="@+id/tv_caption_wx_id" />
+
+        <TextView
+            android:id="@+id/tv_wx_id"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:copyable="@{true}"
+            android:text="@{contact.id}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            app:layout_constraintEnd_toEndOf="@+id/tv_caption_wx_id"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_caption_wx_id"
+            tools:text="WXID_SDUSDHU" />
+
+        <TextView
+            android:id="@+id/tv_wx_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:copyable="@{true}"
+            android:text="@{TextUtils.isEmpty(contact.alias)?@string/bracketed_none:contact.alias}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tv_caption_wx_id"
+            app:layout_constraintTop_toTopOf="@id/tv_wx_id"
+            tools:text="M_E_Z_X_J" />
+
+        <TextView
+            android:id="@+id/tv_caption_nickname"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/nickname"
+            app:layout_constraintEnd_toEndOf="@+id/tv_caption_wx_id"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_wx_id" />
+
+        <TextView
+            android:id="@+id/tv_caption_remark"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/remark"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_caption_nickname"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tv_caption_wx_id"
+            app:layout_constraintTop_toTopOf="@+id/tv_caption_nickname" />
+
+        <TextView
+            android:id="@+id/tv_nickname"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:copyable="@{true}"
+            android:text="@{contact.nickname}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            app:layout_constraintEnd_toEndOf="@+id/tv_wx_id"
+            app:layout_constraintStart_toStartOf="@+id/tv_caption_nickname"
+            app:layout_constraintTop_toBottomOf="@+id/tv_caption_nickname"
+            tools:text="IM-XJUNZ" />
+
+        <TextView
+            android:id="@+id/tv_remark"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:copyable="@{true}"
+            android:text="@{TextUtils.isEmpty(contact.remark)?@string/bracketed_none:contact.remark}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tv_caption_wx_id"
+            app:layout_constraintTop_toTopOf="@+id/tv_nickname"
+            tools:text="XJUNZ" />
+
+        <TextView
+            android:id="@+id/tv_caption_last_msg_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/last_msg_time"
+            android:visible="@{talker!=null}"
+            app:layout_constraintEnd_toEndOf="@+id/tv_caption_wx_id"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_nickname" />
+
+        <TextView
+            android:id="@+id/tv_last_msg_time"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:copyable="@{true}"
+            android:text="@{UniUtils.formatDate(talker.lastMsgTimestamp)}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:visible="@{talker!=null}"
+            app:layout_constraintEnd_toEndOf="@+id/tv_wx_id"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_caption_last_msg_time"
+            tools:text="@tools:sample/date/mmddyy" />
+
+        <TextView
+            android:id="@+id/tv_caption_msg_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/msg_count"
+            android:visible="@{talker!=null}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tv_caption_wx_id"
+            app:layout_constraintTop_toTopOf="@+id/tv_caption_last_msg_time" />
+
+        <TextView
+            android:id="@+id/tv_msg_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:copyable="@{true}"
+            android:text="@{String.valueOf(talker.messageCount)}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:visible="@{talker!=null}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tv_caption_wx_id"
+            app:layout_constraintTop_toTopOf="@+id/tv_last_msg_time"
+            tools:text="2020" />
+
+        <View
+            android:id="@+id/divider3"
+            android:visible="@{talker!=null}"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/divider_thickness"
+            android:layout_marginTop="16dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_last_msg_time" />
+
+        <Button
+            android:id="@+id/btn_check_msg"
+            style="@android:style/Widget.Material.Button.Borderless.Colored"
+            android:textColor="?colorAccent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:drawableStart="@drawable/ic_baseline_eye_24"
+            android:text="@string/check_msg"
+            android:visible="@{talker!=null}"
+            app:layout_constraintEnd_toStartOf="@id/space_center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/divider3" />
+
+        <Button
+            android:id="@+id/btn_export_msg"
+            android:visible="@{talker!=null}"
+            style="@android:style/Widget.Material.Button.Borderless.Colored"
+            android:textColor="?colorAccent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_export_24dp"
+            android:text="@string/export_msg"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_check_msg"
+            app:layout_constraintTop_toTopOf="@+id/btn_check_msg" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

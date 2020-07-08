@@ -112,7 +112,7 @@
                     android:inputType="text"
                     android:text="@={model.currentConfig.searchKeyword}"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:visible="@{model.currentConfig.isInSearchMode}"
+                    android:animateVisible="@{model.currentConfig.isInSearchMode}"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/pb_load"
                     app:layout_constraintStart_toEndOf="@+id/tv_top_bar_title"

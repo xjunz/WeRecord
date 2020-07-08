@@ -28,4 +28,5 @@
     <dimen name="ts_medium">20sp</dimen>
     <dimen name="dp_48">48dp</dimen>
     <dimen name="dp_20">20dp</dimen>
+    <dimen name="divider_thickness">.5dp</dimen>
 </resources>

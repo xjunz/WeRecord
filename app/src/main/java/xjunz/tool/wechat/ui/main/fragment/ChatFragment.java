@@ -18,7 +18,6 @@ import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.model.account.Talker;
 import xjunz.tool.wechat.impl.repo.AccountRepository;
 import xjunz.tool.wechat.impl.repo.TalkerRepository;
-import xjunz.tool.wechat.ui.customview.MasterToast;
 
 
 /**
@@ -103,14 +102,6 @@ public class ChatFragment extends ListPageFragment<Talker> {
                 super(itemView);
                 tvMsgCount = itemView.findViewById(R.id.tv_msg_count);
                 tvTime = itemView.findViewById(R.id.tv_time);
-                itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (getItemViewType() == Item.TYPE_DATA) {
-                            MasterToast.shortToast("....");
-                        }
-                    }
-                });
             }
         }
     }

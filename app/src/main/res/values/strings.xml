@@ -124,5 +124,12 @@
     <string name="confirm_filter">确认</string>
     <string name="reset_completed">已重置</string>
     <string name="msg_filter_config_unchanged">筛选配置没有改变</string>
-
+    <string name="nickname">昵称</string>
+    <string name="remark">备注</string>
+    <string name="last_msg_time">最后聊天时间</string>
+    <string name="msg_count">消息数量</string>
+    <string name="wx_id">微信ID</string>
+    <string name="wx_name">微信号</string>
+    <string name="check_msg">查看消息</string>
+    <string name="export_msg">导出消息</string>
 </resources>

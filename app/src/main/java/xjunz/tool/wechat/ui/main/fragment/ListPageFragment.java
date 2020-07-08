@@ -1,5 +1,7 @@
 package xjunz.tool.wechat.ui.main.fragment;
 
+import android.app.ActivityOptions;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -46,6 +48,7 @@ import xjunz.tool.wechat.data.viewmodel.SortBy;
 import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.repo.AccountRepository;
 import xjunz.tool.wechat.ui.customview.MasterToast;
+import xjunz.tool.wechat.ui.main.DetailActivity;
 import xjunz.tool.wechat.util.UiUtils;
 
 public abstract class ListPageFragment<T extends Contact> extends PageFragment implements PageConfig.EventHandler {
@@ -591,7 +594,7 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
         }
     }
 
-    public static class ListPageViewHolder extends RecyclerView.ViewHolder {
+    public class ListPageViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvSeparator;
         ImageView ivAvatar;
         View bottomDivider;
@@ -602,6 +605,14 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
             tvSeparator = itemView.findViewById(R.id.tv_separator);
             ivAvatar = itemView.findViewById(R.id.iv_avatar);
             bottomDivider = itemView.findViewById(R.id.divider_bottom);
+            itemView.setOnClickListener(v -> {
+                if (getItemViewType() == Item.TYPE_DATA) {
+                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(requireActivity(), this.ivAvatar, this.ivAvatar.getTransitionName());
+                    Intent i = new Intent(requireActivity(), DetailActivity.class);
+                    i.putExtra(DetailActivity.EXTRA_DATA, mItemList.get(getAdapterPosition()).content);
+                    startActivity(i, options.toBundle());
+                }
+            });
         }
     }
 

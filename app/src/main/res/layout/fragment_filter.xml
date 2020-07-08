@@ -124,7 +124,7 @@
         <View
             android:id="@+id/divider_bottom"
             android:layout_width="match_parent"
-            android:layout_height="1px"
+            android:layout_height="@dimen/divider_thickness"
             android:layout_marginTop="@dimen/spacing_normal"
             android:background="?android:attr/listDivider"
             app:layout_constraintTop_toBottomOf="@+id/sp_msg_count" />
@@ -176,7 +176,7 @@
         <View
             android:id="@+id/divider2"
             android:layout_width="match_parent"
-            android:layout_height="1px"
+            android:layout_height="@dimen/divider_thickness"
             android:layout_marginTop="@dimen/spacing_normal"
             android:background="?android:attr/listDivider"
             app:layout_constraintTop_toBottomOf="@+id/sp_order_by" />

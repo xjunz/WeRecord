@@ -77,7 +77,7 @@ public class UniUtils {
         return dayOfWeek == 1 ? "日" : arabicDigit2HanDigit(dayOfWeek - 1);
     }
 
-    public static void copyPlainText(String label, String msg) {
+    public static void copyPlainText(String label, CharSequence msg) {
         ClipboardManager clipboardManager = (ClipboardManager) App.getContext().getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboardManager != null) {
             clipboardManager.setPrimaryClip(new ClipData(label, new String[]{"text/plain"}, new ClipData.Item(msg)));

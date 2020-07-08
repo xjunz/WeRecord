@@ -31,7 +31,6 @@
 
     <style name="AppTheme.Main.Translucent">
         <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@color/colorMask</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
@@ -39,9 +38,16 @@
     </style>
 
     <style name="AppTheme.Main.Translucent.Filter">
+        <item name="android:windowBackground">@color/colorMask</item>
         <item name="android:windowSharedElementEnterTransition">@transition/filter_shared_enter_2
         </item>
+    </style>
 
+    <style name="AppTheme.Main.Translucent.Detail">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowEnterTransition">@transition/detail_enter</item>
+        <item name="android:windowSharedElementEnterTransition">@transition/detail_shared_enter
+        </item>
     </style>
 
     <style name="Theme.AppCompat.Light.DialogWhenLarge.Material">
@@ -122,5 +128,14 @@
         <item name="android:windowExitAnimation">@anim/dialog_exit</item>
     </style>
 
+    <style name="TextAppearance.AppCompat.Caption.Tag">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@drawable/bg_tag</item>
+        <item name="android:paddingStart">@dimen/dp_6</item>
+        <item name="android:paddingEnd">@dimen/dp_6</item>
+        <item name="android:paddingTop">@dimen/dp_2</item>
+        <item name="android:paddingBottom">@dimen/dp_2</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
 
 </resources>

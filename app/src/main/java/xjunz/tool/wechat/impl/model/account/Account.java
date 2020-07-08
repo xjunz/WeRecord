@@ -28,8 +28,8 @@ public abstract class Account implements Serializable {
      * 微信号，是微信账号或有的唯一标识
      */
     public String alias;
-    private transient String originalAvatarPath;
-    private transient String backupAvatarPath;
+    private String originalAvatarPath;
+    private String backupAvatarPath;
     /**
      * 微信ID，通常的形式是"wxid_xxxxx"，是微信账号必有的唯一标识
      */
@@ -163,6 +163,5 @@ public abstract class Account implements Serializable {
     public int hashCode() {
         return id.hashCode();
     }
-
 
 }

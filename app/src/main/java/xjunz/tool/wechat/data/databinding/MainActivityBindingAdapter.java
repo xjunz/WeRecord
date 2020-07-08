@@ -91,8 +91,8 @@ public class MainActivityBindingAdapter {
         });
     }
 
-    @BindingAdapter(value = {"android:visible"})
-    public static void setVisible(View view, boolean oldValue, boolean isVisible) {
+    @BindingAdapter(value = {"android:animateVisible"})
+    public static void animateVisible(View view, boolean oldValue, boolean isVisible) {
         if (oldValue != isVisible) {
             Transition transition = new Fade();
             transition.addTarget(view);
