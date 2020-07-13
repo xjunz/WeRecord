@@ -1,9 +1,12 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.ui.main.fragment;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Spannable;
@@ -35,7 +38,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.reactivex.Flowable;
 import io.reactivex.Single;
-import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -49,6 +51,7 @@ import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.repo.AccountRepository;
 import xjunz.tool.wechat.ui.customview.MasterToast;
 import xjunz.tool.wechat.ui.main.DetailActivity;
+import xjunz.tool.wechat.util.RxJavaUtils;
 import xjunz.tool.wechat.util.UiUtils;
 
 public abstract class ListPageFragment<T extends Contact> extends PageFragment implements PageConfig.EventHandler {
@@ -560,15 +563,17 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
                             holder.tvName.setText(content.getName());
                         }
                         //异步设置头像
-                        Disposable disposable = Single.create((SingleOnSubscribe<Drawable>) emitter -> {
-                            Bitmap avatar = content.getAvatar();
-                            if (avatar == null) {
-                                emitter.onSuccess(defaultAvatar);
-                            } else {
-                                emitter.onSuccess(new BitmapDrawable(getResources(), avatar));
+                        RxJavaUtils.maybe(content::getAvatar).subscribe(new RxJavaUtils.MaybeObserverAdapter<Bitmap>() {
+                            @Override
+                            public void onSuccess(Bitmap bitmap) {
+                                holder.ivAvatar.setImageBitmap(bitmap);
                             }
-                        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(drawable -> holder.ivAvatar.setImageDrawable(drawable));
-                        mDisposables.add(disposable);
+
+                            @Override
+                            public void onComplete() {
+                                holder.ivAvatar.setImageResource(R.mipmap.avatar_default);
+                            }
+                        });
                     } else {
                         //设置不可见
                         holder.itemView.setVisibility(View.GONE);

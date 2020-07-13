@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+
 <resources>
     <string-array name="talker_sorts">
         <item>按名称</item>
@@ -30,14 +33,19 @@
         <item>升序</item>
         <item>降序</item>
     </string-array>
-    <string-array name="bottom_item_captions">
+    <string-array name="main_bottom_item_captions">
         <item>@string/chat</item>
         <item>@string/contact</item>
         <item>@string/mine</item>
     </string-array>
-    <integer-array name="bottom_item_images">
+    <integer-array name="main_bottom_item_images">
         <item>@drawable/ic_chat_squashed</item>
         <item>@drawable/ic_contacts_24dp</item>
         <item>@drawable/ic_mine_24dp</item>
     </integer-array>
+    <string-array name="message_bottom_item_captions">
+        <item>@string/search</item>
+        <item>@string/edit</item>
+        <item>@string/statistics</item>
+    </string-array>
 </resources>

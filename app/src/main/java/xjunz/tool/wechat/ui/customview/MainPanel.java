@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.ui.customview;
 
 import android.annotation.SuppressLint;
@@ -17,9 +21,12 @@ import java.util.ArrayList;
 
 import xjunz.tool.wechat.R;
 
+/**
+ * 主页面的面板视图
+ */
 public class MainPanel extends RelativeLayout {
     private ViewDragHelper mHelper;
-    private ViewGroup mCurtain, mHandler, mFilter;
+    private ViewGroup mCurtain, mTopBar, mFilter;
     private View mMask;
     private int mCurtainHeight, mHandlerHeight, mFilterHeight;
     private int mMaxTop, mMinTop;
@@ -56,7 +63,7 @@ public class MainPanel extends RelativeLayout {
         } else {
             super.onLayout(changed, l, t, r, b);
             mCurtainHeight = mCurtain.getHeight();
-            mHandlerHeight = mHandler.getHeight();
+            mHandlerHeight = mTopBar.getHeight();
             mFilterHeight = mFilter.getHeight();
             mMinTop = mHandlerHeight - mCurtainHeight;
             mMaxTop = -mHandlerHeight;
@@ -68,7 +75,7 @@ public class MainPanel extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mCurtain = findViewById(R.id.ll_curtain);
-        mHandler = findViewById(R.id.top_bar);
+        mTopBar = findViewById(R.id.top_bar);
         mFilter = findViewById(R.id.fl_filter);
         mMask = findViewById(R.id.mask);
         mMask.setOnClickListener(v -> closePanel());
@@ -81,8 +88,8 @@ public class MainPanel extends RelativeLayout {
 
             @Override
             public void onPanelSlideFinished(boolean isOpen) {
-                for (int i = 0; i < mHandler.getChildCount(); i++) {
-                    mHandler.getChildAt(i).setClickable(!isOpen);
+                if (isOpen) {
+                    mTopBar.setVisibility(INVISIBLE);
                 }
                 if (!isOpen) {
                     mMask.setVisibility(GONE);
@@ -91,7 +98,7 @@ public class MainPanel extends RelativeLayout {
 
             @Override
             public void onPanelSlide(float fraction) {
-                mHandler.setAlpha(1 - fraction);
+                mTopBar.setAlpha(1 - fraction);
                 mFilter.setAlpha(fraction);
                 mMask.setAlpha(fraction);
                 mFilter.setTop((int) (fraction * mHandlerHeight));
@@ -101,13 +108,17 @@ public class MainPanel extends RelativeLayout {
 
             @Override
             public void onPanelSlideStart(boolean isToOpen) {
+                mReadyToUser = true;
+                if (!isToOpen) {
+                    mTopBar.findViewById(R.id.et_search).requestFocus();
+                    mTopBar.setVisibility(VISIBLE);
+                }
                 if (isToOpen) {
                     mMask.setAlpha(0);
                     mMask.setVisibility(VISIBLE);
                 }
             }
         });
-
     }
 
     @Override
@@ -153,7 +164,7 @@ public class MainPanel extends RelativeLayout {
         @Override
         public void onViewCaptured(@NonNull View capturedChild, int activePointerId) {
             super.onViewCaptured(capturedChild, activePointerId);
-            mReadyToUser = true;
+
         }
 
         @Override
@@ -214,5 +225,9 @@ public class MainPanel extends RelativeLayout {
         void onPanelSlide(float fraction);
 
         void onPanelSlideStart(boolean isToOpen);
+    }
+
+    public boolean isOpen() {
+        return mCurtain.getTop() == mMaxTop;
     }
 }

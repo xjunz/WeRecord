@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.impl;
 
 import android.content.pm.PackageInfo;
@@ -37,9 +41,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import io.reactivex.Completable;
-import io.reactivex.CompletableEmitter;
 import io.reactivex.CompletableObserver;
-import io.reactivex.CompletableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.App;
@@ -113,44 +115,41 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
      * @param observer the callback
      */
     public void init(CompletableObserver observer) {
-        Completable initTask = Completable.create(new CompletableOnSubscribe() {
-            @Override
-            public void subscribe(CompletableEmitter emitter) throws Exception {
-                mBasicEnvironmentInfo = "<br/>[<br/>" + getBasicHardwareInfo() + "<br/>" + getVersionInfo();
-                //create backup dirs
-                mAppFilesDir = App.getContext().getFilesDir().getPath();
-                mDatabaseBackupDirPath = mAppFilesDir + separator + DigestUtils.md5Hex("database_backup");
-                File file = new File(mDatabaseBackupDirPath);
-                if (!file.exists()) {
-                    if (!file.mkdir()) {
-                        throw new RuntimeException("Failed to create db backup dir");
-                    }
+        Completable initTask = Completable.create(emitter -> {
+            mBasicEnvironmentInfo = "<br/>[<br/>" + getBasicHardwareInfo() + "<br/>" + getVersionInfo();
+            //create backup dirs
+            mAppFilesDir = App.getContext().getFilesDir().getPath();
+            mDatabaseBackupDirPath = mAppFilesDir + separator + DigestUtils.md5Hex("database_backup");
+            File file = new File(mDatabaseBackupDirPath);
+            if (!file.exists()) {
+                if (!file.mkdir()) {
+                    throw new RuntimeException("Failed to create db backup dir");
                 }
-                mAvatarBackupPath = mAppFilesDir + separator + DigestUtils.md5Hex("avatar_backup");
-                File file1 = new File(mAvatarBackupPath);
-                if (!file1.exists()) {
-                    if (!file1.mkdir()) {
-                        throw new RuntimeException("Failed to create avatar backup dir");
-                    }
-                }
-                PackageManager packageManager = App.getContext().getPackageManager();
-                PackageInfo packageInfo = packageManager.getPackageInfo(WECHAT_PACKAGE_NAME, 0);
-                mBasicEnvironmentInfo += "<br/><b>wechat_version_code</b>: " + packageInfo.versionCode + "<br/><b>wechat_version_name</b>: " + packageInfo.versionName + "<br/>]";
-                String gWechatDataPath = packageInfo.applicationInfo.dataDir;
-                mWechatMicroMsgPath = gWechatDataPath + separator + "MicroMsg";
-                String sWechatSharedPrefsPath = gWechatDataPath + separator + "shared_prefs";
-                mWechatSharedPrefsUinSetPath = sWechatSharedPrefsPath + separator + "app_brand_global_sp.xml";
-                mWechatSharedPrefsCurUinPath = sWechatSharedPrefsPath + separator + "system_config_prefs.xml";
-                mWechatImeiPath = mWechatMicroMsgPath + File.separator + "CompatibleInfo.cfg";
-                initImei();
-                initUins();
-                initUsers();
-                backupDatabaseOf(mCurrentUser);
-                tryOpenDatabaseOf(mCurrentUser, mImei);
-                fulfillUsers();
-                mLifecycle.setCurrentState(Lifecycle.State.STARTED);
-                emitter.onComplete();
             }
+            mAvatarBackupPath = mAppFilesDir + separator + DigestUtils.md5Hex("avatar_backup");
+            File file1 = new File(mAvatarBackupPath);
+            if (!file1.exists()) {
+                if (!file1.mkdir()) {
+                    throw new RuntimeException("Failed to create avatar backup dir");
+                }
+            }
+            PackageManager packageManager = App.getContext().getPackageManager();
+            PackageInfo packageInfo = packageManager.getPackageInfo(WECHAT_PACKAGE_NAME, 0);
+            mBasicEnvironmentInfo += "<br/><b>wechat_version_code</b>: " + packageInfo.versionCode + "<br/><b>wechat_version_name</b>: " + packageInfo.versionName + "<br/>]";
+            String gWechatDataPath = packageInfo.applicationInfo.dataDir;
+            mWechatMicroMsgPath = gWechatDataPath + separator + "MicroMsg";
+            String sWechatSharedPrefsPath = gWechatDataPath + separator + "shared_prefs";
+            mWechatSharedPrefsUinSetPath = sWechatSharedPrefsPath + separator + "app_brand_global_sp.xml";
+            mWechatSharedPrefsCurUinPath = sWechatSharedPrefsPath + separator + "system_config_prefs.xml";
+            mWechatImeiPath = mWechatMicroMsgPath + File.separator + "CompatibleInfo.cfg";
+            initImei();
+            initUins();
+            initUsers();
+            backupDatabaseOf(mCurrentUser);
+            tryOpenDatabaseOf(mCurrentUser, mImei);
+            fulfillUsers();
+            mLifecycle.setCurrentState(Lifecycle.State.STARTED);
+            emitter.onComplete();
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
         initTask.subscribe(observer);
     }
@@ -175,7 +174,7 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
                 String value = cursor.getString(1);
                 switch (id) {
                     case 2:
-                        user.endowIdentity(value);
+                        user.id = value;
                         break;
                     case 4:
                         user.nickname = value;
@@ -223,7 +222,7 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
     }*/
 
     private void backupDatabaseOf(User user) throws ShellUtils.ShellException, IOException {
-        user.backupDatabaseFilePath = mDatabaseBackupDirPath + File.separator + DigestUtils.md5Hex(user.getOwnerUin());
+        user.backupDatabaseFilePath = mDatabaseBackupDirPath + File.separator + DigestUtils.md5Hex(user.uin);
         ShellUtils.cp(user.getMsgDatabasePath(), user.backupDatabaseFilePath, "Failed to backup database files");
     }
 
@@ -242,6 +241,7 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
     }
 
 
+    @SuppressWarnings("unchecked")
     private void initImei() {
         //fetch from SP first
         mImei = App.getSharedPrefsManager().getIMEI();
@@ -275,7 +275,7 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
 
 
     private void tryOpenDatabaseOf(@NonNull User user, @NonNull String imei) {
-        user.databasePragmaKey = DigestUtils.md5Hex(imei + user.getOwnerUin()).substring(0, 7).toLowerCase();
+        user.databasePragmaKey = DigestUtils.md5Hex(imei + user.uin).substring(0, 7).toLowerCase();
         mDatabaseOfCurUser = SQLiteDatabase.openDatabase(user.backupDatabaseFilePath, user.databasePragmaKey, null, SQLiteDatabase.OPEN_READONLY, this);
     }
 

@@ -1,8 +1,14 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.impl.model.account;
 
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+
+import org.apaches.commons.codec.digest.DigestUtils;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -11,22 +17,26 @@ import xjunz.tool.wechat.impl.Environment;
 
 
 public class User extends Account {
-
-    private String originalDatabaseFilePath;
+    public final String dirPath;
+    private final String originalDatabaseFilePath;
     public String backupDatabaseFilePath;
     public transient String databasePragmaKey;
-    public String imageCachePath;
-    public String videoCachePath;
+    public final String imageCachePath;
+    public final String videoCachePath;
     public boolean isLastLogin;
+    public String uin;
 
 
     public User(String uin) {
-        super(uin);
-        this.originalDatabaseFilePath = this.getOwnerDirPath() + File.separator + Environment.DATABASE_EN_MICRO_MSG_NAME;
+        super();
+        this.uin = uin;
+        String pathIdentifier = DigestUtils.md5Hex("mm" + uin);
+        this.dirPath = Environment.getInstance().getWechatMicroMsgPath() + File.separator + pathIdentifier;
+        this.originalDatabaseFilePath = dirPath + File.separator + Environment.DATABASE_EN_MICRO_MSG_NAME;
         this.imageCachePath = android.os.Environment.getExternalStorageDirectory().getPath() + File.separator + "tencent"
-                + File.separator + "MicroMsg" + File.separator + getPathIdentifier() + File.separator + "image2";
+                + File.separator + "MicroMsg" + File.separator + pathIdentifier + File.separator + "image2";
         this.videoCachePath = android.os.Environment.getExternalStorageDirectory().getPath() + File.separator + "tencent"
-                + File.separator + "MicroMsg" + File.separator + getPathIdentifier() + File.separator + "video";
+                + File.separator + "MicroMsg" + File.separator + pathIdentifier + File.separator + "video";
     }
 
     public String getMsgDatabasePath() {
@@ -36,12 +46,9 @@ public class User extends Account {
     public void deleteBackupDatabase() {
         final File backup = new File(backupDatabaseFilePath);
         if (backup.exists()) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!backup.delete()) {
-                        Log.wtf("?o?", "Failed to delete backup files");
-                    }
+            new Thread(() -> {
+                if (!backup.delete()) {
+                    Log.wtf("?o?", "Failed to delete backup files");
                 }
             }).start();
         }

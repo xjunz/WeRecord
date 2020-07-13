@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.data.databinding;
 
 import android.transition.Fade;
@@ -80,7 +84,7 @@ public class MainActivityBindingAdapter {
         return imageButton.getTag() != null && (boolean) imageButton.getTag();
     }
 
-    @BindingAdapter(value = {"android:onClick", "android:searchModeAttrChanged"}, requireAll = false)
+    @BindingAdapter(value = {"android:searchModeOnClick", "android:searchModeAttrChanged"}, requireAll = false)
     public static void setSearchModeChangeListener(ImageButton imageButton, View.OnClickListener listener, InverseBindingListener searchModeAttr) {
         imageButton.setOnClickListener(v -> {
             imageButton.setTag(!isSearchMode(imageButton));
@@ -107,7 +111,7 @@ public class MainActivityBindingAdapter {
     }
 
 
-    @BindingAdapter(value = "android:hide")
+    @BindingAdapter(value = "android:animateHide")
     public static void shouldHide(View view, Boolean oldValue, Boolean should) {
         if (should != null) {
             if (should && !oldValue) {
@@ -141,4 +145,6 @@ public class MainActivityBindingAdapter {
             }
         });
     }
+
+
 }

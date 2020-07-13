@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.impl.model.account;
 
 import android.text.TextUtils;
@@ -11,7 +15,6 @@ import java.util.List;
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.data.viewmodel.SortBy;
-import xjunz.tool.wechat.impl.Environment;
 import xjunz.tool.wechat.impl.repo.ContactRepository;
 import xjunz.tool.wechat.util.UniUtils;
 
@@ -66,10 +69,6 @@ public class Contact extends Account {
      * @see Contact#getNamePyAttr()
      */
     private String pyAbbr;
-
-    public Contact() {
-        super(Environment.getInstance().getCurrentUin());
-    }
 
 
     /**
@@ -212,6 +211,15 @@ public class Contact extends Account {
                 }
                 break;
         }
+    }
+
+    /**
+     * 创建一个虚拟{@link Contact}，这个{@link Contact}主要用于查找、比较
+     */
+    public static Contact mockAccount(String id) {
+        Contact mock = new Contact();
+        mock.id = id;
+        return mock;
     }
 
 

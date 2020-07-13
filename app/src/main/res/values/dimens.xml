@@ -1,3 +1,7 @@
+<!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="dp_1">1dp</dimen>
@@ -21,7 +25,8 @@
     <dimen name="z_card">2dp</dimen>
     <dimen name="z_dialog">10dp</dimen>
     <dimen name="z_fab">4dp</dimen>
-    <dimen name="z_item">1.5dp</dimen>
+    <dimen name="z_item">1dp</dimen>
+    <dimen name="z_float_bottom_bar">2.5dp</dimen>
     <dimen name="corner_card">2dp</dimen>
     <dimen name="corner_dialog">4dp</dimen>
     <dimen name="corner_button">2dp</dimen>
@@ -29,4 +34,9 @@
     <dimen name="dp_48">48dp</dimen>
     <dimen name="dp_20">20dp</dimen>
     <dimen name="divider_thickness">.5dp</dimen>
+    <dimen name="z_bubble">1dp</dimen>
+    <dimen name="max_bubble_width">300dp</dimen>
+    <dimen name="r_bubble_obtuse">20dp</dimen>
+    <dimen name="r_bubble_acute">5dp</dimen>
+    <dimen name="min_complex_msg_width">250dp</dimen>
 </resources>

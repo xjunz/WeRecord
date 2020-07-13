@@ -1,9 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#04000000">
+    android:background="@color/colorBackgroundLightGrey">
 
     <ImageButton
         android:id="@+id/ib_shutter"
@@ -19,12 +22,6 @@
         android:src="@drawable/ic_baseline_expand_more_24"
         android:tint="?colorAccent" />
 
-    <!-- <View
-         android:id="@+id/divider_top"
-         android:layout_width="match_parent"
-         android:layout_height="1px"
-         android:layout_alignParentTop="true"
-         android:background="?android:listDivider" />-->
 
     <TextView
         android:id="@+id/tv_separator"

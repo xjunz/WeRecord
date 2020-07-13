@@ -1,19 +1,18 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.impl.model.account;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 import androidx.annotation.Nullable;
 
-import org.apaches.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.Serializable;
 
-import xjunz.tool.wechat.impl.Environment;
 import xjunz.tool.wechat.impl.repo.AvatarRepository;
-import xjunz.tool.wechat.util.ShellUtils;
 
 
 /**
@@ -28,33 +27,25 @@ public abstract class Account implements Serializable {
      * 微信号，是微信账号或有的唯一标识
      */
     public String alias;
-    private String originalAvatarPath;
-    private String backupAvatarPath;
     /**
      * 微信ID，通常的形式是"wxid_xxxxx"，是微信账号必有的唯一标识
      */
     public String id;
-    private String pathIdentifier;
-    private String ownerDirPath;
     /**
-     * 当前用户的UIN，是当前用户的唯一标识
+     * 头像文件是否已经尝试解码过
+     *
+     * @see Account#getAvatar()
      */
-    private String ownerUin;
-    private boolean hasLocalAvatar = true;
-
-    String getPathIdentifier() {
-        return pathIdentifier;
-    }
-
-    String getOwnerDirPath() {
-        return ownerDirPath;
-    }
-
+    private boolean mHasTryDecodeAvatar;
+    /**
+     * 是否存在本地头像
+     */
+    private boolean mHasLocalAvatar;
 
     /**
      * @return 当前账号是否为公众号
      */
-    protected boolean isGZH() {
+    public boolean isGZH() {
         return id.startsWith("gh_");
     }
 
@@ -78,26 +69,10 @@ public abstract class Account implements Serializable {
     /**
      * @return 当前账号是否为群聊号
      */
-    protected boolean isGroup() {
+    public boolean isGroup() {
         return id.endsWith("@chatroom");
     }
 
-    Account(String uin) {
-        this.ownerUin = uin;
-        this.pathIdentifier = DigestUtils.md5Hex("mm" + ownerUin);
-        this.ownerDirPath = Environment.getInstance().getWechatMicroMsgPath() + File.separator + pathIdentifier;
-    }
-
-
-    public void endowIdentity(String id) {
-        this.id = id;
-        String idMd5 = DigestUtils.md5Hex(id);
-        this.backupAvatarPath = Environment.getInstance().getAvatarBackupPath() + File.separator + idMd5;
-        this.originalAvatarPath = this.ownerDirPath + File.separator + "avatar" + File.separator
-                + idMd5.substring(0, 2) + File.separator
-                + idMd5.substring(2, 4) + File.separator
-                + "user_" + idMd5 + ".png";
-    }
 
     protected boolean empty(String str) {
         return str == null || str.length() == 0;
@@ -108,35 +83,21 @@ public abstract class Account implements Serializable {
         return empty(nickname) ? (empty(alias) ? (empty(id) ? "<unknown>" : id) : alias) : nickname;
     }
 
-    public String getOwnerUin() {
-        return ownerUin;
-    }
 
-    @Nullable
-    private Bitmap decodeAvatar() {
-        File backup = new File(backupAvatarPath);
-        if (!backup.exists()) {
-            ShellUtils.cpNoError(originalAvatarPath, backupAvatarPath);
-        }
-        Bitmap bitmap = BitmapFactory.decodeFile(backupAvatarPath);
-        this.hasLocalAvatar = bitmap != null;
-        return bitmap;
-    }
-
-
+    /**
+     * 获取当前账号的头像
+     *
+     * @return 当前账号的头像
+     */
     @Nullable
     public Bitmap getAvatar() {
-        if (hasLocalAvatar) {
-            Bitmap bitmap = AvatarRepository.getInstance().getAvatarOf(id);
-            if (bitmap == null) {
-                bitmap = decodeAvatar();
-                if (bitmap != null) {
-                    AvatarRepository.getInstance().putAvatarOf(id, bitmap);
-                }
-            }
+        if (!mHasTryDecodeAvatar) {
+            Bitmap bitmap = AvatarRepository.getInstance().getAvatar(id);
+            mHasTryDecodeAvatar = true;
+            mHasLocalAvatar = bitmap != null;
             return bitmap;
         } else {
-            return null;
+            return mHasLocalAvatar ? AvatarRepository.getInstance().getAvatar(id) : null;
         }
     }
 

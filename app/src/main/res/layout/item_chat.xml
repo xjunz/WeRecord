@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -6,7 +9,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/bg_selectable_item"
     android:clickable="true"
-    android:elevation="1dp"
+    android:elevation="@dimen/z_item"
     android:focusable="true">
 
     <de.hdodenhof.circleimageview.CircleImageView
@@ -24,6 +27,7 @@
 
     <TextView
         android:id="@+id/tv_name"
+        android:transitionName="@string/tn_name"
         android:ellipsize="end"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

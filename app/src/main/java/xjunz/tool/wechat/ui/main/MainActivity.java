@@ -1,6 +1,9 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.ui.main;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 
@@ -145,16 +148,19 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    private long lastPressedTimestamp;
+
     @Override
     public void onBackPressed() {
-        UiUtils.createAlert(this, R.string.msg_exit_confirmation)
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        MainActivity.super.onBackPressed();
-                    }
-                }).show();
-
+        if (mBinding.mainPanel.isOpen()) {
+            mBinding.mainPanel.closePanel();
+        } else {
+            if (lastPressedTimestamp != 0 && System.currentTimeMillis() - lastPressedTimestamp < 2000) {
+                super.onBackPressed();
+            } else {
+                MasterToast.longToast("再次点击以退出");
+                lastPressedTimestamp = System.currentTimeMillis();
+            }
+        }
     }
 }

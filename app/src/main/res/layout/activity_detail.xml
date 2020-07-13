@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
@@ -26,12 +29,17 @@
         android:layout_gravity="center"
         android:layout_marginHorizontal="@dimen/spacing_large"
         android:background="@drawable/bg_cornered_card"
-        android:clipChildren="false"
         android:elevation="@dimen/z_dialog"
-        android:padding="@dimen/spacing_normal">
+        android:paddingStart="@dimen/spacing_normal"
+        android:paddingEnd="@dimen/spacing_normal"
+        android:paddingTop="@dimen/spacing_normal"
+        android:paddingBottom="@{talker==null?@dimen/spacing_normal:@dimen/spacing_unit}">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_avatar"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="viewImage"
             android:transitionName="@string/tn_avatar"
             android:layout_width="@dimen/fab_normal"
             android:layout_height="@dimen/fab_normal"
@@ -75,6 +83,7 @@
 
         <TextView
             android:id="@+id/tv_name"
+            android:transitionName="@string/tn_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -240,12 +249,13 @@
         <Button
             android:id="@+id/btn_check_msg"
             style="@android:style/Widget.Material.Button.Borderless.Colored"
-            android:textColor="?colorAccent"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:drawableStart="@drawable/ic_baseline_eye_24"
             android:text="@string/check_msg"
+            android:onClick="checkMessages"
+            android:textColor="?colorAccent"
             android:visible="@{talker!=null}"
             app:layout_constraintEnd_toStartOf="@id/space_center"
             app:layout_constraintStart_toStartOf="parent"

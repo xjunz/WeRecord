@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.ui.customview;
 
 import android.annotation.SuppressLint;
@@ -9,7 +13,7 @@ import android.view.LayoutInflater;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import xjunz.tool.wechat.App;
@@ -32,12 +36,26 @@ public class MasterToast extends android.widget.Toast {
     }
 
     /**
+     * 创建一个{@link MasterToast}
+     *
+     * @param msg 要显示的信息
+     * @return 创建的{@link MasterToast}
+     */
+    public static MasterToast make(@Nullable CharSequence msg) {
+        MasterToast toast = new MasterToast(App.getContext());
+        @SuppressLint("InflateParams") TextView content = (TextView) LayoutInflater.from(App.getContext()).inflate(R.layout.widget_toast, null);
+        toast.setView(content);
+        content.setText(msg);
+        return toast;
+    }
+
+    /**
      * 显示一个{@link MasterToast}
      *
      * @param msg    要显示的信息
      * @param length 时长
      */
-    private static void toast(@NonNull String msg, int length) {
+    private static void toast(@Nullable CharSequence msg, int length) {
         MasterToast toast = new MasterToast(App.getContext());
         @SuppressLint("InflateParams") TextView content = (TextView) LayoutInflater.from(App.getContext()).inflate(R.layout.widget_toast, null);
         toast.setView(content);
@@ -51,7 +69,7 @@ public class MasterToast extends android.widget.Toast {
      *
      * @param msg 要显示的消息
      */
-    public static void shortToast(@NonNull String msg) {
+    public static void shortToast(@Nullable CharSequence msg) {
         toast(msg, Toast.LENGTH_SHORT);
     }
 
@@ -69,7 +87,7 @@ public class MasterToast extends android.widget.Toast {
      *
      * @param msg 要显示的消息
      */
-    public static void longToast(@NonNull String msg) {
+    public static void longToast(@Nullable String msg) {
         toast(msg, Toast.LENGTH_LONG);
     }
 

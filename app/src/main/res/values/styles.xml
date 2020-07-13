@@ -1,7 +1,11 @@
+<!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Base" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorControlHighlight">@color/colorAccentWeak</item>
         <item name="android:buttonStyle">@style/Widget.AppCompat.Button.Normal</item>
@@ -15,21 +19,23 @@
         <item name="colorControlNormal">?colorAccent</item>
         <item name="colorControlActivated">?colorAccent</item>
         <item name="android:textColorHighlight">?colorControlHighlight</item>
-        <item name="android:ambientShadowAlpha">.039</item>
-        <item name="android:spotShadowAlpha">.089</item>
+        <item name="android:colorEdgeEffect">@color/colorAccent</item>
         <item name="android:navigationBarColor">?colorPrimary</item>
     </style>
 
-    <style name="AppTheme.Main">
+    <style name="Base.AppTheme" />
+
+
+    <style name="Base.AppTheme.Main">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">?colorPrimaryDark</item>
     </style>
 
-    <style name="AppTheme.Intro">
+    <style name="Base.AppTheme.Intro">
         <item name="android:windowFullscreen">true</item>
     </style>
 
-    <style name="AppTheme.Main.Translucent">
+    <style name="Base.AppTheme.Main.Translucent">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -37,13 +43,14 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.Main.Translucent.Filter">
+    <style name="Base.AppTheme.Main.Translucent.ImageViewer">
         <item name="android:windowBackground">@color/colorMask</item>
-        <item name="android:windowSharedElementEnterTransition">@transition/filter_shared_enter_2
+        <item name="android:windowSharedElementEnterTransition">
+            @transition/image_viewer_shared_enter
         </item>
     </style>
 
-    <style name="AppTheme.Main.Translucent.Detail">
+    <style name="Base.AppTheme.Main.Translucent.Detail">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowEnterTransition">@transition/detail_enter</item>
         <item name="android:windowSharedElementEnterTransition">@transition/detail_shared_enter

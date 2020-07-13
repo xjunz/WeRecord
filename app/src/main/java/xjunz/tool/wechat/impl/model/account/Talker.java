@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.impl.model.account;
 
 import androidx.annotation.NonNull;
@@ -81,7 +85,12 @@ public class Talker extends Contact {
                     Calendar now = Calendar.getInstance();
                     now.setTime(new Date(System.currentTimeMillis()));
                     int yearGap = now.get(Calendar.YEAR) - lastMsg.get(Calendar.YEAR);
-                    if (yearGap == 0) {
+                    //刚刚更新的消息，时间戳还没同步被微信同步到数据库
+                    if (yearGap < 0) {
+                        this.lastMsgTimestamp = System.currentTimeMillis();
+                        timestampDes = App.getStringOf(R.string.today);
+                        formatTimestamp = App.getStringOf(R.string.just_now);
+                    } else if (yearGap == 0) {
                         int dayGap = now.get(Calendar.DAY_OF_YEAR) - lastMsg.get(Calendar.DAY_OF_YEAR);
                         int weekGap = now.get(Calendar.WEEK_OF_YEAR) - lastMsg.get(Calendar.WEEK_OF_YEAR);
                         int monthGap = now.get(Calendar.MONTH) - lastMsg.get(Calendar.MONTH);

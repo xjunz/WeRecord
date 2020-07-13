@@ -1,13 +1,19 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.util;
 
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.net.Uri;
 
 import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
 
 import com.github.promeg.pinyinhelper.Pinyin;
 
@@ -162,4 +168,19 @@ public class UniUtils {
         return String.format(App.getContext().getResources().getConfiguration().locale, "%tF %tT", date, date);
     }
 
+    /**
+     * 从{@link Context}中获取其宿主{@link Activity}，即{@code unwrap}{@link ContextWrapper}
+     *
+     * @param context 被{@code wrap}的{@link Context}
+     * @return 宿主 {@link Activity}
+     */
+    @NonNull
+    public static Activity getHostActivity(@NonNull Context context) {
+        if (context instanceof Activity) {
+            return (Activity) context;
+        } else if (context instanceof ContextWrapper) {
+            return getHostActivity(((ContextWrapper) context).getBaseContext());
+        }
+        throw new IllegalArgumentException("The context passes in must be an Activity or a ContextWrapper! ");
+    }
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+
+<resources>
+
+    <style name="Base.AppTheme">
+        <item name="android:contextPopupMenuStyle">@style/FlatContextMenu</item>
+    </style>
+
+    <!--Context menu style with flattened elevation-->
+    <style name="FlatContextMenu" parent="android:Widget.Material.PopupMenu">
+        <item name="android:popupElevation">@dimen/z_popup</item>
+        <item name="android:overlapAnchor">true</item>
+    </style>
+</resources>

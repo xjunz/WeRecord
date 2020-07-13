@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+<layout>
+
+    <data>
+
+        <variable
+            name="activity"
+            type="xjunz.tool.wechat.ui.main.MessageActivity" />
+
+        <variable
+            name="account"
+            type="xjunz.tool.wechat.impl.model.account.Account" />
+
+        <variable
+            name="message"
+            type="xjunz.tool.wechat.impl.model.message.Message" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/iv_avatar"
+            android:layout_width="@dimen/fab_small"
+            android:layout_height="@dimen/fab_small"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@{message.groupTalkerId==null?@dimen/spacing_unit:@dimen/spacing_normal}"
+            android:avatar="@{account}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@tools:sample/avatars" />
+
+        <Space
+            android:id="@+id/space"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_avatar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/iv_avatar"
+            app:layout_constraintVertical_bias="0.35" />
+
+        <TextView
+            android:id="@+id/tv_message"
+            android:contextMenu="@{true}"
+            android:onClick="@{()->activity.onMessageClicked(message)}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_unit"
+            android:layout_marginTop="@dimen/dp_4"
+            android:layout_marginBottom="@dimen/spacing_unit"
+            android:background="@drawable/bg_bubble_left"
+            android:clickable="true"
+            android:elevation="@dimen/z_bubble"
+            android:focusable="true"
+            android:gravity="start"
+            android:maxWidth="@dimen/max_bubble_width"
+            android:paddingStart="@dimen/spacing_normal"
+            android:paddingTop="@dimen/spacing_unit"
+            android:paddingEnd="@dimen/spacing_normal"
+            android:paddingBottom="@dimen/spacing_unit"
+            android:text="@{message.content}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/iv_avatar"
+            app:layout_constraintTop_toBottomOf="@+id/space"
+            tools:text="@tools:sample/lorem" />
+
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@{message.groupTalkerId==null?null:account.name}"
+            app:layout_constraintBottom_toTopOf="@+id/space"
+            app:layout_constraintStart_toEndOf="@+id/iv_avatar"
+            tools:text="@tools:sample/lorem" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,4 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?><!--suppress AndroidUnknownAttribute -->
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+
+<!--suppress AndroidUnknownAttribute -->
 <!-- android:selection 属性无法被IDE识别，但是此属性已经在AdapterViewBindingAdapter中声明，且可正常使用-->
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">

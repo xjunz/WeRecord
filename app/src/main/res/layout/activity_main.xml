@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -43,12 +46,12 @@
                 android:layout_alignParentBottom="true"
                 android:background="?colorPrimary"
                 android:elevation="@dimen/z_bottom_bar"
-                android:hide="@{model.currentConfig.isInSearchMode}"
+                android:animateHide="@{model.currentConfig.isInSearchMode}"
                 android:minHeight="?actionBarSize"
                 android:onItemSelect="@{activity::onItemSelect}"
                 android:selection="@={activity.mCurrentPageIndex}"
-                app:captionEntries="@array/bottom_item_captions"
-                app:imageEntries="@array/bottom_item_images" />
+                app:captionEntries="@array/main_bottom_item_captions"
+                app:imageEntries="@array/main_bottom_item_images" />
 
             <View
                 android:id="@+id/mask"
@@ -64,6 +67,8 @@
 
         <LinearLayout
             android:id="@+id/ll_curtain"
+            android:clickable="true"
+            android:focusable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?colorPrimary"
@@ -83,7 +88,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="?actionBarSize">
-
 
                 <TextView
                     android:id="@+id/tv_top_bar_title"
@@ -105,6 +109,7 @@
                     android:layout_marginStart="@dimen/spacing_unit"
                     android:layout_marginEnd="@dimen/spacing_unit"
                     android:afterTextChanged="@{model::notifySearch}"
+                    android:animateVisible="@{model.currentConfig.isInSearchMode}"
                     android:autofillHints="name"
                     android:background="@null"
                     android:enabled="@{model.currentConfig.isInSearchMode}"
@@ -112,43 +117,31 @@
                     android:inputType="text"
                     android:text="@={model.currentConfig.searchKeyword}"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:animateVisible="@{model.currentConfig.isInSearchMode}"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/pb_load"
-                    app:layout_constraintStart_toEndOf="@+id/tv_top_bar_title"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ProgressBar
-                    android:id="@+id/pb_load"
-                    style="@android:style/Widget.Material.ProgressBar.Small.Title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/spacing_normal"
-                    android:minWidth="@dimen/dp_20"
-                    android:minHeight="@dimen/dp_20"
-                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/ib_search"
+                    app:layout_constraintStart_toEndOf="@+id/tv_top_bar_title"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageButton
                     android:id="@+id/ib_search"
+                    android:tooltip="@{@string/search}"
                     android:layout_width="@dimen/fab_small"
                     android:layout_height="@dimen/fab_small"
                     android:layout_marginEnd="@dimen/spacing_unit"
                     android:background="?android:selectableItemBackgroundBorderless"
                     android:contentDescription="@string/search"
-                    android:onClick="@{activity::enterSearchMode}"
+                    android:searchModeOnClick="@{activity::enterSearchMode}"
                     android:searchMode="@={model.currentConfig.isInSearchMode}"
                     android:src="@drawable/ic_search_24dp"
                     android:tint="?colorButtonNormal"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/ib_filter"
+                    app:layout_constraintEnd_toStartOf="@+id/ib_close"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageButton
-                    android:id="@+id/ib_filter"
+                    android:id="@+id/ib_close"
+                    android:tooltip="@{@string/filter}"
                     android:layout_width="@dimen/fab_small"
                     android:layout_height="@dimen/fab_small"
                     android:layout_marginEnd="@dimen/spacing_normal"

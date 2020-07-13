@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+
 <resources>
     <color name="colorAccent">#008577</color>
     <color name="colorAccentWeak">#30008577</color>
@@ -10,4 +13,5 @@
     <color name="colorAccentBlind">#80C0BB</color>
     <color name="colorTintDark">#626262</color>
     <color name="colorTintDarkDisabled">#BEBEBE</color>
+    <color name="colorBackgroundLightGrey">#04000000</color>
 </resources>

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.ui.main.fragment;
 
 import android.os.Bundle;
@@ -25,6 +29,9 @@ import xjunz.tool.wechat.data.viewmodel.SortBy;
 import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.repo.AccountRepository;
 import xjunz.tool.wechat.impl.repo.ContactRepository;
+
+import static xjunz.tool.wechat.util.UiUtils.getFirstVisibleItemIndexOfList;
+import static xjunz.tool.wechat.util.UiUtils.getLastVisibleItemIndexOfList;
 
 
 /**
@@ -144,16 +151,6 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
         super.updateList(newItemList);
         mScrollerAdapter.reverseIndicatorSerial(!getCurrentConfig().isAscending());
         mScrollerAdapter.notifyDataSetChanged();
-    }
-
-    private int getFirstVisibleItemIndexOfList(RecyclerView recyclerView, boolean completelyVisible) {
-        LinearLayoutManager llm = (LinearLayoutManager) Objects.requireNonNull(recyclerView.getLayoutManager());
-        return completelyVisible ? llm.findFirstCompletelyVisibleItemPosition() : llm.findFirstVisibleItemPosition();
-    }
-
-    private int getLastVisibleItemIndexOfList(RecyclerView recyclerView, boolean completelyVisible) {
-        LinearLayoutManager llm = (LinearLayoutManager) Objects.requireNonNull(recyclerView.getLayoutManager());
-        return completelyVisible ? llm.findLastCompletelyVisibleItemPosition() : llm.findLastVisibleItemPosition();
     }
 
 

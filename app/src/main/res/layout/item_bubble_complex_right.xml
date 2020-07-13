@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.text.TextUtils" />
+
+        <variable
+            name="activity"
+            type="xjunz.tool.wechat.ui.main.MessageActivity" />
+
+        <variable
+            name="account"
+            type="xjunz.tool.wechat.impl.model.account.Account" />
+
+        <variable
+            name="message"
+            type="xjunz.tool.wechat.impl.model.message.Message" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/iv_avatar"
+            android:layout_width="@dimen/fab_small"
+            android:layout_height="@dimen/fab_small"
+            android:layout_marginTop="@{message.groupTalkerId==null?@dimen/spacing_unit:@dimen/spacing_normal}"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:avatar="@{account}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@tools:sample/avatars" />
+
+        <Space
+            android:id="@+id/space"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_avatar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/iv_avatar"
+            app:layout_constraintVertical_bias="0.35" />
+
+
+        <LinearLayout
+            android:id="@+id/ll_container"
+            android:contextMenu="@{true}"
+            android:onClick="@{()->activity.onMessageClicked(message)}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/spacing_unit"
+            android:layout_marginBottom="@dimen/spacing_unit"
+            android:background="@drawable/bg_bubble_complex"
+            android:backgroundTint="?colorAccent"
+            android:clickable="true"
+            android:elevation="@dimen/z_bubble"
+            android:focusable="true"
+            android:minWidth="@dimen/min_complex_msg_width"
+            android:orientation="vertical"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/iv_avatar"
+            app:layout_constraintTop_toBottomOf="@+id/space">
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:layout_marginTop="@dimen/spacing_unit"
+                android:layout_marginEnd="@dimen/spacing_unit"
+                android:layout_marginBottom="@dimen/spacing_unit"
+                android:maxWidth="@dimen/max_bubble_width"
+                android:text="@{message.title}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="?android:textColorPrimary"
+                tools:text="@tools:sample/lorem" />
+
+            <TextView
+                android:id="@+id/tv_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:layout_marginEnd="@dimen/spacing_unit"
+                android:layout_marginBottom="@dimen/spacing_unit"
+                android:maxWidth="@dimen/max_bubble_width"
+                android:text="@{message.description}"
+                android:visible="@{!TextUtils.isEmpty(message.description)}"
+                tools:text="@tools:sample/lorem" />
+
+            <TextView
+                android:id="@+id/tv_caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_bubble_banner_bottom"
+                android:backgroundTint="@color/colorMask"
+                android:padding="@dimen/spacing_unit"
+                android:text="@{message.type==null?message.type.caption:@string/others}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                android:textColor="?android:textColorPrimary"
+                tools:text="@tools:sample/lorem" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

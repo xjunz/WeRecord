@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.data.databinding;
 
 import android.view.View;
@@ -91,6 +95,4 @@ public class FilterFragmentBindingAdapter {
             spinner.setAdapter(new ArrayAdapter<>(spinner.getContext(), android.R.layout.simple_spinner_dropdown_item, entries));
         }
     }
-
-
 }

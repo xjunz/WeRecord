@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+<layout>
+
+    <data>
+
+        <variable
+            name="activity"
+            type="xjunz.tool.wechat.ui.main.MessageActivity" />
+
+        <variable
+            name="message"
+            type="xjunz.tool.wechat.impl.model.message.Message" />
+    </data>
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/spacing_large"
+        android:paddingTop="@dimen/spacing_unit"
+        android:paddingEnd="@dimen/spacing_large"
+        android:paddingBottom="@dimen/spacing_unit">
+
+        <TextView
+            android:id="@+id/tv_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_bubble_system_message"
+            android:clickable="true"
+            android:contextMenu="@{true}"
+            android:focusable="true"
+            android:gravity="center|start"
+            android:onClick="@{()->activity.onMessageClicked(message)}"
+            android:paddingStart="@dimen/spacing_normal"
+            android:paddingTop="@dimen/spacing_unit"
+            android:paddingEnd="@dimen/spacing_normal"
+            android:paddingBottom="@dimen/spacing_unit"
+            android:text="@{message.content}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:textColor="?android:textColorPrimaryInverse"
+            tools:text="@tools:sample/lorem" />
+    </FrameLayout>
+</layout>

@@ -1,4 +1,9 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.impl.repo;
+
 
 import androidx.annotation.Keep;
 import androidx.lifecycle.Lifecycle;
@@ -37,5 +42,4 @@ public abstract class LifecyclePerceptiveRepository implements LifecycleObserver
     @Keep
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     public abstract void purge();
-
 }

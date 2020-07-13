@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?colorControlHighlight">
+    <item>
+        <shape android:shape="rectangle">
+            <corners
+                android:bottomLeftRadius="@dimen/r_bubble_obtuse"
+                android:bottomRightRadius="@dimen/r_bubble_obtuse"
+                android:topLeftRadius="@dimen/r_bubble_acute"
+                android:topRightRadius="@dimen/r_bubble_obtuse" />
+            <solid android:color="?colorPrimary" />
+        </shape>
+    </item>
+</ripple>

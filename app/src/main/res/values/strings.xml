@@ -1,3 +1,7 @@
+<!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+
 <resources>
     <!--application-->
     <string name="copyright">Copyright © 2020 <b>WeRecord</b> \n All rights reserved.</string>
@@ -53,22 +57,7 @@
     <string name="exit">退出</string>
     <string name="start">开始</string>
     <string name="statistics">统计</string>
-    <!--wechat message type-->
-    <string name="file">文件</string>
-    <string name="call">通话</string>
-    <string name="hongbao">红包</string>
-    <string name="wcx">小程序</string>
-    <string name="link">链接</string>
-    <string name="picture">图片</string>
-    <string name="transfer">转账</string>
-    <string name="music">音乐</string>
-    <string name="location">位置</string>
-    <string name="video">视频</string>
-    <string name="from_to">从%1s\n至%2s</string>
-    <string name="plain_text">文字</string>
-    <string name="voice">语音</string>
-    <string name="system_msg">系统（撤回，群聊相关通知，红包领取等）</string>
-    <string name="others">其他</string>
+    <string name="close">关闭</string>
     <!--alert message-->
     <string name="init_failed">初始化失败</string>
     <string name="msg_init_failed">很抱歉，应用初始化失败! 我们需要您重新进入设置向导页面，进行<b>检查或反馈</b>，点击确定以继续。</string>
@@ -124,6 +113,7 @@
     <string name="confirm_filter">确认</string>
     <string name="reset_completed">已重置</string>
     <string name="msg_filter_config_unchanged">筛选配置没有改变</string>
+    <!--detail-->
     <string name="nickname">昵称</string>
     <string name="remark">备注</string>
     <string name="last_msg_time">最后聊天时间</string>
@@ -132,4 +122,38 @@
     <string name="wx_name">微信号</string>
     <string name="check_msg">查看消息</string>
     <string name="export_msg">导出消息</string>
+    <string name="msg_no_more_show_this">以后不再显示此对话框</string>
+    <!--message-->
+    <string name="file">文件</string>
+    <string name="call">通话</string>
+    <string name="hongbao">红包</string>
+    <string name="wcx">小程序的分享</string>
+    <string name="link">链接</string>
+    <string name="picture">图片</string>
+    <string name="transfer">转账</string>
+    <string name="music">音乐</string>
+    <string name="location">位置</string>
+    <string name="video">视频</string>
+    <string name="from_to">从%1s\n至%2s</string>
+    <string name="plain_text">文字</string>
+    <string name="voice">语音</string>
+    <string name="system_msg">系统（撤回，群聊相关通知，红包领取等）</string>
+    <string name="others">其他类型的消息</string>
+    <string name="emoji">表情图</string>
+    <string name="shared_url">分享的链接</string>
+    <string name="repost">转发的消息</string>
+    <string name="push">推送消息</string>
+    <string name="just_now">刚刚</string>
+    <string name="recommend_friend">推荐好友</string>
+    <string name="hint_search_message">搜索聊天记录</string>
+    <string name="check_only">仅查看</string>
+    <string name="edit_mode_entered">已进入编辑模式</string>
+    <string name="edit_mode_exited">已退出编辑模式</string>
+    <string name="add_before">在前面添加</string>
+    <string name="add_after">在后面添加</string>
+    <string name="delete">删除</string>
+    <string name="edit">编辑</string>
+    <string name="check">查看</string>
+    <string name="has_loaded_all_msg">已经加载完全部消息</string>
+    <string name="has_copied_to_clipboard">已复制到剪贴板</string>
 </resources>

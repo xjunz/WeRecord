@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24.00dp"
+    android:height="24.00dp"
+    android:viewportWidth="24.00"
+    android:viewportHeight="24.00">
+    <path
+        android:fillColor="?colorControlNormal"
+        android:strokeWidth="0.2"
+        android:strokeLineJoin="round"
+        android:pathData="M 3,22L 3,8L 7,8L 7,22L 3,22 Z M 9.99999,22L 9.99999,2.00001L 14,2.00001L 14,22L 9.99999,22 Z M 17,22L 17,14L 21,14L 21,22L 17,22 Z " />
+</vector>
+

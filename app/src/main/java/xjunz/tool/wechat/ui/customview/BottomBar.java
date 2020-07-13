@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat.ui.customview;
 
 import android.app.Activity;
@@ -12,6 +16,7 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.TooltipCompat;
 
 import xjunz.tool.wechat.R;
 
@@ -48,11 +53,13 @@ public class BottomBar extends LinearLayout {
             ViewGroup child = (ViewGroup) ((Activity) getContext()).getLayoutInflater().inflate(R.layout.item_bottom_bar, this, false);
             mItemViewList[i] = child;
             child.setTag(i);
+            child.setOnClickListener(view -> setSelection((int) view.getTag()));
+            TooltipCompat.setTooltipText(child, mCaptionEntries[(int) child.getTag()]);
             ImageView image = (ImageView) child.getChildAt(0);
             image.setImageResource(imageEntriesRes[i]);
             image.setContentDescription(mCaptionEntries[i]);
             addView(child);
-            mItemViewList[i].setOnClickListener(view -> setSelection((int) view.getTag()));
+
         }
     }
 

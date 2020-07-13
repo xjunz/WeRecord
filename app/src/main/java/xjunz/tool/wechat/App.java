@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020 xjunz. 保留所有权利
+ */
+
 package xjunz.tool.wechat;
 
 import android.app.Application;
@@ -118,6 +122,14 @@ public class App extends Application {
                 return true;
             }
             return false;
+        }
+
+        public boolean noMore(String key) {
+            return gSharedPrefs.getBoolean(key, false);
+        }
+
+        public void setNoMore(String key, boolean isNoMore) {
+            gSharedPrefs.edit().putBoolean(key, true).apply();
         }
     }
 
