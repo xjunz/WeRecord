@@ -20,6 +20,7 @@ import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.Environment;
 import xjunz.tool.wechat.impl.repo.ContactRepository;
+import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 import xjunz.tool.wechat.impl.repo.TalkerRepository;
 import xjunz.tool.wechat.ui.BaseActivity;
 import xjunz.tool.wechat.ui.intro.IntroActivity;
@@ -60,10 +61,10 @@ public class SplashActivity extends BaseActivity implements CompletableObserver 
     @Override
     public void onComplete() {
         mQueryDisposable = Completable.create(emitter -> {
-            //查询所有聊天记录
-            TalkerRepository.getInstance().queryAll();
+            //查询所有聊天对象
+            RepositoryFactory.singleton(TalkerRepository.class).queryAll();
             //查询所有联系人信息
-            ContactRepository.getInstance().queryAll();
+            RepositoryFactory.singleton(ContactRepository.class).queryAll();
             emitter.onComplete();
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action() {
             @Override

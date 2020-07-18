@@ -21,7 +21,7 @@ import androidx.appcompat.widget.TooltipCompat;
 import xjunz.tool.wechat.R;
 
 /**
- * 一个非常简单的BottomBar，{@link BottomBar#mCurrentCaption}和{@link BottomBar#mSelection}两个字段支持数据绑定
+ * 通过{@link LinearLayout}实现一个非常简单的BottomBar
  */
 public class BottomBar extends LinearLayout {
     private OnItemSelectListener mListener;

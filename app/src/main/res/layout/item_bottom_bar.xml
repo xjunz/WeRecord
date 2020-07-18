@@ -5,7 +5,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:layout_weight="1"
     android:background="?attr/selectableItemBackgroundBorderless"
     android:clickable="true"
@@ -16,9 +16,8 @@
     <ImageView
         android:layout_gravity="center"
         android:id="@+id/iv_bottom_item"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+        android:layout_width="@dimen/r_fab_normal"
+        android:layout_height="@dimen/r_fab_normal"
         android:tint="@color/bottom_bar_image_tint"
         tools:ignore="ContentDescription" />
-
 </FrameLayout>

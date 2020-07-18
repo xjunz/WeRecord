@@ -18,10 +18,8 @@ import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.model.account.Talker;
 
 public class TalkerRepository extends AccountRepository<Talker> {
-    private static TalkerRepository sInstance;
 
-    public static TalkerRepository getInstance() {
-        return sInstance = sInstance == null ? new TalkerRepository() : sInstance;
+    TalkerRepository() {
     }
 
     /**
@@ -68,10 +66,5 @@ public class TalkerRepository extends AccountRepository<Talker> {
         }
     }
 
-
-    @Override
-    public void purge() {
-        sInstance = null;
-    }
 
 }

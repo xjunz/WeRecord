@@ -21,6 +21,7 @@ import xjunz.tool.wechat.data.viewmodel.SortBy;
 import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.model.account.Talker;
 import xjunz.tool.wechat.impl.repo.AccountRepository;
+import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 import xjunz.tool.wechat.impl.repo.TalkerRepository;
 
 
@@ -74,7 +75,7 @@ public class ChatFragment extends ListPageFragment<Talker> {
 
     @Override
     public AccountRepository<Talker> getRepo() {
-        return TalkerRepository.getInstance();
+        return RepositoryFactory.singleton(TalkerRepository.class);
     }
 
 

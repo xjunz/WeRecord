@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Serializable;
 
 import xjunz.tool.wechat.impl.repo.AvatarRepository;
+import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 
 
 /**
@@ -92,12 +93,12 @@ public abstract class Account implements Serializable {
     @Nullable
     public Bitmap getAvatar() {
         if (!mHasTryDecodeAvatar) {
-            Bitmap bitmap = AvatarRepository.getInstance().getAvatar(id);
+            Bitmap bitmap = RepositoryFactory.singleton(AvatarRepository.class).getAvatar(id);
             mHasTryDecodeAvatar = true;
             mHasLocalAvatar = bitmap != null;
             return bitmap;
         } else {
-            return mHasLocalAvatar ? AvatarRepository.getInstance().getAvatar(id) : null;
+            return mHasLocalAvatar ? RepositoryFactory.singleton(AvatarRepository.class).getAvatar(id) : null;
         }
     }
 

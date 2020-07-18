@@ -13,15 +13,8 @@ import java.util.List;
 import xjunz.tool.wechat.impl.model.account.Group;
 
 public class GroupRepository extends AccountRepository<Group> {
-    private static GroupRepository sRepository;
 
-    public static GroupRepository getInstance() {
-        return sRepository = (sRepository == null ? new GroupRepository() : sRepository);
-    }
-
-    @Override
-    public void purge() {
-        sRepository = null;
+    GroupRepository() {
     }
 
     @Override

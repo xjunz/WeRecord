@@ -29,6 +29,7 @@ import xjunz.tool.wechat.data.viewmodel.SortBy;
 import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.repo.AccountRepository;
 import xjunz.tool.wechat.impl.repo.ContactRepository;
+import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 
 import static xjunz.tool.wechat.util.UiUtils.getFirstVisibleItemIndexOfList;
 import static xjunz.tool.wechat.util.UiUtils.getLastVisibleItemIndexOfList;
@@ -127,7 +128,7 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
 
     @Override
     public AccountRepository<Contact> getRepo() {
-        return ContactRepository.getInstance();
+        return RepositoryFactory.singleton(ContactRepository.class);
     }
 
 

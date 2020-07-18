@@ -21,6 +21,7 @@ import io.reactivex.Completable;
 import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.Environment;
+import xjunz.tool.wechat.impl.model.account.User;
 import xjunz.tool.wechat.util.UiUtils;
 
 public abstract class BaseActivity extends AppCompatActivity {
@@ -66,5 +67,9 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     public Environment getEnvironment() {
         return Environment.getInstance();
+    }
+
+    public User getCurrentUser() {
+        return getEnvironment().getCurrentUser();
     }
 }

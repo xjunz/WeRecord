@@ -18,12 +18,11 @@ import java.io.File;
 import xjunz.tool.wechat.util.ShellUtils;
 
 public class AvatarRepository extends LifecyclePerceptiveRepository {
-    private static AvatarRepository sInstance;
     private static final int DEFAULT_CACHE_SIZE = 20 * 1024 * 1024;
     //Create a LruCache with 20MB of opacity
     private final LruCache<String, Bitmap> mAvatarCache;
 
-    private AvatarRepository() {
+    AvatarRepository() {
         this.mAvatarCache = new LruCache<String, Bitmap>(DEFAULT_CACHE_SIZE) {
             @Override
             protected int sizeOf(String key, Bitmap value) {
@@ -31,6 +30,7 @@ public class AvatarRepository extends LifecyclePerceptiveRepository {
             }
         };
     }
+
 
     /**
      * 从本地文件中解码指定微信ID的头像{@link Bitmap}
@@ -104,13 +104,9 @@ public class AvatarRepository extends LifecyclePerceptiveRepository {
     }
 
 
-    public static AvatarRepository getInstance() {
-        return sInstance = (sInstance == null ? new AvatarRepository() : sInstance);
-    }
-
     @Override
     public void purge() {
-        sInstance = null;
+
     }
 
 }
