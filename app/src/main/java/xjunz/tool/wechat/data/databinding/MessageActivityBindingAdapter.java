@@ -97,4 +97,33 @@ public class MessageActivityBindingAdapter {
             });
         }
     }
+
+    @BindingAdapter(value = "android:onDismiss")
+    public static void setOnDismissCallback(ElasticDragDismissFrameLayout layout, Runnable onDismiss) {
+        layout.addListener(new ElasticDragDismissFrameLayout.ElasticDragDismissCallback() {
+            @Override
+            public void onDragDismissed() {
+                super.onDragDismissed();
+                if (onDismiss != null) {
+                    onDismiss.run();
+                }
+            }
+        });
+    }
+
+    @BindingAdapter(value = "android:keywordHighlight")
+    public static void setKeywordHighlight(TextView textView, SearchFragment.MessageItem item) {
+        if (item.spanStartIndex >= 0 && item.spanLength > 0) {
+            //设置高亮
+            ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(UiUtils.getColorAccent(textView.getContext()));
+            BackgroundColorSpan backgroundColorSpan = new BackgroundColorSpan(UiUtils.getColorControlHighlight(textView.getContext()));
+            SpannableString span = new SpannableString(item.message.getParsedContent());
+            span.setSpan(foregroundColorSpan, item.spanStartIndex, item.spanStartIndex + item.spanLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            span.setSpan(backgroundColorSpan, item.spanStartIndex, item.spanStartIndex + item.spanLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+            textView.setText(span);
+        } else {
+            //清除样式
+            textView.setText(item.message.getParsedContent());
+        }
+    }
 }

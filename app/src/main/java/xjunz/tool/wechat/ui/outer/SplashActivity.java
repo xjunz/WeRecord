@@ -14,7 +14,6 @@ import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Action;
 import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
@@ -66,16 +65,12 @@ public class SplashActivity extends BaseActivity implements CompletableObserver 
             //查询所有联系人信息
             RepositoryFactory.singleton(ContactRepository.class).queryAll();
             emitter.onComplete();
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action() {
-            @Override
-            public void run() {
-                Intent i = new Intent(SplashActivity.this, MainActivity.class);
-                //清除当前任务
-                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(i);
-            }
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(() -> {
+            Intent i = new Intent(SplashActivity.this, MainActivity.class);
+            //清除当前任务
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
         }, Throwable::printStackTrace);
-
     }
 
     @Override
@@ -92,8 +87,13 @@ public class SplashActivity extends BaseActivity implements CompletableObserver 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mQueryDisposable != null) {
+        if (mQueryDisposable != null && !mQueryDisposable.isDisposed()) {
             mQueryDisposable.dispose();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        //block
     }
 }

@@ -91,16 +91,17 @@ public class Message {
 
     public Message(@Nullable String raw, @NonNull String talkerId) {
         this.talkerId = talkerId;
+        this.rawContent = raw;
         if (raw != null && talkerId.endsWith("@chatroom")) {
             if (raw.startsWith("wxid_")) {
                 int spilt = raw.indexOf(":");
                 this.groupTalkerId = raw.substring(0, spilt);
-                this.rawContent = raw.substring(spilt + 2);
+                this.content = raw.substring(spilt + 2);
             } else {
-                this.rawContent = raw;
+                this.content = raw;
             }
         } else {
-            this.rawContent = raw;
+            this.content = raw;
         }
     }
 
@@ -112,6 +113,17 @@ public class Message {
         this.msgId = msgId;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getImgPath() {
+        return imgPath;
+    }
 
     @NonNull
     public String requireSenderId() {
@@ -158,31 +170,26 @@ public class Message {
     }
 
 
-    public String getImagePath() {
+    public String getLocalImagePath() {
         User user = Environment.getInstance().getCurrentUser();
-        if (imgPath == null) {
-            if (!TextUtils.isEmpty(imgName)) {
-                if (imgName.startsWith("T")) {
-                    int index = imgName.lastIndexOf("_");
-                    String md5 = imgName.substring(index + 1);
-                    imgPath = user.imageCachePath + File.separator
+        if (localImagePath == null) {
+            if (!TextUtils.isEmpty(imgPath)) {
+                if (imgPath.startsWith("T")) {
+                    int index = imgPath.lastIndexOf("_");
+                    String md5 = imgPath.substring(index + 1);
+                    localImagePath = user.imageCachePath + File.separator
                             + md5.substring(0, 2) + File.separator
                             + md5.substring(2, 4) + File.separator
                             + "th_" + md5;
                 }
             }
         }
-        return imgPath;
+        return localImagePath;
     }
 
-
-    /**
-     * @return 未经过加工的消息内容
-     */
     public String getRawContent() {
         return rawContent;
     }
-
 
     public String getGroupTalkerId() {
         return groupTalkerId;
@@ -201,24 +208,31 @@ public class Message {
         return talkerId;
     }
 
-
-    public void setImgName(String imgName) {
-        this.imgName = imgName;
+    public void setImgPath(String imgPath) {
+        this.imgPath = imgPath;
     }
 
     public void setSend(boolean send) {
         isSend = send;
     }
 
-
     public void setCreateTimeStamp(long createTimeStamp) {
         this.createTimeStamp = createTimeStamp;
     }
 
-    public void setTalkerId(String talkerId) {
-        this.talkerId = talkerId;
+
+    public String getContent() {
+        return content;
     }
 
+    public void setContent(String content) {
+        this.content = content;
+        if (groupTalkerId != null) {
+            this.rawContent = groupTalkerId + ":" + content;
+        } else {
+            this.rawContent = content;
+        }
+    }
 
     private String xmlMatch(final String key) {
         SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -378,5 +392,27 @@ public class Message {
             description = match("des");
         }
         return description;
+    }
+
+
+    @NonNull
+    @Override
+    public Message clone() throws CloneNotSupportedException {
+        try {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            ObjectOutputStream objout = new ObjectOutputStream(bout);
+            objout.writeObject(this);
+            ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
+            ObjectInputStream objin = new ObjectInputStream(bin);
+            Message message = (Message) objin.readObject();
+            bout.close();
+            objin.close();
+            bin.close();
+            objin.close();
+            return message;
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return (Message) super.clone();
     }
 }

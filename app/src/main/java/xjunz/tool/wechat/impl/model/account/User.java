@@ -18,7 +18,7 @@ import xjunz.tool.wechat.impl.Environment;
 
 public class User extends Account {
     public final String dirPath;
-    private final String originalDatabaseFilePath;
+    public final String originalDatabaseFilePath;
     public String backupDatabaseFilePath;
     public transient String databasePragmaKey;
     public final String imageCachePath;

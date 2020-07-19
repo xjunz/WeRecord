@@ -48,7 +48,11 @@ public class AvatarRepository extends LifecyclePerceptiveRepository {
                     + idMd5.substring(0, 2) + File.separator
                     + idMd5.substring(2, 4) + File.separator
                     + "user_" + idMd5 + ".png";
-            ShellUtils.cpNoError(originalAvatarPath, backupAvatarPath);
+            try {
+                ShellUtils.cp(originalAvatarPath, backupAvatarPath, "decodeAvatar");
+            } catch (ShellUtils.ShellException e) {
+                e.printStackTrace();
+            }
         }
         return BitmapFactory.decodeFile(backupAvatarPath);
     }

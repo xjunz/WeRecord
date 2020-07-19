@@ -22,6 +22,7 @@ import org.apaches.commons.codec.DecoderException;
 import org.apaches.commons.codec.binary.Hex;
 import org.apaches.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -221,9 +222,16 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
         Shell.SU.run("chmod " + "660 " + user.originalDatabaseFilePath);
     }*/
 
-    private void backupDatabaseOf(User user) throws ShellUtils.ShellException, IOException {
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void backupDatabaseOf(@NotNull User user) throws ShellUtils.ShellException {
         user.backupDatabaseFilePath = mDatabaseBackupDirPath + File.separator + DigestUtils.md5Hex(user.uin);
-        ShellUtils.cp(user.getMsgDatabasePath(), user.backupDatabaseFilePath, "Failed to backup database files");
+        File backup = new File(user.backupDatabaseFilePath);
+        try {
+            backup.createNewFile();
+            ShellUtils.cp(user.originalDatabaseFilePath, user.backupDatabaseFilePath, "backupDatabaseOf");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -252,7 +260,7 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
         String temp = mAppFilesDir + separator + "temp.cfg";
         try {
             ShellUtils.cp(mWechatImeiPath, temp, "Failed to backup CompatibleInfo.cfg");
-        } catch (ShellUtils.ShellException | IOException e) {
+        } catch (ShellUtils.ShellException e) {
             e.printStackTrace();
         }
         File tempFile = new File(temp);
@@ -277,6 +285,10 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
     private void tryOpenDatabaseOf(@NonNull User user, @NonNull String imei) {
         user.databasePragmaKey = DigestUtils.md5Hex(imei + user.uin).substring(0, 7).toLowerCase();
         mDatabaseOfCurUser = SQLiteDatabase.openDatabase(user.backupDatabaseFilePath, user.databasePragmaKey, null, SQLiteDatabase.OPEN_READONLY, this);
+    }
+
+    public DatabaseModifier modifyDatabase() {
+        return DatabaseModifier.getInstance(mDatabaseOfCurUser, mCurrentUser);
     }
 
     public String serialize() {

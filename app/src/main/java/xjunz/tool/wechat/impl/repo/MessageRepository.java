@@ -69,7 +69,7 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
      * @return 查询到的实际消息数
      */
     public int queryMessageByTalkerLimit(@NonNull String id, int limitCount, @NonNull List<Message> formerMsgList) {
-        Cursor cursor = getDatabase().rawQuery("select type,isSend,createTime,content,imgPath,msgId from message where talker=" + "'"
+        Cursor cursor = getDatabase().rawQuery("select type,isSend,createTime,content,imgPath,msgId,status from message where talker=" + "'"
                 + id + "'" + " order by createTime desc" + " limit " + limitCount + " offset " + formerMsgList.size(), null);
         int i = 0;
         while (cursor.moveToNext()) {
@@ -78,8 +78,9 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
             message.setRawType(cursor.getInt(0));
             message.setSend(cursor.getInt(1) == 1);
             message.setCreateTimeStamp(cursor.getLong(2));
-            message.setImgName(cursor.getString(4));
+            message.setImgPath(cursor.getString(4));
             message.setMsgId(cursor.getInt(5));
+            message.setStatus(cursor.getInt(6));
             formerMsgList.add(message);
         }
         cursor.close();
@@ -100,8 +101,9 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
             Message message = new Message(cursor.getString(3), id);
             message.setSend(cursor.getInt(1) == 1);
             message.setCreateTimeStamp(cursor.getLong(2));
-            message.setImgName(cursor.getString(4));
+            message.setImgPath(cursor.getString(4));
             message.setMsgId(cursor.getInt(5));
+            message.setStatus(cursor.getInt(6));
             messages.add(message);
         }
         cursor.close();
