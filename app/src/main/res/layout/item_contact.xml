@@ -7,7 +7,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_selectable_item"
+    android:background="@drawable/bg_selectable_item_white"
     android:clickable="true"
     android:elevation="@dimen/z_item"
     android:focusable="true">

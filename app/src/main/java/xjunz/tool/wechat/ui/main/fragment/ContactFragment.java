@@ -27,7 +27,6 @@ import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.data.viewmodel.PageConfig;
 import xjunz.tool.wechat.data.viewmodel.SortBy;
 import xjunz.tool.wechat.impl.model.account.Contact;
-import xjunz.tool.wechat.impl.repo.AccountRepository;
 import xjunz.tool.wechat.impl.repo.ContactRepository;
 import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 
@@ -87,6 +86,16 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
     }
 
     @Override
+    public List<Contact> getAllOfType(@NonNull Contact.Type type) {
+        return RepositoryFactory.get(ContactRepository.class).getAllOfType(type);
+    }
+
+    @Override
+    public List<Contact> getAll() {
+        return RepositoryFactory.get(ContactRepository.class).getAll();
+    }
+
+    @Override
     public int getLayoutResource() {
         return R.layout.fragment_contact;
     }
@@ -126,11 +135,6 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
         config.descriptionSelectionMap.clear();
     }
 
-    @Override
-    public AccountRepository<Contact> getRepo() {
-        return RepositoryFactory.singleton(ContactRepository.class);
-    }
-
 
     @Override
     protected void collectSeparatorDescListMap() {
@@ -148,7 +152,7 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
 
 
     @Override
-    protected void updateList(List<Item> newItemList) {
+    protected void updateList(@NotNull List<Item> newItemList) {
         super.updateList(newItemList);
         mScrollerAdapter.reverseIndicatorSerial(!getCurrentConfig().isAscending());
         mScrollerAdapter.notifyDataSetChanged();

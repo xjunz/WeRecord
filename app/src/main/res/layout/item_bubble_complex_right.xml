@@ -10,8 +10,12 @@
         <import type="android.text.TextUtils" />
 
         <variable
-            name="activity"
-            type="xjunz.tool.wechat.ui.main.MessageActivity" />
+            name="position"
+            type="int" />
+
+        <variable
+            name="model"
+            type="xjunz.tool.wechat.data.viewmodel.MessageViewModel" />
 
         <variable
             name="account"
@@ -19,7 +23,7 @@
 
         <variable
             name="message"
-            type="xjunz.tool.wechat.impl.model.message.Message" />
+            type="xjunz.tool.wechat.impl.model.message.ComplexMessage" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -30,7 +34,7 @@
             android:id="@+id/iv_avatar"
             android:layout_width="@dimen/fab_small"
             android:layout_height="@dimen/fab_small"
-            android:layout_marginTop="@{message.groupTalkerId==null?@dimen/spacing_unit:@dimen/spacing_normal}"
+            android:layout_marginTop="@{message.inGroupChat?@dimen/spacing_normal:@dimen/spacing_unit}"
             android:layout_marginEnd="@dimen/spacing_normal"
             android:avatar="@{account}"
             app:layout_constraintEnd_toEndOf="parent"
@@ -49,64 +53,76 @@
             app:layout_constraintVertical_bias="0.35" />
 
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/ll_container"
-            android:contextMenu="@{true}"
-            android:onClick="@{()->activity.onMessageClicked(message)}"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/max_bubble_width"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/spacing_unit"
             android:layout_marginBottom="@dimen/spacing_unit"
             android:background="@drawable/bg_bubble_complex"
-            android:backgroundTint="?colorAccent"
+            android:backgroundTint="?colorPrimary"
             android:clickable="true"
+            android:contextMenu="@{true}"
             android:elevation="@dimen/z_bubble"
             android:focusable="true"
-            android:minWidth="@dimen/min_complex_msg_width"
-            android:orientation="vertical"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark"
+            android:onClick="@{()->model.setSelectedMessagePosition(position)}"
+            android:padding="@dimen/dp_12"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/iv_avatar"
             app:layout_constraintTop_toBottomOf="@+id/space">
 
             <TextView
+                android:id="@+id/tv_source"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:ellipsize="end"
+                android:gravity="end|center"
+                android:text="@{message.source}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_caption"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/tv_caption"
+                app:layout_constraintTop_toTopOf="@+id/tv_caption"
+                tools:text="@tools:sample/lorem/random" />
+
+            <TextView
+                android:id="@+id/tv_caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.05"
+                android:text="@{message.subtype.caption}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textColor="?colorAccent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="@tools:sample/lorem" />
+
+            <TextView
                 android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_unit"
-                android:layout_marginTop="@dimen/spacing_unit"
-                android:layout_marginEnd="@dimen/spacing_unit"
-                android:layout_marginBottom="@dimen/spacing_unit"
-                android:maxWidth="@dimen/max_bubble_width"
-                android:text="@{message.title}"
+                android:layout_marginTop="8dp"
+                android:text="@{message.title??@string/parse_failed}"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="?android:textColorPrimary"
+                app:layout_constraintStart_toStartOf="@+id/tv_caption"
+                app:layout_constraintTop_toBottomOf="@+id/tv_caption"
                 tools:text="@tools:sample/lorem" />
 
             <TextView
                 android:id="@+id/tv_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/spacing_unit"
-                android:layout_marginEnd="@dimen/spacing_unit"
-                android:layout_marginBottom="@dimen/spacing_unit"
-                android:maxWidth="@dimen/max_bubble_width"
+                android:layout_marginTop="8dp"
                 android:text="@{message.description}"
                 android:visible="@{!TextUtils.isEmpty(message.description)}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tv_title"
+                app:layout_constraintTop_toBottomOf="@+id/tv_title"
                 tools:text="@tools:sample/lorem" />
 
-            <TextView
-                android:id="@+id/tv_caption"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_bubble_banner_bottom"
-                android:backgroundTint="@color/colorMask"
-                android:padding="@dimen/spacing_unit"
-                android:text="@{message.type==null?message.type.caption:@string/others}"
-                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                android:textColor="?android:textColorPrimary"
-                tools:text="@tools:sample/lorem" />
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

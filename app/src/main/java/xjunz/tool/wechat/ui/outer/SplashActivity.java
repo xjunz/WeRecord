@@ -61,9 +61,9 @@ public class SplashActivity extends BaseActivity implements CompletableObserver 
     public void onComplete() {
         mQueryDisposable = Completable.create(emitter -> {
             //查询所有聊天对象
-            RepositoryFactory.singleton(TalkerRepository.class).queryAll();
+            RepositoryFactory.get(TalkerRepository.class).queryAll();
             //查询所有联系人信息
-            RepositoryFactory.singleton(ContactRepository.class).queryAll();
+            RepositoryFactory.get(ContactRepository.class).queryAll();
             emitter.onComplete();
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(() -> {
             Intent i = new Intent(SplashActivity.this, MainActivity.class);

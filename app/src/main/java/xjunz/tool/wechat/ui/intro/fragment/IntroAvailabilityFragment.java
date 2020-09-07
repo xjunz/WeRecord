@@ -5,7 +5,6 @@
 package xjunz.tool.wechat.ui.intro.fragment;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,9 +16,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
+import org.jetbrains.annotations.NotNull;
+
 import io.reactivex.CompletableObserver;
 import io.reactivex.disposables.Disposable;
-import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.BuildConfig;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.Environment;
@@ -61,23 +61,20 @@ public class IntroAvailabilityFragment extends IntroFragment implements View.OnC
         public void onComplete() {
             mProgressDialog.dismiss();
             mBtnCheck.setText(R.string.check_succeeded);
-            App.getSharedPrefsManager().putIMEI(Environment.getInstance().getIMEI());
+            // App.getSharedPrefsManager().putIMEI(Environment.getInstance().getIMEI());
             notifyStepDone();
         }
 
         @Override
-        public void onError(final Throwable e) {
+        public void onError(@NotNull final Throwable e) {
             mBtnCheck.setEnabled(true);
             mProgressDialog.dismiss();
             final String log = e.getClass().getName() + ": " + e.getMessage() + "\n" + "Serial: " + Environment.getInstance().serialize();
             AlertDialog.Builder builder = UiUtils.createDialog(requireActivity(), R.string.error_occurred, log)
-                    .setPositiveButton(R.string.feedback, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (UniUtils.feedbackTempQChat(requireActivity())) {
-                                UniUtils.copyPlainText("feedback message", log);
-                                UiUtils.toast(R.string.qchat_feedback_tip);
-                            }
+                    .setPositiveButton(R.string.feedback, (dialog, which) -> {
+                        if (UniUtils.feedbackTempQChat(requireActivity())) {
+                            UniUtils.copyPlainText("feedback message", log);
+                            UiUtils.toast(R.string.qchat_feedback_tip);
                         }
                     });
             if (BuildConfig.DEBUG) {
@@ -92,7 +89,7 @@ public class IntroAvailabilityFragment extends IntroFragment implements View.OnC
     };
 
     @Override
-    public void onClick(View v) {
+    public void onClick(@NotNull View v) {
         v.setEnabled(false);
         Environment.getInstance().init(mObserver);
     }

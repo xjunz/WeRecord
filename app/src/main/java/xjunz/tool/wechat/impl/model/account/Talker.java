@@ -27,8 +27,6 @@ import static xjunz.tool.wechat.util.UniUtils.arabicDigit2HanDigit;
  */
 
 public class Talker extends Contact {
-    public static final SortBy DEFAULT_SORT_BY = SortBy.TIMESTAMP;
-    public static final boolean DEFAULT_IS_ASCENDING = true;
     /**
      * 聊天消息数量
      */
@@ -49,6 +47,9 @@ public class Talker extends Contact {
      */
     public String formatTimestamp;
 
+    public Talker(String id) {
+        super(id);
+    }
 
     /**
      * 获取某特定排序规则下的描述，描述的用途在于为数据分类
@@ -89,7 +90,7 @@ public class Talker extends Contact {
                     if (yearGap < 0) {
                         this.lastMsgTimestamp = System.currentTimeMillis();
                         timestampDes = App.getStringOf(R.string.today);
-                        formatTimestamp = App.getStringOf(R.string.just_now);
+                        formatTimestamp = App.getStringOf(R.string.not_long_ago);
                     } else if (yearGap == 0) {
                         int dayGap = now.get(Calendar.DAY_OF_YEAR) - lastMsg.get(Calendar.DAY_OF_YEAR);
                         int weekGap = now.get(Calendar.WEEK_OF_YEAR) - lastMsg.get(Calendar.WEEK_OF_YEAR);

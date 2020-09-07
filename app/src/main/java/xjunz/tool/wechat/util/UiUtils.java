@@ -6,19 +6,24 @@ package xjunz.tool.wechat.util;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.BounceInterpolator;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -28,6 +33,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,7 +44,6 @@ import java.util.Objects;
 
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
-import xjunz.tool.wechat.generated.callback.Runnable;
 import xjunz.tool.wechat.ui.customview.MasterToast;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
@@ -114,7 +119,6 @@ public class UiUtils {
             }
             return;
         }
-
         final View parent = (View) target.getParent();
         Bitmap bitmap = Bitmap.createBitmap(target.getWidth(), target.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
@@ -143,13 +147,10 @@ public class UiUtils {
                 parent.getOverlay().add(drawingCache);
             }
         });
-        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float alpha = (float) animation.getAnimatedValue();
-                target.setAlpha(alpha);
-                drawingCache.setAlpha((int) ((1f - alpha) * 255));
-            }
+        valueAnimator.addUpdateListener(animation -> {
+            float alpha = (float) animation.getAnimatedValue();
+            target.setAlpha(alpha);
+            drawingCache.setAlpha((int) ((1f - alpha) * 255));
         });
         valueAnimator.setInterpolator(AnimUtils.getFastOutSlowInInterpolator());
         valueAnimator.start();
@@ -199,9 +200,12 @@ public class UiUtils {
         valueAnimator.start();
     }
 
-
-    public static void translateY(@NotNull View target, int transY) {
+    public static void animateTranslateY(@NotNull View target, int transY) {
         target.animate().translationY(transY).setInterpolator(AnimUtils.getFastOutSlowInInterpolator()).start();
+    }
+
+    public static void animateTranslateX(@NotNull View target, int transX) {
+        target.animate().translationX(transX).setInterpolator(AnimUtils.getFastOutSlowInInterpolator()).start();
     }
 
     @NotNull
@@ -264,16 +268,31 @@ public class UiUtils {
         }
     }
 
+    public static void swing(@NonNull View view) {
+        ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(view, View.TRANSLATION_X, -20F, 20F, 0F);
+        objectAnimator.setInterpolator(new BounceInterpolator());
+        objectAnimator.start();
+    }
 
-    public static void toast(@Nullable Object msg) {
-        if (msg instanceof Integer) {
-            MasterToast.shortToast((Integer) msg);
+    public static void toast(@StringRes int msgRes) {
+        MasterToast.shortToast(msgRes);
+    }
+
+
+    public static void toast(@Nullable Object... messages) {
+        StringBuilder msg = new StringBuilder();
+        if (messages == null) {
+            msg.append("<null>");
         } else {
-            if (msg == null) {
-                msg = "<null>";
+            for (Object obj : messages) {
+                if (obj == null) {
+                    msg.append("<null>");
+                } else {
+                    msg.append(obj.toString());
+                }
             }
-            MasterToast.shortToast(msg.toString());
         }
+        MasterToast.shortToast(msg);
     }
 
     public static int getFirstVisibleItemIndexOfList(@NotNull RecyclerView recyclerView, boolean completelyVisible) {
@@ -286,16 +305,61 @@ public class UiUtils {
         return completelyVisible ? llm.findLastCompletelyVisibleItemPosition() : llm.findLastVisibleItemPosition();
     }
 
-    public static void fadeOut(View... views) {
+    public static void fadeOut(@NotNull View... views) {
         for (View v : views) {
             v.animate().alpha(0f).withEndAction(() -> v.setVisibility(View.GONE)).start();
         }
     }
 
-    public static void fadeIn(View... views) {
+    public static void fadeIn(@NotNull View... views) {
         for (View v : views) {
             v.setAlpha(0f);
             v.animate().alpha(1f).withStartAction(() -> v.setVisibility(View.VISIBLE)).start();
         }
     }
+
+    /**
+     * Determine if the navigation bar will be on the bottom of the screen, based on logic in
+     * PhoneWindowManager.
+     */
+    public static boolean isNavBarOnBottom(@NonNull Context context) {
+        final Resources res = context.getResources();
+        final Configuration cfg = context.getResources().getConfiguration();
+        final DisplayMetrics dm = res.getDisplayMetrics();
+        boolean canMove = (dm.widthPixels != dm.heightPixels &&
+                cfg.smallestScreenWidthDp < 600);
+        return (!canMove || dm.widthPixels < dm.heightPixels);
+    }
+
+    private static int sColorAccent = -1;
+    private static int sColorControlHighlight = -1;
+    private static int sTextColorSecondary = -1;
+
+    public static void initColors(@NonNull Context context) {
+        TypedArray typedArray = context.obtainStyledAttributes(new int[]{R.attr.colorAccent, R.attr.colorControlHighlight, android.R.attr.textColorSecondary});
+        sColorAccent = typedArray.getColor(0, sColorAccent);
+        sColorControlHighlight = typedArray.getColor(1, sColorControlHighlight);
+        sTextColorSecondary = Objects.requireNonNull(typedArray.getColorStateList(2)).getDefaultColor();
+        typedArray.recycle();
+    }
+
+
+    @ColorInt
+    public static int getColorAccent() {
+        return sColorAccent;
+    }
+
+
+    @ColorInt
+    public static int getColorControlHighlight() {
+        return sColorControlHighlight;
+    }
+
+
+    @ColorInt
+    public static int getTextColorSecondary() {
+        return sTextColorSecondary;
+    }
+
+
 }

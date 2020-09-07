@@ -25,6 +25,9 @@ import xjunz.tool.wechat.R;
  * 主页面的面板视图
  */
 public class MainPanel extends RelativeLayout {
+    /**
+     * {@link ViewDragHelper}实例，用于实现面板的拖拽
+     */
     private ViewDragHelper mHelper;
     private ViewGroup mCurtain, mTopBar, mFilter;
     private View mMask;
@@ -50,6 +53,10 @@ public class MainPanel extends RelativeLayout {
 
     public void addOnPanelSlideListener(@NonNull OnPanelSlideListener listener) {
         this.mListenerList.add(listener);
+    }
+
+    public void removeOnPanelSlideListener(@NonNull OnPanelSlideListener listener) {
+        this.mListenerList.remove(listener);
     }
 
     @Override

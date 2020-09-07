@@ -6,8 +6,12 @@
     <data>
 
         <variable
-            name="activity"
-            type="xjunz.tool.wechat.ui.main.MessageActivity" />
+            name="position"
+            type="int" />
+
+        <variable
+            name="model"
+            type="xjunz.tool.wechat.data.viewmodel.MessageViewModel" />
 
         <variable
             name="message"
@@ -32,13 +36,13 @@
             android:clickable="true"
             android:contextMenu="@{true}"
             android:focusable="true"
-            android:gravity="center|start"
-            android:onClick="@{()->activity.onMessageClicked(message)}"
+            android:gravity="center"
+            android:onClick="@{()->model.setSelectedMessagePosition(position)}"
             android:paddingStart="@dimen/spacing_normal"
             android:paddingTop="@dimen/spacing_unit"
             android:paddingEnd="@dimen/spacing_normal"
             android:paddingBottom="@dimen/spacing_unit"
-            android:text="@{message.content}"
+            android:text="@{message.spannedContent}"
             android:textAppearance="@style/TextAppearance.AppCompat.Caption"
             android:textColor="?android:textColorPrimaryInverse"
             tools:text="@tools:sample/lorem" />

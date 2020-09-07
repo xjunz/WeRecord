@@ -7,38 +7,45 @@ package xjunz.tool.wechat.ui.main;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 
-import com.bm.library.PhotoView;
+import java.util.Objects;
 
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.ui.BaseActivity;
-import xjunz.tool.wechat.ui.customview.MasterToast;
+import xjunz.tool.wechat.util.UiUtils;
 
 public class ImageViewerActivity extends BaseActivity {
-    public static final String EXTRA_DATA = "ImageViewerActivity.extra.data";
-    PhotoView photoView;
+    public static final String EXTRA_CONTACT = "ImageViewerActivity.extra.contact";
+    ImageView mIvAvatar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_viewer);
-        photoView = findViewById(R.id.photo_view);
+        mIvAvatar = findViewById(R.id.iv_avatar);
+        setWithAndHeight();
         Intent intent = getIntent();
-        if (intent != null) {
-            Contact contact = (Contact) intent.getSerializableExtra(EXTRA_DATA);
-            if (contact != null) {
-                Bitmap bitmap = contact.getAvatar();
-                if (bitmap == null) {
-                    MasterToast.shortToast("No avatar");
-                } else {
-                    photoView.setImageBitmap(bitmap);
-                    photoView.enable();
-
-                }
-            }
+        Contact contact = (Contact) Objects.requireNonNull(intent.getSerializableExtra(EXTRA_CONTACT), "Got null contact");
+        Bitmap bitmap = contact.getAvatar();
+        if (bitmap == null) {
+            UiUtils.toast(R.string.no_local_avatar_found);
+            mIvAvatar.setImageResource(R.mipmap.avatar_default);
+        } else {
+            mIvAvatar.setImageBitmap(bitmap);
         }
+    }
+
+    @SuppressWarnings("SuspiciousNameCombination")
+    private void setWithAndHeight() {
+        ViewGroup.LayoutParams lp = mIvAvatar.getLayoutParams();
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        lp.width = screenWidth;
+        lp.height = screenWidth;
+        mIvAvatar.setLayoutParams(lp);
     }
 }

@@ -33,7 +33,7 @@ public class ObservableViewModel extends ViewModel implements Observable {
     /**
      * Notifies observers that all properties of this instance have changed.
      */
-    void notifyChange() {
+    public void notifyChange() {
         mCallbacks.notifyCallbacks(this, 0, null);
     }
 
@@ -44,7 +44,7 @@ public class ObservableViewModel extends ViewModel implements Observable {
      *
      * @param fieldId The generated BR id for the Bindable field.
      */
-    void notifyPropertyChanged(int fieldId) {
+    public void notifyPropertyChanged(int fieldId) {
         mCallbacks.notifyCallbacks(this, fieldId, null);
     }
 }

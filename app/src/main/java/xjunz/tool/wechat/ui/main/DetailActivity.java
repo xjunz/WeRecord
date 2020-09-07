@@ -17,23 +17,23 @@ import xjunz.tool.wechat.databinding.ActivityDetailBinding;
 import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.model.account.Talker;
 import xjunz.tool.wechat.ui.BaseActivity;
+import xjunz.tool.wechat.ui.message.MessageActivity;
 
 public class DetailActivity extends BaseActivity {
-    public static final String EXTRA_DATA = "DetailActivity.extra.data";
-    private ActivityDetailBinding mBinding;
+    public static final String EXTRA_CONTACT = "DetailActivity.extra.contact";
     private Contact mData;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_detail);
+        ActivityDetailBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_detail);
         if (intent != null) {
-            mData = (Contact) intent.getSerializableExtra(EXTRA_DATA);
+            mData = (Contact) intent.getSerializableExtra(EXTRA_CONTACT);
             if (mData != null) {
-                mBinding.setContact(mData);
+                binding.setContact(mData);
                 if (mData instanceof Talker) {
-                    mBinding.setTalker((Talker) mData);
+                    binding.setTalker((Talker) mData);
                 }
             }
         }
@@ -43,14 +43,13 @@ public class DetailActivity extends BaseActivity {
     public void viewImage(View view) {
         ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, view, view.getTransitionName());
         Intent i = new Intent(this, ImageViewerActivity.class);
-        i.putExtra(ImageViewerActivity.EXTRA_DATA, mData);
+        i.putExtra(ImageViewerActivity.EXTRA_CONTACT, mData);
         startActivity(i, options.toBundle());
     }
 
     public void checkMessages(View view) {
         Intent i = new Intent(this, MessageActivity.class);
-        i.putExtra(MessageActivity.EXTRA_DATA, mData);
-        startActivity(i);
-        this.finish();
+        i.putExtra(MessageActivity.EXTRA_TALKER, mData);
+        startActivity(i, ActivityOptions.makeSceneTransitionAnimation(this, view, view.getTransitionName()).toBundle());
     }
 }

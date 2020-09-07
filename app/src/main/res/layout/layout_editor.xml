@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="model"
+            type="xjunz.tool.wechat.data.viewmodel.EditorViewModel" />
+
+        <import type="xjunz.tool.wechat.util.UniUtils" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_edit_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_selectable_item_grey"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="editContent">
+
+            <ImageView
+                android:id="@+id/iv_edit"
+                android:layout_width="@dimen/fab_small"
+                android:layout_height="@dimen/fab_small"
+                android:layout_marginStart="@dimen/spacing_normal"
+                android:contentDescription="@string/edit"
+                android:padding="@dimen/dp_4"
+                android:scaleType="centerInside"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tv_caption_edit"
+                app:srcCompat="@drawable/ic_baseline_message_24dp" />
+
+            <TextView
+                android:id="@+id/tv_caption_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:changed="@{model.inEditMode&amp;&amp;model.contentChanged}"
+                android:ellipsize="end"
+                android:maxLines="5"
+                android:text="@string/msg_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:textColor="?colorAccent"
+                app:layout_constraintStart_toEndOf="@+id/iv_edit"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_content"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_unit"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                android:ellipsize="end"
+                android:maxLines="10"
+                android:text="@{model.inEditMode?model.modifiedMessage.content:@string/bracketed_none}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                app:layout_constraintBottom_toTopOf="@+id/divider1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tv_caption_edit"
+                app:layout_constraintTop_toBottomOf="@+id/tv_caption_edit"
+                tools:text="@tools:sample/lorem" />
+
+            <View
+                android:id="@+id/divider1"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_content" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_template"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_selectable_item_grey"
+            android:clickable="true"
+            android:focusable="true"
+            android:visible="@{!model.inEditMode}">
+
+            <Space
+                android:id="@+id/space"
+                android:layout_width="@dimen/fab_small"
+                android:layout_height="@dimen/fab_small"
+                android:layout_marginStart="@dimen/spacing_normal"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_template"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tv_caption_template" />
+
+            <TextView
+                android:id="@+id/tv_caption_template"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:text="@string/use_template"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:textColor="?colorAccent"
+                app:layout_constraintStart_toEndOf="@id/space"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_template"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_unit"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                android:maxLines="5"
+                android:text="无"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tv_caption_template"
+                app:layout_constraintTop_toBottomOf="@+id/tv_caption_template" />
+
+            <View
+                android:id="@+id/divider2"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintTop_toBottomOf="@+id/tv_template" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_sender"
+            android:onClick="editSender"
+            android:visible="@{!model.originalMessage.type.system}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_selectable_item_grey"
+            android:clickable="true"
+            android:elevation="@dimen/z_item"
+            android:focusable="true"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/tv_caption_sender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:text="@string/sender"
+                android:changed="@{model.inEditMode&amp;&amp;model.senderChanged}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:textColor="?colorAccent"
+                app:layout_constraintStart_toEndOf="@+id/iv_avatar"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/iv_avatar"
+                android:layout_width="@dimen/fab_small"
+                android:layout_height="@dimen/fab_small"
+                android:layout_marginStart="@dimen/spacing_normal"
+                android:avatar="@{model.selectedSender}"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_name"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tv_caption_sender"
+                tools:src="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:layout_marginTop="@dimen/spacing_unit"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                android:text="@{model.selectedSender.name??@string/bracketed_none}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/iv_avatar"
+                app:layout_constraintTop_toBottomOf="@+id/tv_caption_sender"
+                tools:text="@tools:sample/first_names" />
+
+            <View
+                android:id="@+id/divider3"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_name" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_send_time"
+            android:onClick="editTimestamp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_selectable_item_grey"
+            android:clickable="true"
+            android:elevation="@dimen/z_item"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/iv_time"
+                android:layout_width="@dimen/fab_small"
+                android:layout_height="@dimen/fab_small"
+                android:layout_marginStart="@dimen/spacing_normal"
+                android:contentDescription="@string/send_time"
+                android:scaleType="centerInside"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_send_time"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tv_caption_send_time"
+                app:srcCompat="@drawable/ic_baseline_time_24dp" />
+
+            <TextView
+                android:id="@+id/tv_caption_send_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:text="@string/send_time"
+                android:changed="@{model.inEditMode&amp;&amp;model.sendTimestampChanged}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:textColor="?colorAccent"
+                app:layout_constraintStart_toEndOf="@+id/iv_time"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_send_time"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:layout_marginTop="@dimen/spacing_unit"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                android:text="@{UniUtils.formatDate(model.modifiedTimestamp)}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/iv_time"
+                app:layout_constraintTop_toBottomOf="@+id/tv_caption_send_time" />
+
+            <View
+                android:id="@+id/divider4"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_send_time" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_selectable_item_grey"
+            android:clickable="true"
+            android:elevation="@dimen/z_item"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/iv_status"
+                android:layout_width="@dimen/fab_small"
+                android:layout_height="@dimen/fab_small"
+                android:layout_marginStart="@dimen/spacing_normal"
+                android:contentDescription="@string/send_status"
+                android:scaleType="centerInside"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_send_status"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tv_caption_send_status"
+                app:srcCompat="@drawable/ic_baseline_info_24dp" />
+
+            <TextView
+                android:id="@+id/tv_caption_send_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:text="@string/send_status"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:textColor="?colorAccent"
+                app:layout_constraintStart_toEndOf="@+id/iv_status"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_send_status"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:layout_marginTop="@dimen/spacing_unit"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/iv_status"
+                app:layout_constraintTop_toBottomOf="@+id/tv_caption_send_status" />
+
+            <View
+                android:id="@+id/divider5"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_send_status" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_selectable_item_grey"
+            android:clickable="true"
+            android:elevation="@dimen/z_item"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/iv_preview"
+                android:layout_width="@dimen/fab_small"
+                android:layout_height="@dimen/fab_small"
+                android:layout_marginStart="@dimen/spacing_normal"
+                android:contentDescription="@string/preview"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_baseline_eye_24"
+                app:layout_constraintBottom_toBottomOf="@+id/fl_preview_container"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tv_caption_preview" />
+
+            <TextView
+                android:id="@+id/tv_caption_preview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:text="@string/preview"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:textColor="?colorAccent"
+                app:layout_constraintStart_toEndOf="@+id/iv_preview"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <FrameLayout
+                android:id="@+id/fl_preview_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_unit"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tv_caption_preview"
+                app:layout_constraintTop_toBottomOf="@+id/tv_caption_preview">
+
+            </FrameLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</layout>

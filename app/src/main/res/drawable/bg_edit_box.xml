@@ -3,6 +3,7 @@
   -->
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/colorBackgroundMask" />
     <stroke
         android:width=".75dp"
         android:color="?android:textColorSecondaryNoDisable" />

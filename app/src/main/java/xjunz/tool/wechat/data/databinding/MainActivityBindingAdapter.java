@@ -20,7 +20,10 @@ import androidx.databinding.InverseBindingAdapter;
 import androidx.databinding.InverseBindingListener;
 import androidx.databinding.InverseBindingMethod;
 import androidx.databinding.InverseBindingMethods;
+import androidx.databinding.adapters.ListenerUtil;
 import androidx.viewpager2.widget.ViewPager2;
+
+import org.jetbrains.annotations.NotNull;
 
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.ui.customview.BottomBar;
@@ -50,17 +53,22 @@ public class MainActivityBindingAdapter {
 
     @BindingAdapter(value = {"android:currentItemAttrChanged"})
     public static void setCurrentItemChangeListener(ViewPager2 pager, InverseBindingListener currentItemAttr) {
-        pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+        ViewPager2.OnPageChangeCallback newValue = new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 currentItemAttr.onChange();
             }
-        });
+        };
+        ViewPager2.OnPageChangeCallback oldValue = ListenerUtil.trackListener(pager, newValue, R.id.onPageChange);
+        if (oldValue != null) {
+            pager.unregisterOnPageChangeCallback(oldValue);
+        }
+        pager.registerOnPageChangeCallback(newValue);
     }
 
     @BindingAdapter(value = {"android:onItemSelect", "android:selectionAttrChanged"}, requireAll = false)
-    public static void setSelectionChangeListener(BottomBar bottomBar, BottomBar.OnItemSelectListener listener, InverseBindingListener selectionAttr) {
+    public static void setSelectionChangeListener(@NotNull BottomBar bottomBar, BottomBar.OnItemSelectListener listener, InverseBindingListener selectionAttr) {
         bottomBar.setOnItemSelectListener((position, caption, unchanged) -> {
             if (listener != null) {
                 listener.onItemSelect(position, caption, unchanged);
@@ -80,12 +88,12 @@ public class MainActivityBindingAdapter {
     }
 
     @InverseBindingAdapter(attribute = "android:searchMode", event = "android:searchModeAttrChanged")
-    public static boolean isSearchMode(ImageButton imageButton) {
+    public static boolean isSearchMode(@NotNull ImageButton imageButton) {
         return imageButton.getTag() != null && (boolean) imageButton.getTag();
     }
 
     @BindingAdapter(value = {"android:searchModeOnClick", "android:searchModeAttrChanged"}, requireAll = false)
-    public static void setSearchModeChangeListener(ImageButton imageButton, View.OnClickListener listener, InverseBindingListener searchModeAttr) {
+    public static void setSearchModeChangeListener(@NotNull ImageButton imageButton, View.OnClickListener listener, InverseBindingListener searchModeAttr) {
         imageButton.setOnClickListener(v -> {
             imageButton.setTag(!isSearchMode(imageButton));
             searchModeAttr.onChange();
@@ -123,8 +131,8 @@ public class MainActivityBindingAdapter {
     }
 
     @BindingAdapter(value = {"android:onPanelClose", "android:onPanelOpen"}, requireAll = false)
-    public static void setOnPanelCloseListener(MainPanel mainPanel, @NonNull Runnable closeListener, @NonNull Runnable openListener) {
-        mainPanel.addOnPanelSlideListener(new MainPanel.OnPanelSlideListener() {
+    public static void setOnPanelCloseListener(@NotNull MainPanel mainPanel, @NonNull Runnable closeListener, @NonNull Runnable openListener) {
+        MainPanel.OnPanelSlideListener newValue = new MainPanel.OnPanelSlideListener() {
             @Override
             public void onPanelSlideFinished(boolean isOpen) {
                 if (!isOpen) {
@@ -143,7 +151,12 @@ public class MainActivityBindingAdapter {
             public void onPanelSlideStart(boolean isToOpen) {
 
             }
-        });
+        };
+        MainPanel.OnPanelSlideListener oldValue = ListenerUtil.trackListener(mainPanel, newValue, R.id.onPanelSlide);
+        if (oldValue != null) {
+            mainPanel.removeOnPanelSlideListener(oldValue);
+        }
+        mainPanel.addOnPanelSlideListener(newValue);
     }
 
 

@@ -19,7 +19,6 @@ import xjunz.tool.wechat.impl.repo.ContactRepository;
 import xjunz.tool.wechat.util.UniUtils;
 
 public class Contact extends Account {
-    public static final boolean DEFAULT_IS_ASCENDING = true;
     /**
      * 为此联系人设置的备注
      */
@@ -70,6 +69,9 @@ public class Contact extends Account {
      */
     private String pyAbbr;
 
+    public Contact(String id) {
+        this.id = id;
+    }
 
     /**
      * 获取用于排序的名称拼音缩写，名称的优先级为备注、昵称、微信号、微信ID。
@@ -211,15 +213,6 @@ public class Contact extends Account {
                 }
                 break;
         }
-    }
-
-    /**
-     * 创建一个虚拟{@link Contact}，这个{@link Contact}主要用于查找、比较
-     */
-    public static Contact mockAccount(String id) {
-        Contact mock = new Contact();
-        mock.id = id;
-        return mock;
     }
 
 

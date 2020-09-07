@@ -12,6 +12,10 @@ import android.content.pm.PackageManager;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
+import androidx.lifecycle.ViewModelStore;
+import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.github.promeg.pinyinhelper.Pinyin;
 
@@ -19,13 +23,14 @@ import net.sqlcipher.database.SQLiteDatabase;
 
 import org.apaches.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
 
 import xjunz.tool.wechat.util.IOUtils;
 
-public class App extends Application {
+public class App extends Application implements ViewModelStoreOwner {
     private static WeakReference<Context> sApplicationContext;
     private static final String DATA_SHARED_PREFS_NAME = "data";
     public static int VERSION_CODE;
@@ -33,12 +38,15 @@ public class App extends Application {
     private static SharedPreferences gSharedPrefs;
     private static SharedPrefsManager gSharedPrefsManager;
     public static String DATA_PATH;
+    private ViewModelStore mViewModelStore;
 
-    public static String getStringOf(int strRes) {
+    @NotNull
+    public static String getStringOf(@StringRes int strRes) {
         return getContext().getString(strRes);
     }
 
-    public static String getStringOf(int strRes, Object... args) {
+    @NotNull
+    public static String getStringOf(@StringRes int strRes, Object... args) {
         return getContext().getString(strRes, args);
     }
 
@@ -62,6 +70,7 @@ public class App extends Application {
             if (BuildConfig.DEBUG)
                 e.printStackTrace();
         }
+        mViewModelStore = new ViewModelStore();
     }
 
     public static Context getContext() {
@@ -76,6 +85,12 @@ public class App extends Application {
     @Contract(pure = true)
     public static SharedPrefsManager getSharedPrefsManager() {
         return gSharedPrefsManager;
+    }
+
+    @NonNull
+    @Override
+    public ViewModelStore getViewModelStore() {
+        return mViewModelStore;
     }
 
     public static class SharedPrefsManager {

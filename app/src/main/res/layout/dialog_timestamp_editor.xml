@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="xjunz.tool.wechat.util.UiUtils" />
+
+        <import type="xjunz.tool.wechat.util.UniUtils" />
+
+        <import type="android.text.Html" />
+
+        <variable
+            name="model"
+            type="xjunz.tool.wechat.data.viewmodel.EditorViewModel" />
+
+        <variable
+            name="dialog"
+            type="xjunz.tool.wechat.ui.message.fragment.dialog.TimestampEditorDialog" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_normal"
+            android:labelFor="@+id/et_editor"
+            android:text="编辑发送时间"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/et_editor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginEnd="16dp"
+            android:afterTextChanged="@{e->model.notifyTextChanged(e)}"
+            android:background="@drawable/bg_edit_box"
+            android:digits="1234567890- :"
+            android:importantForAutofill="no"
+            android:inputType="datetime"
+            android:padding="@dimen/spacing_unit"
+            android:text="@{UniUtils.formatDate(model.modifiedTimestamp)}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tv_title"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+
+        <TextView
+            android:id="@+id/tv_hint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:background="@drawable/bg_cornered_card"
+            android:backgroundTint="@{model.parsedTimestamp&lt;0?@color/colorError:@color/colorOk}"
+            android:padding="@dimen/dp_4"
+            android:text="@{model.hintText}"
+            android:textColor="?android:textColorPrimary"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@+id/et_editor"
+            app:layout_constraintStart_toStartOf="@+id/et_editor"
+            app:layout_constraintTop_toBottomOf="@+id/et_editor" />
+
+        <ImageView
+            android:id="@+id/iv_info"
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:src="@drawable/ic_baseline_info_24dp"
+            android:tint="?colorAccent"
+            android:visible="@{!model.inEditMode}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_hint" />
+
+        <TextView
+            android:id="@+id/tv_caption_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/dp_4"
+            android:text="允许设置的时间范围"
+            android:textStyle="bold"
+            android:visible="@{!model.inEditMode}"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_info"
+            app:layout_constraintEnd_toEndOf="@+id/et_editor"
+            app:layout_constraintStart_toEndOf="@+id/iv_info"
+            app:layout_constraintTop_toTopOf="@+id/iv_info" />
+
+        <TextView
+            android:id="@+id/tv_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/dp_4"
+            android:text="@{Html.fromHtml(@string/format_send_time_limit(UniUtils.formatDate(model.sendTimestampStartLimit),UniUtils.formatDate(model.sendTimestampEndLimit)))}"
+            android:visible="@{!model.inEditMode}"
+            app:layout_constraintStart_toStartOf="@+id/tv_caption_info"
+            app:layout_constraintTop_toBottomOf="@id/tv_caption_info" />
+
+        <Button
+            android:id="@+id/btn_auto"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_unit"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginBottom="@dimen/spacing_unit"
+            android:onClick="@{()->etEditor.setText(UniUtils.formatDate(model.defSendTimestamp))}"
+            android:onClick2="@{()->etEditor.setSelection(etEditor.text.length())}"
+            android:text="@{model.inEditMode?@string/reset:@string/use_default}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_info" />
+
+        <Button
+            android:id="@+id/btn_cancel"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{()->dialog.dismiss()}"
+            android:text="@android:string/cancel"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_auto"
+            app:layout_constraintEnd_toStartOf="@+id/btn_ok"
+            app:layout_constraintTop_toTopOf="@+id/btn_auto" />
+
+        <Button
+            android:id="@+id/btn_ok"
+            style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/spacing_unit"
+            android:onClick="@{()->model.parsedTimestamp&lt;0?UiUtils.swing(tvHint):model.setModifiedTimestamp(model.parsedTimestamp)}"
+            android:onClick2="@{()->model.parsedTimestamp&lt;0?null:dialog.dismiss()}"
+            android:text="@android:string/ok"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_auto"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/btn_auto" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

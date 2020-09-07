@@ -5,6 +5,8 @@
 <resources>
 
     <style name="Base.AppTheme">
+        <item name="alertDialogTheme">@style/Theme.AppCompat.Light.Dialog.Alert.Material
+        </item>
         <item name="android:contextPopupMenuStyle">@style/FlatContextMenu</item>
     </style>
 

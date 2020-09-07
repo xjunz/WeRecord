@@ -8,18 +8,28 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.InverseBindingAdapter;
 import androidx.databinding.InverseBindingListener;
 
+import org.jetbrains.annotations.NotNull;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.model.account.Account;
+import xjunz.tool.wechat.ui.customview.ElasticDragDismissFrameLayout;
 import xjunz.tool.wechat.ui.customview.MasterToast;
+import xjunz.tool.wechat.ui.message.fragment.SearchFragment;
 import xjunz.tool.wechat.util.RxJavaUtils;
 import xjunz.tool.wechat.util.UiUtils;
 import xjunz.tool.wechat.util.UniUtils;
@@ -35,12 +45,12 @@ public class MessageActivityBindingAdapter {
     }
 
     @InverseBindingAdapter(attribute = "android:editMode", event = "android:editModeAttrChanged")
-    public static boolean isEditMode(ImageButton imageButton) {
+    public static boolean isEditMode(@NotNull ImageButton imageButton) {
         return imageButton.getTag() != null && (boolean) imageButton.getTag();
     }
 
     @BindingAdapter(value = {"android:editModeOnClick", "android:editModeAttrChanged"}, requireAll = false)
-    public static void setEditModeChangeListener(ImageButton imageButton, View.OnClickListener listener, InverseBindingListener editModeAttr) {
+    public static void setEditModeChangeListener(@NotNull ImageButton imageButton, View.OnClickListener listener, InverseBindingListener editModeAttr) {
         imageButton.setOnClickListener(v -> {
             imageButton.setTag(!isEditMode(imageButton));
             editModeAttr.onChange();
@@ -52,21 +62,25 @@ public class MessageActivityBindingAdapter {
 
     @BindingAdapter(value = "android:avatar")
     public static void setAvatar(CircleImageView imageView, Account account) {
-        RxJavaUtils.maybe(account::getAvatar).subscribe(new RxJavaUtils.MaybeObserverAdapter<Bitmap>() {
-            @Override
-            public void onComplete() {
-                imageView.setImageResource(R.mipmap.avatar_default);
-            }
+        if (account == null) {
+            imageView.setImageResource(R.mipmap.avatar_default);
+        } else {
+            RxJavaUtils.maybe(account::getAvatar).subscribe(new RxJavaUtils.MaybeObserverAdapter<Bitmap>() {
+                @Override
+                public void onComplete() {
+                    imageView.setImageResource(R.mipmap.avatar_default);
+                }
 
-            @Override
-            public void onSuccess(Bitmap bitmap) {
-                imageView.setImageBitmap(bitmap);
-            }
-        });
+                @Override
+                public void onSuccess(Bitmap bitmap) {
+                    imageView.setImageBitmap(bitmap);
+                }
+            });
+        }
     }
 
     @BindingAdapter(value = "android:layout_marginTop")
-    public static void setMarginTop(View view, float marginTop) {
+    public static void setMarginTop(@NotNull View view, float marginTop) {
         ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) view.getLayoutParams();
         lp.topMargin = (int) marginTop;
         view.setLayoutParams(lp);
@@ -95,6 +109,12 @@ public class MessageActivityBindingAdapter {
                     onClickListener.onClick(v);
                 }
             });
+            view.setOnLongClickListener(v -> {
+                if (onClickListener != null) {
+                    onClickListener.onClick(v);
+                }
+                return false;
+            });
         }
     }
 
@@ -115,8 +135,8 @@ public class MessageActivityBindingAdapter {
     public static void setKeywordHighlight(TextView textView, SearchFragment.MessageItem item) {
         if (item.spanStartIndex >= 0 && item.spanLength > 0) {
             //设置高亮
-            ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(UiUtils.getColorAccent(textView.getContext()));
-            BackgroundColorSpan backgroundColorSpan = new BackgroundColorSpan(UiUtils.getColorControlHighlight(textView.getContext()));
+            ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(UiUtils.getColorAccent());
+            BackgroundColorSpan backgroundColorSpan = new BackgroundColorSpan(UiUtils.getColorControlHighlight());
             SpannableString span = new SpannableString(item.message.getParsedContent());
             span.setSpan(foregroundColorSpan, item.spanStartIndex, item.spanStartIndex + item.spanLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             span.setSpan(backgroundColorSpan, item.spanStartIndex, item.spanStartIndex + item.spanLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE);

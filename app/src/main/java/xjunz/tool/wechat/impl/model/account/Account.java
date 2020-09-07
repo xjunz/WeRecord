@@ -19,7 +19,7 @@ import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 /**
  * 微信账号（个人用户、群聊、公众号）的抽象类
  */
-public abstract class Account implements Serializable {
+public class Account implements Serializable {
     /**
      * 微信的昵称
      */
@@ -84,7 +84,6 @@ public abstract class Account implements Serializable {
         return empty(nickname) ? (empty(alias) ? (empty(id) ? "<unknown>" : id) : alias) : nickname;
     }
 
-
     /**
      * 获取当前账号的头像
      *
@@ -93,20 +92,27 @@ public abstract class Account implements Serializable {
     @Nullable
     public Bitmap getAvatar() {
         if (!mHasTryDecodeAvatar) {
-            Bitmap bitmap = RepositoryFactory.singleton(AvatarRepository.class).getAvatar(id);
+            Bitmap bitmap = RepositoryFactory.get(AvatarRepository.class).getAvatar(id);
             mHasTryDecodeAvatar = true;
             mHasLocalAvatar = bitmap != null;
             return bitmap;
         } else {
-            return mHasLocalAvatar ? RepositoryFactory.singleton(AvatarRepository.class).getAvatar(id) : null;
+            return mHasLocalAvatar ? RepositoryFactory.get(AvatarRepository.class).getAvatar(id) : null;
         }
     }
 
 
+    /**
+     * 比较两个账号的ID是否相等
+     * <p>
+     * 也可仅传入微信ID的{@link String}，如果此账号的ID与传入的ID一致，返回true
+     */
     @Override
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof Account) {
             return ((Account) obj).id.equals(id);
+        } else if (obj instanceof String) {
+            return obj.toString().equals(id);
         }
         return super.equals(obj);
     }
@@ -120,6 +126,7 @@ public abstract class Account implements Serializable {
                 ", id='" + id + '\'' +
                 '}';
     }
+
 
     @Override
     public int hashCode() {

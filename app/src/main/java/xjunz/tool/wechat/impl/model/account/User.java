@@ -20,19 +20,17 @@ public class User extends Account {
     public final String dirPath;
     public final String originalDatabaseFilePath;
     public String backupDatabaseFilePath;
-    public transient String databasePragmaKey;
+    public String databasePragmaKey;
     public final String imageCachePath;
     public final String videoCachePath;
     public boolean isLastLogin;
     public String uin;
 
-
     public User(String uin) {
-        super();
         this.uin = uin;
         String pathIdentifier = DigestUtils.md5Hex("mm" + uin);
         this.dirPath = Environment.getInstance().getWechatMicroMsgPath() + File.separator + pathIdentifier;
-        this.originalDatabaseFilePath = dirPath + File.separator + Environment.DATABASE_EN_MICRO_MSG_NAME;
+        this.originalDatabaseFilePath = dirPath + File.separator + "EnMicroMsg.db";
         this.imageCachePath = android.os.Environment.getExternalStorageDirectory().getPath() + File.separator + "tencent"
                 + File.separator + "MicroMsg" + File.separator + pathIdentifier + File.separator + "image2";
         this.videoCachePath = android.os.Environment.getExternalStorageDirectory().getPath() + File.separator + "tencent"

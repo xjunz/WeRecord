@@ -3,7 +3,7 @@
   -->
 
 <vector android:height="24dp"
-    android:tint="#FFFFFF"
+    android:tint="?colorControlActivated"
     android:viewportHeight="24.0"
     android:viewportWidth="24.0"
     android:width="24dp"

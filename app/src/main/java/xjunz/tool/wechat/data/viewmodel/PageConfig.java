@@ -143,7 +143,7 @@ public class PageConfig {
     @NonNull
     EventHandler getEventHandler() {
         if (mEventHandler == null) {
-            throw new IllegalArgumentException("Please setEventHandler first");
+            throw new IllegalArgumentException("Please call setEventHandler() first");
         }
         return mEventHandler;
     }

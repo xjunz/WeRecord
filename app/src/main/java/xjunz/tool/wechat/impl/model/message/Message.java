@@ -4,173 +4,157 @@
 
 package xjunz.tool.wechat.impl.model.message;
 
-import android.text.Html;
+import android.content.ContentValues;
+import android.os.Parcel;
 import android.text.TextUtils;
-import android.util.Patterns;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import xjunz.tool.wechat.App;
-import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.Environment;
+import xjunz.tool.wechat.impl.model.account.Account;
 import xjunz.tool.wechat.impl.model.account.User;
-import xjunz.tool.wechat.util.UniUtils;
+import xjunz.tool.wechat.impl.repo.ContactRepository;
+import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 
 public class Message {
-    private int msgId;
-    private String rawContent;
-    private String groupTalkerId;
-    private String imgName;
-    private String imgPath;
-    private boolean isSend;
-    private long createTimeStamp;
-    private String talkerId;
-    private String senderId;
-    private List<String> contentUrls;
-    private int rawType;
-    private Type type;
+    private ContentValues values;
+    public static final Integer SEND = 1;
+    public static final Integer RECEIVE_FROM_PEER = 0;
+    public static final Integer RECEIVE_FROM_PEER_GLOBAL = 2;
+    public static final Integer RECEIVE_FROM_SYSTEM = null;
+    public static final String KEY_MSG_ID = "msgId";
+    public static final String KEY_CONTENT = "content";
+    public static final String KEY_TYPE = "type";
+    public static final String KEY_IS_SEND = "isSend";
+    public static final String KEY_CREATE_TIME = "createTime";
+    public static final String KEY_STATUS = "status";
+    public static final String KEY_IMG_PATH = "imgPath";
+    public static final String KEY_TALKER = "talker";
+    /**
+     * 未经处理的消息内容
+     * <p>
+     * 群聊消息的{@link Message#getRawContent()}前会有发送消息的微信ID加":"前缀，或者系统消息前会有
+     * 群聊ID加":"前缀，后面才是发送的消息内容。<b>注：这个前缀会被去除</b>
+     * </p>
+     */
+    protected String content;
+    /**
+     * 从图片名{@link Message#getImgPath()}中解析得到的本地图片路径
+     *
+     * @see Message#getLocalImagePath()
+     */
+    protected String localImagePath;
+    /**
+     * 消息发送者ID，如果发送者为本人或者消息是系统发送的，此值为null。如果是单人聊天，发送者为{@link Message#getTalkerId()}，
+     */
+    @Nullable
+    protected String senderId;
+    /**
+     * 是否已经尝试寻找发送者
+     */
+    private boolean hasTriedFindingSender;
+    /**
+     * 此消息发送者的{@link Account}对象
+     */
+    protected Account senderAccount;
+    /**
+     * 解析后的枚举类消息类型
+     *
+     * @see MessageFactory#judgeType(int)
+     */
+    @NonNull
+    protected MessageFactory.Type type = MessageFactory.Type.OTHERS;
 
-    public enum Type {
-        CALL(R.string.call),
-        FILE(R.string.file, true),
-        TRANSFER(R.string.transfer, true),
-        LOCATION(R.string.location, true),
-        HB(R.string.hongbao, true),
-        EMOJI(R.string.emoji),
-        REPOST(R.string.repost, true),
-        RECOMMEND(R.string.recommend_friend),
-        SYSTEM(R.string.system_msg),
-        PLAIN(R.string.plain_text),
-        WCX_SHARED(R.string.wcx, true),
-        SHARED_URL(R.string.shared_url, true),
-        PICTURE(R.string.picture),
-        PUSH(R.string.push),
-        VIDEO(R.string.video);
-        String caption;
-        boolean isComplex;
-
-        Type(@StringRes int captionRes, boolean isComplex) {
-            this.caption = App.getStringOf(captionRes);
-            this.isComplex = isComplex;
-        }
-
-        Type(@StringRes int captionRes) {
-            this.caption = App.getStringOf(captionRes);
-            this.isComplex = false;
-        }
-
-        public boolean isComplex() {
-            return isComplex;
-        }
-
-        public String getCaption() {
-            return caption;
-        }
-
-
+    public ContentValues getValues() {
+        return values;
     }
 
-    public Message(@Nullable String raw, @NonNull String talkerId) {
-        this.talkerId = talkerId;
-        this.rawContent = raw;
-        if (raw != null && talkerId.endsWith("@chatroom")) {
-            if (raw.startsWith("wxid_")) {
-                int spilt = raw.indexOf(":");
-                this.groupTalkerId = raw.substring(0, spilt);
-                this.content = raw.substring(spilt + 2);
-            } else {
-                this.content = raw;
+    public String getTalkerId() {
+        return values.getAsString(KEY_TALKER);
+    }
+
+    public Message(@NonNull ContentValues values) {
+        this.values = values;
+        String raw = getRawContent();
+        //如果消息内容不为空、不是用户本人发送的消息且是群聊
+        if (raw != null && !isSend() && isInGroupChat()) {
+            //格式：[微信号:(\n)][内容]
+            Pattern pattern = Pattern.compile("^([0-9|A-z_@]+?):\n?");
+            Matcher matcher = pattern.matcher(raw);
+            if (matcher.find()) {
+                this.senderId = matcher.group(1);
+                this.content = raw.substring(matcher.group().length());
+                return;
             }
-        } else {
-            this.content = raw;
         }
+        this.content = raw;
+        if (!isSend()) {
+            this.senderId = getTalkerId();
+        }
+    }
+
+
+    public boolean isInGroupChat() {
+        return getTalkerId().endsWith("@chatroom");
     }
 
     public int getMsgId() {
-        return msgId;
+        return values.getAsInteger(KEY_MSG_ID);
     }
 
-    public void setMsgId(int msgId) {
-        this.msgId = msgId;
-    }
 
     public int getStatus() {
-        return status;
+        return values.getAsInteger(KEY_STATUS);
     }
 
     public void setStatus(int status) {
-        this.status = status;
+        values.put(KEY_STATUS, status);
     }
 
     public String getImgPath() {
-        return imgPath;
+        return values.getAsString(KEY_IMG_PATH);
+    }
+
+    @Nullable
+    public Account getSenderAccount() {
+        if (senderAccount == null && !hasTriedFindingSender) {
+            if (isSend()) {
+                senderAccount = Environment.getInstance().getCurrentUser();
+            } else {
+                ContactRepository repository = RepositoryFactory.get(ContactRepository.class);
+                senderAccount = repository.get(requireSenderId());
+            }
+            hasTriedFindingSender = true;
+        }
+        return senderAccount;
     }
 
     @NonNull
     public String requireSenderId() {
-        if (senderId == null) {
-            if (groupTalkerId == null) {
-                senderId = talkerId;
-            } else {
-                senderId = groupTalkerId;
-            }
-        }
-        return senderId;
+        return Objects.requireNonNull(getSenderId(), "Got null senderId, this message may be sent by the user. ");
     }
 
     /**
-     * @return 发送者ID，如果发送者为自己，返回null
+     * 获取本条消息发送者ID，如果发送者为用户本人或者未找到发送者（如某些系统消息），返回NULL
+     *
+     * @return 消息发送者ID
      */
     @Nullable
     public String getSenderId() {
-        if (isSend) {
-            return null;
-        }
-        if (senderId == null) {
-            if (groupTalkerId == null) {
-                senderId = talkerId;
-            } else {
-                senderId = groupTalkerId;
-            }
-        }
         return senderId;
-    }
-
-    /**
-     * @return 消息中所有的url
-     */
-    public List<String> getContentUrls() {
-        if (contentUrls == null) {
-            contentUrls = new ArrayList<>();
-            Matcher matcher = Patterns.WEB_URL.matcher(rawContent);
-            while (matcher.find()) {
-                contentUrls.add(matcher.group());
-            }
-        }
-        return contentUrls;
     }
 
 
     public String getLocalImagePath() {
+        String imgPath = getImgPath();
         User user = Environment.getInstance().getCurrentUser();
         if (localImagePath == null) {
             if (!TextUtils.isEmpty(imgPath)) {
@@ -188,36 +172,30 @@ public class Message {
     }
 
     public String getRawContent() {
-        return rawContent;
+        return values.getAsString(KEY_CONTENT);
     }
 
-    public String getGroupTalkerId() {
-        return groupTalkerId;
-    }
 
     public boolean isSend() {
-        return isSend;
+        Integer isSend = values.getAsInteger(KEY_IS_SEND);
+        return isSend != null && isSend.equals(SEND);
     }
 
 
     public long getCreateTimeStamp() {
-        return createTimeStamp;
-    }
-
-    public String getTalkerId() {
-        return talkerId;
+        return values.getAsLong(KEY_CREATE_TIME);
     }
 
     public void setImgPath(String imgPath) {
-        this.imgPath = imgPath;
+        values.put(KEY_IMG_PATH, imgPath);
     }
 
-    public void setSend(boolean send) {
-        isSend = send;
+    public void setSend(int send) {
+        values.put(KEY_IS_SEND, send);
     }
 
     public void setCreateTimeStamp(long createTimeStamp) {
-        this.createTimeStamp = createTimeStamp;
+        values.put(KEY_CREATE_TIME, createTimeStamp);
     }
 
 
@@ -227,192 +205,101 @@ public class Message {
 
     public void setContent(String content) {
         this.content = content;
-        if (groupTalkerId != null) {
-            this.rawContent = groupTalkerId + ":" + content;
-        } else {
-            this.rawContent = content;
-        }
-    }
-
-    private String xmlMatch(final String key) {
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        final String[] value = new String[1];
-        try {
-            SAXParser parser = factory.newSAXParser();
-            parser.parse(new ByteArrayInputStream(getRawContent().getBytes()), new DefaultHandler() {
-                boolean isType;
-
-                @Override
-                public void characters(char[] ch, int start, int length) throws SAXException {
-                    super.characters(ch, start, length);
-                    if (isType) {
-                        String content = new String(ch, start, length);
-                        value[0] = content;
-                    }
-                }
-
-                @Override
-                public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-                    super.startElement(uri, localName, qName, attributes);
-                    isType = localName.equals(key);
-                }
-            });
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            e.printStackTrace();
-        }
-        return value[0];
-    }
-
-    String match(String key) {
-        String matched;
-        if (getRawContent().contains(key + "><![CDATA[")) {
-            matched = UniUtils.extractFirst(getRawContent(), key + "><\\!\\[CDATA\\[(.*?)\\]\\]></" + key);
-        } else {
-            matched = UniUtils.extractFirst(getRawContent(), key + ">(.*?)</" + key);
-        }
-        if (matched != null) {
-            Pattern pattern = Pattern.compile("&#x(.*?);");
-            Matcher matcher = pattern.matcher(matched);
-            while (matcher.find()) {
-                String ascii = String.valueOf((char) Integer.valueOf(Objects.requireNonNull(matcher.group(1)), 16).intValue());
-                matched = matched.replace(matcher.group(), ascii);
+        if (isInGroupChat()) {
+            if (senderId != null) {
+                values.put(KEY_CONTENT, senderId + ":\n" + content);
             }
+        } else {
+            values.put(KEY_CONTENT, content);
         }
-        return matched;
-    }
-
-    String rudeMatch(String key) {
-        return UniUtils.extractFirst(getRawContent(), key + ">(.+?)<");
-    }
-
-    String simpleMatch(String key) {
-        return UniUtils.extractFirst(getRawContent(), key + "=\"(.+?)\"");
     }
 
     public int getRawType() {
-        return rawType;
+        return values.getAsInteger(KEY_TYPE);
     }
 
-    @Nullable
-    public CharSequence getContent() {
-        if (!type.isComplex) {
-            if (type == Type.PLAIN) {
-                return Html.fromHtml(getRawContent());
-            } else if (type == Type.SYSTEM) {
-                return Html.fromHtml(getRawContent());
-            } else {
-                return "<" + type.getCaption() + ">";
-            }
-        }
-        return null;
+    /**
+     * 返回解析后的用于比较、查找的用户所关心的消息内容。
+     * 这些内容反映真实的消息信息，不包含各种富文本标签
+     *
+     * @return 内容
+     */
+    @NonNull
+    public String getParsedContent() {
+        return content;
     }
 
-    private static final int TYPE_PLAIN_MSG = 1;
-    private static final int TYPE_PICTURE = 3;
-    private static final int TYPE_EMOJI = 47;
-    private static final int TYPE_TRANSFER = 419430449;
-    private static final int TYPE_HB = 436207665;
-    private static final int TYPE_SHARE = 49;
-    private static final int TYPE_CALL = 50;
-    private static final int TYPE_RECOMMEND = 42;
-    private static final int SUBTYPE_FILE = 6;
-    private static final int SUBTYPE_WCX_URL = 33;
-    private static final int SUBTYPE_URL = 5;
-    private static final int SUBTYPE_REPOST = 19;
-    private static final int SUBTYPE_WCX_VIDEO = 36;
-    private static final int TYPE_SYSTEM = 10000;
-    private static final int TYPE_PUSH = 285212721;
-    private static final int TYPE_VIDEO = 43;
-    private static final int TYPE_LOCATION = 48;
 
-
-    private Type judgeType(int rawType) {
-        switch (rawType) {
-            case TYPE_PLAIN_MSG:
-                return Type.PLAIN;
-            case TYPE_PICTURE:
-                return Type.PICTURE;
-            case TYPE_EMOJI:
-                return Type.EMOJI;
-            case TYPE_TRANSFER:
-                return Type.TRANSFER;
-            case TYPE_HB:
-                return Type.HB;
-            case TYPE_CALL:
-                return Type.CALL;
-            case TYPE_VIDEO:
-                return Type.VIDEO;
-            case TYPE_RECOMMEND:
-                return Type.RECOMMEND;
-            case TYPE_LOCATION:
-                return Type.LOCATION;
-            case TYPE_PUSH:
-                return Type.PUSH;
-            case TYPE_SHARE:
-                int subType = Integer.parseInt(match("type"));
-                switch (subType) {
-                    case SUBTYPE_FILE:
-                        return Type.FILE;
-                    case SUBTYPE_WCX_URL:
-                    case SUBTYPE_WCX_VIDEO:
-                        return Type.WCX_SHARED;
-                    case SUBTYPE_URL:
-                        return Type.SHARED_URL;
-                    case SUBTYPE_REPOST:
-                        return Type.REPOST;
-                }
-                return null;
-            case TYPE_SYSTEM:
-                return Type.SYSTEM;
-        }
-        return null;
+    /**
+     * 返回用于显示的 {@link CharSequence}，此方法会解析{@code Html}富文本。
+     * 暂不支持解析显示的消息，会返回其消息类型。
+     *
+     * @return 用于显示的 {@link CharSequence}
+     */
+    @NonNull
+    public CharSequence getSpannedContent() {
+        return content;
     }
 
-    public void setRawType(int rawType) {
-        this.rawType = rawType;
-        this.type = judgeType(rawType);
-    }
 
-    public Type getType() {
+    @NotNull
+    public MessageFactory.Type getType() {
         return type;
     }
 
-    private String title;
-    private String description;
-
-    public String getTitle() {
-        if (title == null) {
-            title = match("title");
-        }
-        return title;
+    public void setType(@NonNull MessageFactory.Type type) {
+        this.type = type;
     }
 
-    public String getDescription() {
-        if (description == null) {
-            description = match("des");
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
         }
-        return description;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Message message = (Message) o;
+        return getMsgId() == message.getMsgId();
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(getMsgId());
+    }
+
+    @NotNull
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (String name : values.keySet()) {
+            String value = values.getAsString(name);
+            if (sb.length() > 0) {
+                sb.append("\n");
+            }
+            sb.append(name).append("=").append(value);
+        }
+        return sb.toString();
+    }
 
     @NonNull
-    @Override
-    public Message clone() throws CloneNotSupportedException {
-        try {
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            ObjectOutputStream objout = new ObjectOutputStream(bout);
-            objout.writeObject(this);
-            ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
-            ObjectInputStream objin = new ObjectInputStream(bin);
-            Message message = (Message) objin.readObject();
-            bout.close();
-            objin.close();
-            bin.close();
-            objin.close();
-            return message;
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return (Message) super.clone();
+    public Message deepClone() {
+        Parcel parcel = Parcel.obtain();
+        parcel.writeParcelable(values, 0);
+        parcel.setDataPosition(0);
+        Message clone = new Message(Objects.requireNonNull(parcel.readParcelable(values.getClass().getClassLoader())));
+        parcel.recycle();
+        return clone;
+    }
+
+    @NonNull
+    public Message deepFactoryClone() {
+        Parcel parcel = Parcel.obtain();
+        parcel.writeParcelable(values, 0);
+        parcel.setDataPosition(0);
+        Message clone = MessageFactory.createMessage((Objects.requireNonNull(parcel.readParcelable(values.getClass().getClassLoader()))));
+        parcel.recycle();
+        return clone;
     }
 }

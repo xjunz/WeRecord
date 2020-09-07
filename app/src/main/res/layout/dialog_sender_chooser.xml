@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="dialog"
+            type="xjunz.tool.wechat.ui.message.fragment.dialog.SenderChooserDialog" />
+
+        <variable
+            name="model"
+            type="xjunz.tool.wechat.data.viewmodel.EditorViewModel" />
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/tv_title"
+            android:layout_alignBottom="@id/tv_title"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:layout_toEndOf="@id/tv_title"
+            android:gravity="center_vertical" />
+
+        <View
+            android:id="@+id/divider_top"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_below="@+id/tv_title"
+            android:background="?android:attr/listDivider" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:text="@{@string/format_sender_chosen(model.candidateSender.name)}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_sender"
+            android:layout_marginStart="@dimen/spacing_unit"
+            android:layout_marginEnd="@dimen/spacing_unit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_title"
+            android:overScrollMode="never"
+            android:paddingBottom="@{llBtnBar.height}"
+            android:scrollbars="vertical"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="4"
+            tools:itemCount="10"
+            tools:listitem="@layout/item_sender">
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <View
+            android:id="@+id/divider_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_above="@+id/ll_btn_bar"
+            android:background="?android:attr/listDivider" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/ll_btn_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/rv_sender"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="@dimen/spacing_unit">
+
+            <Button
+                android:id="@+id/btn_reset"
+                android:onClick="@{()->model.setCandidateSender(model.defSender)}"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/reset"
+                app:layout_constraintEnd_toStartOf="@+id/btn_cancel"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/btn_ok" />
+
+            <Button
+                android:id="@+id/btn_cancel"
+                app:layout_constraintEnd_toStartOf="@+id/btn_ok"
+                app:layout_constraintTop_toTopOf="@+id/btn_ok"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@+id/btn_ok"
+                android:onClick="@{()->dialog.dismiss()}"
+                android:onClick2="@{()->model.setCandidateSender(model.selectedSender)}"
+                android:text="@android:string/cancel" />
+
+            <Button
+                android:id="@+id/btn_ok"
+                style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="@{()->model.setSelectedSender(model.candidateSender)}"
+                android:onClick2="@{()->dialog.dismiss()}"
+                android:text="@android:string/ok"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </RelativeLayout>
+</layout>

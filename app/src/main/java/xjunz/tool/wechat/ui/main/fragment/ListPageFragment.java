@@ -7,7 +7,6 @@ package xjunz.tool.wechat.ui.main.fragment;
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -48,7 +46,6 @@ import xjunz.tool.wechat.data.viewmodel.PageConfig;
 import xjunz.tool.wechat.data.viewmodel.PageViewModel;
 import xjunz.tool.wechat.data.viewmodel.SortBy;
 import xjunz.tool.wechat.impl.model.account.Contact;
-import xjunz.tool.wechat.impl.repo.AccountRepository;
 import xjunz.tool.wechat.ui.customview.MasterToast;
 import xjunz.tool.wechat.ui.main.DetailActivity;
 import xjunz.tool.wechat.util.RxJavaUtils;
@@ -134,11 +131,6 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
      */
     public abstract void resetFilterConfig(PageConfig config);
 
-    /**
-     * 获取数据的{@code Repository}
-     */
-    public abstract AccountRepository<T> getRepo();
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -191,10 +183,14 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
      *
      * @return 原始数据列表
      */
-    private List<T> getRawDataList() {
-        Contact.Type selectedType = getTypeList()[mConfig.typeSelection.get()];
-        return selectedType == null ? getRepo().getAll() : getRepo().get(selectedType);
-    }
+    public abstract List<T> getAllOfType(@NonNull Contact.Type type);
+
+    /**
+     * 返回查询到的所有数据
+     *
+     * @return 所有数据
+     */
+    public abstract List<T> getAll();
 
     /**
      * 初始化列表
@@ -298,8 +294,7 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
         if (!hasFilterConfigChanged()) {
             MasterToast.shortToast(R.string.msg_filter_config_unchanged);
         } else {
-            Contact.Type selectedType = getTypeList()[mConfig.typeSelection.get()];
-            mDisposables.add(filter(selectedType == null ? getRepo().getAll() : getRepo().get(selectedType)).subscribe(newItemList -> {
+            mDisposables.add(filter(getRawDataList()).subscribe(newItemList -> {
                 mFilteredItemList = newItemList;
                 updateList(newItemList);
             }));
@@ -344,11 +339,11 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
      * 并行获取所有分隔项，作为筛选依据，同时在{@link FilterFragment}中的{@link android.widget.Spinner}中显示。
      */
     protected void collectSeparatorDescListMap() {
-        List<T> all = getRepo().getAll();
-        CopyOnWriteArrayList<T> syncAll = new CopyOnWriteArrayList<>(all);
+        List<T> all = getAll();
         Disposable disposable = Flowable.fromArray(getSortByList()).parallel().runOn(Schedulers.newThread())
                 .map(sortBy -> {
                     List<String> descList = new ArrayList<>();
+                    ArrayList<T> syncAll = new ArrayList<>(all);
                     //对数据进行排序
                     Collections.sort(syncAll, (o1, o2) -> o1.compareTo(o2, sortBy, true));
                     //获取描述列表
@@ -385,12 +380,17 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
         mDisposables.add(disposable);
     }
 
+    private List<T> getRawDataList() {
+        Contact.Type selectedType = getTypeList()[mConfig.typeSelection.get()];
+        return selectedType == null ? getAll() : getAllOfType(selectedType);
+    }
+
     /**
      * 通知数据更新并更新UI
      *
      * @param newItemList 新的数据列表
      */
-    protected void updateList(List<Item> newItemList) {
+    protected void updateList(@NotNull List<Item> newItemList) {
         showOrHideNoResultArt(newItemList.size() == 0);
         mItemList = newItemList;
         mAdapter.notifyDataSetChanged();
@@ -523,12 +523,10 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
     public abstract class ListPageAdapter<S extends ListPageViewHolder> extends RecyclerView.Adapter<S> {
         private int foregroundSpanColor;
         private int backgroundSpanColor;
-        private Drawable defaultAvatar;
 
         public ListPageAdapter() {
             foregroundSpanColor = UiUtils.getAttrColor(requireContext(), R.attr.colorAccent);
             backgroundSpanColor = UiUtils.getAttrColor(requireContext(), R.attr.colorControlHighlight);
-            defaultAvatar = getResources().getDrawable(R.mipmap.avatar_default);
         }
 
         @Override
@@ -614,7 +612,7 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
                 if (getItemViewType() == Item.TYPE_DATA) {
                     ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(requireActivity(), this.ivAvatar, this.ivAvatar.getTransitionName());
                     Intent i = new Intent(requireActivity(), DetailActivity.class);
-                    i.putExtra(DetailActivity.EXTRA_DATA, mItemList.get(getAdapterPosition()).content);
+                    i.putExtra(DetailActivity.EXTRA_CONTACT, mItemList.get(getAdapterPosition()).content);
                     startActivity(i, options.toBundle());
                 }
             });

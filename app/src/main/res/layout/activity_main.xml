@@ -33,6 +33,7 @@
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/vp_main"
+                android:background="@color/colorBackgroundMask"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:currentItem="@={activity.mCurrentPageIndex}"
@@ -104,10 +105,12 @@
 
                 <EditText
                     android:id="@+id/et_search"
+                    android:labelFor="@+id/tv_title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/spacing_unit"
                     android:layout_marginEnd="@dimen/spacing_unit"
+                    android:imeOptions="actionSearch"
                     android:afterTextChanged="@{model::notifySearch}"
                     android:animateVisible="@{model.currentConfig.isInSearchMode}"
                     android:autofillHints="name"

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="model"
+            type="xjunz.tool.wechat.data.viewmodel.EditorViewModel" />
+
+        <variable
+            name="dialog"
+            type="xjunz.tool.wechat.ui.message.fragment.dialog.ContentEditorDialog" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white">
+
+        <EditText
+            android:id="@+id/et_editor"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/spacing_normal"
+            android:background="@drawable/bg_edit_box"
+            android:gravity="start"
+            android:inputType="textMultiLine"
+            android:padding="@dimen/spacing_unit"
+            android:text="@{model.modifiedMessage.content}"
+            app:layout_constraintBottom_toTopOf="@+id/btn_cancel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@tools:sample/lorem/random" />
+
+        <Button
+            android:id="@+id/btn_reset"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{()->etEditor.setText(model.originalMessage.content)}"
+            android:text="@string/reset"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_cancel"
+            app:layout_constraintStart_toStartOf="@+id/et_editor"
+            app:layout_constraintTop_toTopOf="@+id/btn_cancel" />
+
+        <Button
+            android:id="@+id/btn_cancel"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{()->dialog.dismiss()}"
+            android:text="@android:string/cancel"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btn_confirm"
+            app:layout_constraintTop_toTopOf="@+id/btn_confirm" />
+
+
+        <Button
+            android:id="@+id/btn_confirm"
+            style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{()->model.setModifiedContent(etEditor.getText().toString())}"
+            android:onClick2="@{()->dialog.dismiss()}"
+            android:text="@android:string/ok"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/et_editor" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

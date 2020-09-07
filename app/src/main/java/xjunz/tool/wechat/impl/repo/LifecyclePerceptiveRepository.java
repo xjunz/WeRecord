@@ -14,28 +14,27 @@ import net.sqlcipher.database.SQLiteDatabase;
 import xjunz.tool.wechat.impl.Environment;
 import xjunz.tool.wechat.impl.model.account.User;
 
-abstract class LifecyclePerceptiveRepository implements LifecycleObserver {
-    private SQLiteDatabase mDb;
-    private Environment mEnv;
-    private User mCurrentUser;
+class LifecyclePerceptiveRepository implements LifecycleObserver {
+    private final SQLiteDatabase mDatabase;
+    private final Environment mEnv;
+    private final User mCurrentUser;
 
-    LifecyclePerceptiveRepository() {
+    protected LifecyclePerceptiveRepository() {
         mEnv = Environment.getInstance();
         mEnv.getLifecycle().addObserver(this);
-        mDb = mEnv.getDatabaseOfCurrentUser();
+        mDatabase = mEnv.getDatabaseOfCurrentUser();
         mCurrentUser = mEnv.getCurrentUser();
     }
 
-
-    SQLiteDatabase getDatabase() {
-        return mDb;
+    protected SQLiteDatabase getDatabase() {
+        return mDatabase;
     }
 
-    User getCurrentUser() {
+    protected User getCurrentUser() {
         return mCurrentUser;
     }
 
-    Environment getEnvironment() {
+    protected Environment getEnvironment() {
         return mEnv;
     }
 

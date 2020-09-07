@@ -13,17 +13,18 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorButtonNormal">@color/button_normal</item>
-        <item name="alertDialogTheme">@style/Theme.AppCompat.Light.Dialog.Alert.Material
-        </item>
         <item name="android:colorBackground">@android:color/white</item>
         <item name="colorControlNormal">?colorAccent</item>
         <item name="colorControlActivated">?colorAccent</item>
         <item name="android:textColorHighlight">?colorControlHighlight</item>
         <item name="android:colorEdgeEffect">@color/colorAccent</item>
-        <item name="android:navigationBarColor">?colorPrimary</item>
+        <item name="android:navigationBarColor">?colorPrimaryDark</item>
     </style>
 
-    <style name="Base.AppTheme" />
+    <style name="Base.AppTheme">
+        <item name="alertDialogTheme">@style/Theme.AppCompat.Light.Dialog.Alert.Material
+        </item>
+    </style>
 
 
     <style name="Base.AppTheme.Main">
@@ -37,20 +38,38 @@
 
     <style name="Base.AppTheme.Main.Translucent">
         <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <style name="Base.AppTheme.Main.Translucent.ImageViewer">
+    <style name="Base.AppTheme.Main.Translucent.Message">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowEnterTransition">@transition/message_enter</item>
+        <item name="android:windowSharedElementEnterTransition">@transition/message_shared_enter
+        </item>
+    </style>
+
+    <style name="Base.AppTheme.Main.Translucent.Editor">
+        <item name="android:windowSharedElementsUseOverlay">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowEnterTransition">@transition/editor_enter</item>
+    </style>
+
+    <style name="Base.AppTheme.Main.Translucent.Dialog">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="Base.AppTheme.Main.Translucent.Dialog.ImageViewer">
         <item name="android:windowBackground">@color/colorMask</item>
         <item name="android:windowSharedElementEnterTransition">
             @transition/image_viewer_shared_enter
         </item>
+        <item name="android:windowSharedElementReturnTransition">
+            @transition/image_viewer_shared_return
+        </item>
     </style>
 
-    <style name="Base.AppTheme.Main.Translucent.Detail">
+    <style name="Base.AppTheme.Main.Translucent.Dialog.Detail">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowEnterTransition">@transition/detail_enter</item>
         <item name="android:windowSharedElementEnterTransition">@transition/detail_shared_enter
@@ -72,10 +91,11 @@
         <item name="android:windowAnimationStyle">@style/Sade</item>
     </style>
 
+    <style name="Base.AlertDialog"></style>
+
     <style name="Theme.AppCompat.Light.Dialog.Alert.Material">
         <item name="colorButtonNormal">@color/button_normal</item>
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="android:windowMinWidthMajor">60%</item>
         <item name="android:windowMinWidthMinor">90%</item>
         <item name="buttonBarPositiveButtonStyle">@style/Widget.AppCompat.Button.Normal.Flat.Small
         </item>
@@ -89,6 +109,26 @@
         <item name="android:backgroundDimAmount">0.25</item>
         <item name="android:windowAnimationStyle">@style/Sade</item>
         <item name="android:windowBackground">@drawable/bg_material_dialog</item>
+    </style>
+
+    <style name="Base.Dialog">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/Sade</item>
+    </style>
+
+    <style name="Base.Dialog.ContentEditor">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="Base.Dialog.SenderChooser">
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowElevation">@dimen/z_dialog</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowBackground">@drawable/bg_material_dialog</item>
+        <item name="android:windowMinWidthMinor">100%</item>
     </style>
 
     <!-- normal-sized button style (for normal usage) -->
@@ -145,4 +185,17 @@
         <item name="android:letterSpacing">0.05</item>
     </style>
 
+    <style name="TimePicker">
+        <item name="android:padding">@dimen/spacing_unit</item>
+        <item name="android:clickable">true</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <integer name="animDurationNormal">300</integer>
+    <integer name="animDurationShort">200</integer>
+    <integer name="animDurationLong">400</integer>
 </resources>

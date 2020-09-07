@@ -19,29 +19,29 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_list"
-        android:clipToPadding="false"
-        android:paddingBottom="?android:attr/actionBarSize"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:paddingBottom="?android:attr/actionBarSize"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/item_contact" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_scroller"
-        android:clipToPadding="false"
-        android:paddingBottom="?android:attr/actionBarSize"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:background="@drawable/bg_cornered_card"
+        android:clipToPadding="false"
         android:elevation="@dimen/z_card"
+        android:paddingBottom="?android:attr/actionBarSize"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:itemCount="38"
         tools:listitem="@layout/item_scroller" />
 
     <ImageButton
-        android:visibility="gone"
         android:layout_width="@dimen/fab_normal"
         android:layout_height="@dimen/fab_normal"
         android:layout_alignParentEnd="true"
@@ -50,7 +50,9 @@
         android:layout_marginEnd="@dimen/spacing_large"
         android:layout_marginBottom="@dimen/spacing_large"
         android:background="@drawable/bg_fab"
+        android:contentDescription="@string/export_msg"
         android:elevation="@dimen/z_fab"
         android:src="@drawable/ic_export_24dp"
-        android:tint="@android:color/white" />
+        android:tint="@android:color/white"
+        android:visibility="gone" />
 </RelativeLayout>

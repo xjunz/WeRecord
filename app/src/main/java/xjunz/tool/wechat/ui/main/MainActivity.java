@@ -73,6 +73,7 @@ public class MainActivity extends BaseActivity {
         mFilterModel = new ViewModelProvider(MainActivity.this, new ViewModelProvider.NewInstanceFactory()).get(PageViewModel.class);
         mBinding.setModel(mFilterModel);
         mFilterModel.addEventHandler(mFilterEventHandler);
+        UiUtils.initColors(this);
     }
 
 

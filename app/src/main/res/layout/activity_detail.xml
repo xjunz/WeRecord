@@ -23,7 +23,6 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/panel_detail"
-        android:transitionGroup="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -31,20 +30,21 @@
         android:background="@drawable/bg_cornered_card"
         android:elevation="@dimen/z_dialog"
         android:paddingStart="@dimen/spacing_normal"
-        android:paddingEnd="@dimen/spacing_normal"
         android:paddingTop="@dimen/spacing_normal"
-        android:paddingBottom="@{talker==null?@dimen/spacing_normal:@dimen/spacing_unit}">
+        android:paddingEnd="@dimen/spacing_normal"
+        android:paddingBottom="@{talker==null?@dimen/spacing_normal:@dimen/spacing_unit}"
+        android:transitionGroup="true">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_avatar"
+            android:layout_width="@dimen/fab_normal"
+            android:layout_height="@dimen/fab_normal"
+            android:layout_marginTop="@dimen/dp_2"
+            android:avatar="@{contact.avatar}"
             android:clickable="true"
             android:focusable="true"
             android:onClick="viewImage"
             android:transitionName="@string/tn_avatar"
-            android:layout_width="@dimen/fab_normal"
-            android:layout_height="@dimen/fab_normal"
-            android:layout_marginTop="@dimen/dp_2"
-            android:src="@{contact.avatar}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/tv_name"
             tools:src="@tools:sample/avatars" />
@@ -74,7 +74,7 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginTop="8dp"
-            android:text="@{contact.type.caption}"
+            android:text="@{UniUtils.fallback(contact.type.caption,@string/type_unknown)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/tv_name"
@@ -83,7 +83,6 @@
 
         <TextView
             android:id="@+id/tv_name"
-            android:transitionName="@string/tn_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -91,6 +90,7 @@
             android:ellipsize="end"
             android:text="@{contact.name}"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:transitionName="@string/tn_name"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/iv_avatar"
@@ -135,7 +135,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:copyable="@{true}"
-            android:text="@{TextUtils.isEmpty(contact.alias)?@string/bracketed_none:contact.alias}"
+            android:text="@{UniUtils.fallback(contact.alias,@string/bracketed_none)}"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/tv_caption_wx_id"
@@ -168,7 +168,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:copyable="@{true}"
-            android:text="@{contact.nickname}"
+            android:text="@{UniUtils.fallback(contact.nickname,@string/bracketed_none)}"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             app:layout_constraintEnd_toEndOf="@+id/tv_wx_id"
             app:layout_constraintStart_toStartOf="@+id/tv_caption_nickname"
@@ -180,7 +180,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:copyable="@{true}"
-            android:text="@{TextUtils.isEmpty(contact.remark)?@string/bracketed_none:contact.remark}"
+            android:text="@{UniUtils.fallback(contact.remark,@string/bracketed_none)}"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/tv_caption_wx_id"
@@ -237,11 +237,11 @@
 
         <View
             android:id="@+id/divider3"
-            android:visible="@{talker!=null}"
             android:layout_width="0dp"
             android:layout_height="@dimen/divider_thickness"
             android:layout_marginTop="16dp"
             android:background="?android:attr/listDivider"
+            android:visible="@{talker!=null}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_last_msg_time" />
@@ -251,11 +251,12 @@
             style="@android:style/Widget.Material.Button.Borderless.Colored"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/spacing_unit"
             android:drawableStart="@drawable/ic_baseline_eye_24"
-            android:text="@string/check_msg"
             android:onClick="checkMessages"
+            android:text="@string/check_msg"
             android:textColor="?colorAccent"
+            android:transitionName="@string/tn_message_list"
             android:visible="@{talker!=null}"
             app:layout_constraintEnd_toStartOf="@id/space_center"
             app:layout_constraintStart_toStartOf="parent"
@@ -263,13 +264,13 @@
 
         <Button
             android:id="@+id/btn_export_msg"
-            android:visible="@{talker!=null}"
             style="@android:style/Widget.Material.Button.Borderless.Colored"
-            android:textColor="?colorAccent"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:drawableStart="@drawable/ic_export_24dp"
             android:text="@string/export_msg"
+            android:textColor="?colorAccent"
+            android:visible="@{talker!=null}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_check_msg"
             app:layout_constraintTop_toTopOf="@+id/btn_check_msg" />

@@ -8,8 +8,12 @@
     <data>
 
         <variable
-            name="activity"
-            type="xjunz.tool.wechat.ui.main.MessageActivity" />
+            name="position"
+            type="int" />
+
+        <variable
+            name="model"
+            type="xjunz.tool.wechat.data.viewmodel.MessageViewModel" />
 
         <variable
             name="account"
@@ -49,23 +53,23 @@
             android:id="@+id/tv_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="@dimen/spacing_unit"
+            android:layout_marginBottom="@dimen/spacing_unit"
             android:background="@drawable/bg_bubble_right"
+            android:backgroundTint="?colorPrimary"
             android:clickable="true"
             android:contextMenu="@{true}"
             android:elevation="@dimen/z_bubble"
             android:focusable="true"
             android:gravity="start"
             android:maxWidth="@dimen/max_bubble_width"
-            android:onClick="@{()->activity.onMessageClicked(message)}"
+            android:onClick="@{()->model.setSelectedMessagePosition(position)}"
             android:paddingStart="@dimen/spacing_normal"
             android:paddingTop="@dimen/spacing_unit"
             android:paddingEnd="@dimen/spacing_normal"
             android:paddingBottom="@dimen/spacing_unit"
-            android:text="@{message.content}"
+            android:text="@{message.spannedContent}"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/iv_avatar"
             app:layout_constraintTop_toBottomOf="@+id/space"

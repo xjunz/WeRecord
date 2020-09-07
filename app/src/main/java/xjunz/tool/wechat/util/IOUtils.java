@@ -6,6 +6,7 @@ package xjunz.tool.wechat.util;
 
 import org.apaches.commons.codec.DecoderException;
 import org.apaches.commons.codec.binary.Hex;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
@@ -20,7 +21,7 @@ import java.io.OutputStream;
 
 public class IOUtils {
 
-    public static void transferStream(InputStream in, OutputStream out) throws IOException {
+    public static void transferStream(@NotNull InputStream in, OutputStream out) throws IOException {
         byte[] buffer = new byte[1024];
         int count;
         while ((count = in.read(buffer, 0, buffer.length)) != -1) {
@@ -68,7 +69,7 @@ public class IOUtils {
 
 
     @Nullable
-    public static <T> T deserializeFromStorage(String path, Class<T> t) {
+    public static <T> T deserializeFromStorage(String path, @NotNull Class<T> t) {
         try {
             FileInputStream fis = new FileInputStream(path);
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -90,7 +91,7 @@ public class IOUtils {
     }
 
     @Nullable
-    public static <T> T deserializeFromString(String src, Class<T> t) {
+    public static <T> T deserializeFromString(String src, @NotNull Class<T> t) {
         try {
             byte[] decoded = Hex.decodeHex(src);
             ByteArrayInputStream bis = new ByteArrayInputStream(decoded);

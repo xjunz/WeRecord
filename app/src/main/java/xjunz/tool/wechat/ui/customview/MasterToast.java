@@ -20,7 +20,7 @@ import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
 
 /**
- * 简单地实现一个更美观的Toast，暂且命名为<b>MasterToast</b>
+ * 简单地实现一个更美观的Toast，美其名曰<b>MasterToast</b>
  */
 public class MasterToast extends android.widget.Toast {
     /**

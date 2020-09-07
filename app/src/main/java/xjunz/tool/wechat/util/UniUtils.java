@@ -11,15 +11,19 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 
 import com.github.promeg.pinyinhelper.Pinyin;
 
+import org.intellij.lang.annotations.RegExp;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,6 +33,9 @@ import java.util.regex.Pattern;
 
 import xjunz.tool.wechat.App;
 
+/**
+ * 通用工具类，包含各种UI无关的工具方法
+ */
 public class UniUtils {
     private static final String feedbackQGroupNum = "561721325";
     private static final String feedbackQNum = "3285680362";
@@ -52,7 +59,8 @@ public class UniUtils {
      * @param src 源字符串
      * @return 拼音缩写
      */
-    public static String getPinYinAbbr(String src) {
+    @NotNull
+    public static String getPinYinAbbr(@NotNull String src) {
         StringBuilder abbr = new StringBuilder();
         for (char c : src.toCharArray()) {
             abbr.append(Pinyin.toPinyin(c).charAt(0));
@@ -83,6 +91,12 @@ public class UniUtils {
         return dayOfWeek == 1 ? "日" : arabicDigit2HanDigit(dayOfWeek - 1);
     }
 
+    /**
+     * 复制指定文本内容到剪切板
+     *
+     * @param label 文本内容的标签
+     * @param msg   欲复制到剪切板的文本内容
+     */
     public static void copyPlainText(String label, CharSequence msg) {
         ClipboardManager clipboardManager = (ClipboardManager) App.getContext().getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboardManager != null) {
@@ -106,14 +120,12 @@ public class UniUtils {
      * @param regex 正则表达式（包含捕获组）
      * @return 匹配到的捕获组集合
      */
+    @NotNull
     public static List<String> extract(String src, String regex) {
         Pattern p = Pattern.compile(regex, Pattern.DOTALL);
         Matcher m = p.matcher(src);
-        ArrayList<String> strs = null;
+        ArrayList<String> strs = new ArrayList<>();
         while (m.find()) {
-            if (strs == null) {
-                strs = new ArrayList<>();
-            }
             strs.add(m.group(1));
         }
         return strs;
@@ -123,24 +135,13 @@ public class UniUtils {
      * 提取出符合正则的第一个捕获组
      */
     @Nullable
-    public static String extractFirst(String src, String regex) {
+    public static String extractFirst(String src, @RegExp String regex) {
         Pattern p = Pattern.compile(regex, Pattern.DOTALL);
         Matcher m = p.matcher(src);
         if (m.find()) {
             return m.group(1);
         }
         return null;
-    }
-
-    public static String extractAndConcatHans(String src) {
-        StringBuilder builder = new StringBuilder();
-        //Sadly, Android does not support Java 7:(, so below codes don't make sense
-        //List<String> hans=extract(src,"(\\p{IsHan}+)");
-        List<String> hans = extract(src, "([\\u4E00-\\u9FFF]+)");
-        for (String han : hans) {
-            builder.append(han);
-        }
-        return builder.toString();
     }
 
 
@@ -157,19 +158,37 @@ public class UniUtils {
     }
 
 
+    @NotNull
     public static String formatToPercent(float num, int digits) {
         NumberFormat nt = NumberFormat.getPercentInstance();
         nt.setMinimumFractionDigits(digits);
         return nt.format(num);
     }
 
+    @NotNull
     public static String formatDate(long timestamp) {
+        if (timestamp < 0) {
+            return "-";
+        }
         Date date = new Date(timestamp);
-        return String.format(App.getContext().getResources().getConfiguration().locale, "%tF %tT", date, date);
+        SimpleDateFormat format = (SimpleDateFormat) SimpleDateFormat.getDateTimeInstance();
+        format.applyPattern("yyyy-MM-dd HH:mm:ss");
+        return format.format(date);
+    }
+
+    @NotNull
+    public static String formatDateChinese(long timestamp) {
+        if (timestamp < 0) {
+            return "-";
+        }
+        Date date = new Date(timestamp);
+        SimpleDateFormat format = (SimpleDateFormat) SimpleDateFormat.getDateTimeInstance();
+        format.applyPattern("yyyy年MM月dd日 HH时mm分ss秒");
+        return format.format(date);
     }
 
     /**
-     * 从{@link Context}中获取其宿主{@link Activity}，即{@code unwrap}{@link ContextWrapper}
+     * 从{@link Context}中获取其宿主{@link Activity}，即{@code unwrap} {@link ContextWrapper}
      *
      * @param context 被{@code wrap}的{@link Context}
      * @return 宿主 {@link Activity}
@@ -181,6 +200,11 @@ public class UniUtils {
         } else if (context instanceof ContextWrapper) {
             return getHostActivity(((ContextWrapper) context).getBaseContext());
         }
-        throw new IllegalArgumentException("The context passes in must be an Activity or a ContextWrapper! ");
+        throw new IllegalArgumentException("The context passed in must be an Activity or a ContextWrapper wrapping an Activity! ");
+    }
+
+
+    public static String fallback(@Nullable String nullable, @NonNull String fallback) {
+        return TextUtils.isEmpty(nullable) ? fallback : nullable;
     }
 }

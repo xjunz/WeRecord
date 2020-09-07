@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
 
 import io.reactivex.Completable;
 import io.reactivex.CompletableEmitter;
+import io.reactivex.CompletableObserver;
 import io.reactivex.Flowable;
 import io.reactivex.FlowableSubscriber;
 import io.reactivex.Maybe;
@@ -24,9 +25,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.schedulers.Schedulers;
+import xjunz.tool.wechat.impl.model.account.Account;
 
 /**
  * 方便创建各种{@link io.reactivex.Flowable}的工具类，避免写模板代码
+ * <p>
+ * 所创建的所有{@link Flowable}都是在{@link Schedulers#newThread()}中订阅，在
+ * {@link AndroidSchedulers#mainThread()}中被观察。
+ * </p>
  */
 public class RxJavaUtils {
     /**
@@ -86,7 +92,7 @@ public class RxJavaUtils {
     }
 
     /**
-     * 创建一个从{@link T}数组发射数据的{@link Flowable}
+     * 创建一个从{@link Account}数组发射数据的{@link Flowable}
      *
      * @param array 数据源
      * @param <T>   指定泛型
@@ -171,6 +177,27 @@ public class RxJavaUtils {
 
         @Override
         public void onComplete() {
+
+        }
+    }
+
+    /**
+     * {@link CompletableObserver}的适配器
+     */
+    public static class CompletableObservableAdapter implements CompletableObserver {
+
+        @Override
+        public void onSubscribe(Disposable d) {
+
+        }
+
+        @Override
+        public void onComplete() {
+
+        }
+
+        @Override
+        public void onError(Throwable e) {
 
         }
     }

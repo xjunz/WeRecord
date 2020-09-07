@@ -14,6 +14,8 @@ import androidx.databinding.BindingAdapter;
 import androidx.databinding.InverseBindingAdapter;
 import androidx.databinding.InverseBindingListener;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,7 +63,7 @@ public class FilterFragmentBindingAdapter {
      * @param sortByAttr   系统传入的{@link InverseBindingListener}
      */
     @BindingAdapter(value = {"android:onItemSelected", "android:sortByAttrChanged"}, requireAll = false)
-    public static void setSortByChangeListener(Spinner spinner, @Nullable final AdapterView.OnItemSelectedListener itemSelected, final InverseBindingListener sortByAttr) {
+    public static void setSortByChangeListener(@NotNull Spinner spinner, @Nullable final AdapterView.OnItemSelectedListener itemSelected, final InverseBindingListener sortByAttr) {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

@@ -4,56 +4,44 @@
 
 package xjunz.tool.wechat.impl.repo;
 
-import android.util.LruCache;
+import android.content.ContentValues;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import net.sqlcipher.Cursor;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import xjunz.tool.wechat.impl.model.message.Message;
-
+import xjunz.tool.wechat.impl.model.message.MessageFactory;
 
 public class MessageRepository extends LifecyclePerceptiveRepository {
-    private static MessageRepository sInstance;
-    private final static LruCache<String, List<Message>> sMessageCache = new LruCache<String, List<Message>>(1024 * 2) {
-        @Override
-        protected int sizeOf(String key, List<Message> value) {
-            return value.size();
-        }
-    };
 
 
-    public List<Message> getMessagesOf(String talkerId) {
-        MessageRepository messageDao = MessageRepository.getInstance();
-        if (sMessageCache.get(talkerId) != null) {
-            return sMessageCache.get(talkerId);
-        } else {
-            List<Message> messages = messageDao.queryMessagesByTalker(talkerId);
-            Collections.sort(messages, (o1, o2) -> Long.compare(o1.getCreateTimeStamp(), o2.getCreateTimeStamp()));
-            synchronized (sMessageCache) {
-                sMessageCache.put(talkerId, messages);
-            }
-            return messages;
-        }
+    MessageRepository() {
     }
 
-
-    private MessageRepository() {
-    }
-
-    @Override
-    public void purge() {
-        sInstance = null;
-    }
-
-
-    public static MessageRepository getInstance() {
-        sInstance = sInstance == null ? new MessageRepository() : sInstance;
-        return sInstance;
+    /**
+     * 获得指定{@link xjunz.tool.wechat.impl.model.account.Talker}的ID的实际消息数
+     * <p>
+     * {@link xjunz.tool.wechat.impl.model.account.Talker#messageCount}获得的消息数
+     * 来自"rconversation"表，是微信剔除了一些系统消息的消息数，不一定是"message"
+     * 表里实际的消息数。
+     *
+     * @return 实际消息数
+     * @see TalkerRepository#queryAll()
+     * </p>
+     */
+    public int getActualMessageCountOf(String id) {
+        Cursor cursor = getDatabase().rawQuery("select msgId from message where talker=" + "'" + id + "'", null);
+        int actualCount = cursor.getCount();
+        cursor.close();
+        return actualCount;
     }
 
     /**
@@ -69,46 +57,81 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
      * @return 查询到的实际消息数
      */
     public int queryMessageByTalkerLimit(@NonNull String id, int limitCount, @NonNull List<Message> formerMsgList) {
-        Cursor cursor = getDatabase().rawQuery("select type,isSend,createTime,content,imgPath,msgId,status from message where talker=" + "'"
+        Cursor cursor = getDatabase().rawQuery("select type,isSend,createTime,content,imgPath,msgId,status,talker from message where talker=" + "'"
                 + id + "'" + " order by createTime desc" + " limit " + limitCount + " offset " + formerMsgList.size(), null);
-        int i = 0;
         while (cursor.moveToNext()) {
-            i++;
-            Message message = new Message(cursor.getString(3), id);
-            message.setRawType(cursor.getInt(0));
-            message.setSend(cursor.getInt(1) == 1);
-            message.setCreateTimeStamp(cursor.getLong(2));
-            message.setImgPath(cursor.getString(4));
-            message.setMsgId(cursor.getInt(5));
-            message.setStatus(cursor.getInt(6));
-            formerMsgList.add(message);
+            formerMsgList.add(buildMessageFromCursor(cursor));
         }
+        int count = cursor.getCount();
         cursor.close();
-        return i;
+        return count;
     }
-
 
     /**
-     * 查询指定微信ID的全部消息记录
+     * 查询指定微信ID、指定消息起点和数量的消息记录，
+     * 为了减少内存占用和查询时间，我们不会查询消息
+     * 的所有字段，仅查询若干必要的字段
+     * <p>
+     * 记录以发送时间戳为排序依据，升序的形式排序
+     * </p>
      *
-     * @param id 指定{@link xjunz.tool.wechat.impl.model.account.Talker}的微信ID
-     * @return 全部消息记录
+     * @param id         微信ID
+     * @param offset     起点
+     * @param limitCount 消息数量
+     * @return 查询到的消息列表
      */
-    public List<Message> queryMessagesByTalker(String id) {
-        ArrayList<Message> messages = new ArrayList<>();
-        Cursor cursor = getDatabase().rawQuery("select rawType,isSend,createTime,content,imgPath,msgId from message where talker=" + "'" + id + "'", null);
+    public List<Message> queryMessageByTalkerLimit(@NonNull String id, int offset, int limitCount) {
+        List<Message> queried = new ArrayList<>();
+        Cursor cursor = getDatabase().rawQuery("select type,isSend,createTime,content,imgPath,msgId,status,talker from message where talker=" + "'"
+                + id + "'" + " order by createTime desc" + " limit " + limitCount + " offset " + offset, null);
         while (cursor.moveToNext()) {
-            Message message = new Message(cursor.getString(3), id);
-            message.setSend(cursor.getInt(1) == 1);
-            message.setCreateTimeStamp(cursor.getLong(2));
-            message.setImgPath(cursor.getString(4));
-            message.setMsgId(cursor.getInt(5));
-            message.setStatus(cursor.getInt(6));
-            messages.add(message);
+            queried.add(buildMessageFromCursor(cursor));
         }
         cursor.close();
-        return messages;
+        return queried;
     }
 
+    /**
+     * 从数据库中查询某消息记录，且记录其所有字段
+     *
+     * @param msgId 消息ID
+     * @return 返回查询到的消息，如果未查询到返回null
+     */
+    @Nullable
+    public Message queryMessageByMsgId(int msgId) {
+        Cursor cursor = getDatabase().rawQuery("select * from message where msgId=" + msgId, null);
+        if (cursor.moveToNext()) {
+            return buildMessageFromCursor(cursor);
+        }
+        cursor.close();
+        return null;
+    }
 
+    @NotNull
+    @Contract("_ -> new")
+    private Message buildMessageFromCursor(@NotNull Cursor cursor) {
+        ContentValues values = new ContentValues();
+        for (int i = 0; i < cursor.getColumnCount(); i++) {
+            switch (cursor.getType(i)) {
+                case Cursor.FIELD_TYPE_STRING:
+                    values.put(cursor.getColumnName(i), cursor.getString(i));
+                    break;
+                case Cursor.FIELD_TYPE_BLOB:
+                    values.put(cursor.getColumnName(i), cursor.getBlob(i));
+                    break;
+                case Cursor.FIELD_TYPE_FLOAT:
+                    //使用getDouble()可同时兼容Float类型和Double类型，防止Double类型被转为Float导致溢出
+                    values.put(cursor.getColumnName(i), cursor.getDouble(i));
+                    break;
+                case Cursor.FIELD_TYPE_INTEGER:
+                    //使用getLong()可同时兼容Long类型和Integer类型，防止Long类型被转为Integer导致溢出
+                    values.put(cursor.getColumnName(i), cursor.getLong(i));
+                    break;
+                case Cursor.FIELD_TYPE_NULL:
+                    values.putNull(cursor.getColumnName(i));
+                    break;
+            }
+        }
+        return MessageFactory.createMessage(values);
+    }
 }

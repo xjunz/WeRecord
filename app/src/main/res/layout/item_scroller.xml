@@ -7,7 +7,7 @@
     android:id="@+id/tv_text"
     android:layout_width="40dp"
     android:layout_height="40dp"
-    android:background="@drawable/bg_selectable_item"
+    android:background="@drawable/bg_selectable_item_white"
     android:clickable="true"
     android:focusable="true"
     android:gravity="center"

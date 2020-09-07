@@ -6,8 +6,12 @@
     <data>
 
         <variable
-            name="activity"
-            type="xjunz.tool.wechat.ui.main.MessageActivity" />
+            name="position"
+            type="int" />
+
+        <variable
+            name="model"
+            type="xjunz.tool.wechat.data.viewmodel.MessageViewModel" />
 
         <variable
             name="account"
@@ -29,7 +33,7 @@
             android:layout_width="@dimen/fab_small"
             android:layout_height="@dimen/fab_small"
             android:layout_marginStart="@dimen/spacing_normal"
-            android:layout_marginTop="@{message.groupTalkerId==null?@dimen/spacing_unit:@dimen/spacing_normal}"
+            android:layout_marginTop="@{message.inGroupChat?@dimen/spacing_normal:@dimen/spacing_unit}"
             android:avatar="@{account}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -47,8 +51,6 @@
 
         <TextView
             android:id="@+id/tv_message"
-            android:contextMenu="@{true}"
-            android:onClick="@{()->activity.onMessageClicked(message)}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_unit"
@@ -56,15 +58,17 @@
             android:layout_marginBottom="@dimen/spacing_unit"
             android:background="@drawable/bg_bubble_left"
             android:clickable="true"
+            android:contextMenu="@{true}"
             android:elevation="@dimen/z_bubble"
             android:focusable="true"
             android:gravity="start"
             android:maxWidth="@dimen/max_bubble_width"
+            android:onClick="@{()->model.setSelectedMessagePosition(position)}"
             android:paddingStart="@dimen/spacing_normal"
             android:paddingTop="@dimen/spacing_unit"
             android:paddingEnd="@dimen/spacing_normal"
             android:paddingBottom="@dimen/spacing_unit"
-            android:text="@{message.content}"
+            android:text="@{message.spannedContent}"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/iv_avatar"
@@ -76,7 +80,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="@{message.groupTalkerId==null?null:account.name}"
+            android:text="@{message.inGroupChat?account.name:null}"
             app:layout_constraintBottom_toTopOf="@+id/space"
             app:layout_constraintStart_toEndOf="@+id/iv_avatar"
             tools:text="@tools:sample/lorem" />

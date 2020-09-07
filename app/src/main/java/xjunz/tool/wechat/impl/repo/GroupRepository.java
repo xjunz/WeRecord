@@ -13,19 +13,24 @@ import java.util.List;
 import xjunz.tool.wechat.impl.model.account.Group;
 
 public class GroupRepository extends AccountRepository<Group> {
+    private static final int CACHE_CAPACITY = 20;
 
     GroupRepository() {
     }
 
     @Override
-    protected void queryAll(@NotNull List<Group> all) {
+    public int getCacheCapacity() {
+        return CACHE_CAPACITY;
+    }
+
+    @Override
+    protected void queryAllInternal(@NotNull List<Group> all) {
         Cursor cursor = getDatabase().rawQuery("select chatroomname,memberList,displayname,roomowner,memberCount from chatroom", null);
-        Group group = new Group();
-        while (cursor.moveToNext() || !cursor.isClosed()) {
-            group.id = cursor.getString(0);
-            group.setMemberIDSerial(cursor.getString(1));
+        while (cursor.moveToNext()) {
+            Group group = new Group(cursor.getString(0));
+            group.setMemberIdSerial(cursor.getString(1));
             group.memberDisplayName = cursor.getString(2);
-            group.groupOwnerID = cursor.getString(3);
+            group.groupOwnerId = cursor.getString(3);
             group.memberCount = cursor.getInt(4);
             all.add(group);
         }
@@ -33,14 +38,13 @@ public class GroupRepository extends AccountRepository<Group> {
     }
 
     @Override
-    public Group get(String id) {
+    protected Group query(String id) {
         Cursor cursor = getDatabase().rawQuery("select memberList,displayname,roomowner,memberCount from chatroom where chatroomname='" + id + "'", null);
-        Group group = new Group();
-        group.id = id;
-        if (cursor.moveToNext() || !cursor.isClosed()) {
-            group.setMemberIDSerial(cursor.getString(0));
+        Group group = new Group(id);
+        if (cursor.moveToNext()) {
+            group.setMemberIdSerial(cursor.getString(0));
             group.memberDisplayName = cursor.getString(1);
-            group.groupOwnerID = cursor.getString(2);
+            group.groupOwnerId = cursor.getString(2);
             group.memberCount = cursor.getInt(3);
         }
         cursor.close();

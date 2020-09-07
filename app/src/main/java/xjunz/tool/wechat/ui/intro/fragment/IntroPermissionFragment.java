@@ -15,6 +15,8 @@ import android.widget.ImageButton;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.jetbrains.annotations.NotNull;
+
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.util.Permissions;
 import xjunz.tool.wechat.util.UiUtils;
@@ -69,15 +71,16 @@ public class IntroPermissionFragment extends IntroFragment implements View.OnCli
     }
 
     @Override
-    public void onClick(View v) {
+    public void onClick(@NotNull View v) {
         switch (v.getId()) {
             case R.id.btn_access_wx_sandbox:
                 mBtnSandbox.setEnabled(false);
                 mBtnSandbox.setText(R.string.approved);
                 break;
             case R.id.btn_phone_permission:
-                mBtnPhone.setEnabled(false);
-                mBtnPhone.setText(R.string.approved);
+                mPermissions.requestPhonePermission();
+                /*mBtnPhone.setEnabled(false);
+                mBtnPhone.setText(R.string.approved);*/
                 break;
             case R.id.btn_storage_permission:
                 mPermissions.requestStoragePermission();
@@ -90,28 +93,25 @@ public class IntroPermissionFragment extends IntroFragment implements View.OnCli
     }
 
 
-    private void refreshStoragePermissionState() {
-        if (mPermissions.hasStoragePermission()) {
-            mBtnStorage.setText(R.string.permission_granted);
-            mBtnStorage.setEnabled(false);
-        } else if (mPermissions.isStoragePermissionBanned()) {
+    private void refreshPermissionState() {
+        if (mPermissions.hasPhonePermission()) {
+            mBtnPhone.setText(R.string.permission_granted);
+            mBtnPhone.setEnabled(false);
+        } else if (mPermissions.isPhonePermissionBanned()) {
             mBtnStorage.setText(R.string.goto_settings);
-            mBtnStorage.setOnClickListener(mGotoSettings);
+            mBtnPhone.setOnClickListener(mGotoSettings);
         }
     }
 
     private boolean hasDone() {
-        return !mBtnSandbox.isEnabled() && !mBtnPhone.isEnabled() && mPermissions.hasStorageRequested() &&
-                mPermissions.hasStoragePermission();
+        return !mBtnSandbox.isEnabled() && !mBtnPhone.isEnabled();
     }
 
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == Permissions.REQUEST_CODE_STORAGE) {
-            refreshStoragePermissionState();
-        }
+        refreshPermissionState();
         if (hasDone()) {
             notifyStepDone();
         }
@@ -122,7 +122,7 @@ public class IntroPermissionFragment extends IntroFragment implements View.OnCli
     public void onResume() {
         super.onResume();
         if (mShouldRefresh) {
-            refreshStoragePermissionState();
+            refreshPermissionState();
             if (hasDone()) {
                 notifyStepDone();
             }

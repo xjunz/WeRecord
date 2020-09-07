@@ -20,7 +20,6 @@ import xjunz.tool.wechat.data.viewmodel.PageConfig;
 import xjunz.tool.wechat.data.viewmodel.SortBy;
 import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.model.account.Talker;
-import xjunz.tool.wechat.impl.repo.AccountRepository;
 import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 import xjunz.tool.wechat.impl.repo.TalkerRepository;
 
@@ -73,9 +72,15 @@ public class ChatFragment extends ListPageFragment<Talker> {
         config.descriptionSelectionMap.clear();
     }
 
+
     @Override
-    public AccountRepository<Talker> getRepo() {
-        return RepositoryFactory.singleton(TalkerRepository.class);
+    public List<Talker> getAllOfType(@NonNull Contact.Type type) {
+        return RepositoryFactory.get(TalkerRepository.class).getAllOfType(type);
+    }
+
+    @Override
+    public List<Talker> getAll() {
+        return RepositoryFactory.get(TalkerRepository.class).getAll();
     }
 
 

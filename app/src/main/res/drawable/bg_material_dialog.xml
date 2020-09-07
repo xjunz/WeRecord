@@ -15,7 +15,7 @@
             <inset android:insetTop="@dimen/dp_2">
                 <shape android:shape="rectangle">
                     <corners android:radius="@dimen/corner_dialog" />
-                    <solid android:color="#E9E9E9" />
+                    <solid android:color="#F7F7F7" />
                 </shape>
             </inset>
         </item>
@@ -23,10 +23,9 @@
             <inset android:insetBottom="@dimen/dp_2">
                 <shape android:shape="rectangle">
                     <corners android:radius="@dimen/corner_dialog" />
-                    <solid android:color="#F8F8F8" />
+                    <solid android:color="#FAFAFA" />
                 </shape>
             </inset>
         </item>
-
     </layer-list>
 </inset>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="model"
+            type="xjunz.tool.wechat.data.viewmodel.EditorViewModel" />
+
+        <variable
+            name="account"
+            type="xjunz.tool.wechat.impl.model.account.Account" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="@{()->model.setCandidateSender(account)}"
+        android:padding="@dimen/spacing_unit">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/civ_avatar"
+            android:layout_width="@dimen/fab_medium"
+            android:layout_height="@dimen/fab_medium"
+            android:avatar="@{account}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@tools:sample/avatars" />
+
+        <ImageView
+            android:id="@+id/ib_selection"
+            android:layout_width="@dimen/fab_medium"
+            android:layout_height="@dimen/fab_medium"
+            android:background="@drawable/bg_circle"
+            android:backgroundTint="@color/colorMask"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_check_24dp"
+            android:tint="@android:color/white"
+            android:visible="@{model.candidateSender.id.equals(account.id)}"
+            app:layout_constraintBottom_toBottomOf="@id/civ_avatar"
+            app:layout_constraintEnd_toEndOf="@id/civ_avatar"
+            app:layout_constraintStart_toStartOf="@id/civ_avatar"
+            app:layout_constraintTop_toTopOf="@id/civ_avatar"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            style="@style/TextAppearance.AppCompat.Caption.Tag"
+            android:textSize="12sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/dp_4"
+            android:text="@string/group_owner"
+            android:visible="@{account.id.equals(model.groupTalker.groupOwnerId)}"
+            app:layout_constraintBottom_toTopOf="@+id/tv_name"
+            app:layout_constraintEnd_toEndOf="@+id/civ_avatar"
+            app:layout_constraintStart_toStartOf="@+id/civ_avatar" />
+
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:ellipsize="marquee"
+            android:gravity="center"
+            android:singleLine="true"
+            android:text="@{account.name}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:textColor="?android:textColorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/civ_avatar"
+            app:layout_constraintStart_toStartOf="@+id/civ_avatar"
+            app:layout_constraintTop_toBottomOf="@+id/civ_avatar"
+            tools:text="@tools:sample/first_names" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import org.apaches.commons.codec.digest.DigestUtils;
 
 import java.io.File;
+import java.io.IOException;
 
 import xjunz.tool.wechat.util.ShellUtils;
 
@@ -49,8 +50,8 @@ public class AvatarRepository extends LifecyclePerceptiveRepository {
                     + idMd5.substring(2, 4) + File.separator
                     + "user_" + idMd5 + ".png";
             try {
-                ShellUtils.cp(originalAvatarPath, backupAvatarPath, "decodeAvatar");
-            } catch (ShellUtils.ShellException e) {
+                ShellUtils.cp2data(originalAvatarPath, backupAvatarPath, true, "decodeAvatar");
+            } catch (ShellUtils.ShellException | IOException e) {
                 e.printStackTrace();
             }
         }

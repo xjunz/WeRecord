@@ -5,26 +5,27 @@ package xjunz.tool.wechat.impl.repo;
 
 import java.util.HashMap;
 
-public class RepositoryFactory {
-    private static HashMap<Class<? extends LifecyclePerceptiveRepository>, LifecyclePerceptiveRepository> sInstanceMap = new HashMap<>();
+public final class RepositoryFactory {
+    private static final HashMap<Class<? extends LifecyclePerceptiveRepository>, LifecyclePerceptiveRepository> sInstanceMap = new HashMap<>();
 
-    public static <T extends LifecyclePerceptiveRepository> T singleton(Class<T> tClass) {
-        LifecyclePerceptiveRepository singleton = sInstanceMap.get(tClass);
+    public static <T extends LifecyclePerceptiveRepository> T get(Class<T> repoClass) {
+        LifecyclePerceptiveRepository singleton = sInstanceMap.get(repoClass);
         if (singleton == null) {
-            synchronized (LifecyclePerceptiveRepository.class) {
+            synchronized (sInstanceMap) {
                 try {
-                    singleton = tClass.newInstance();
-                    sInstanceMap.put(tClass, singleton);
+                    singleton = repoClass.newInstance();
+                    sInstanceMap.put(repoClass, singleton);
                 } catch (IllegalAccessException | InstantiationException e) {
                     e.printStackTrace();
                 }
             }
         }
-        return tClass.cast(singleton);
+        return repoClass.cast(singleton);
     }
 
     static void remove(Class<? extends LifecyclePerceptiveRepository> tClass) {
-        sInstanceMap.remove(tClass);
+        synchronized (sInstanceMap) {
+            sInstanceMap.remove(tClass);
+        }
     }
-
 }
