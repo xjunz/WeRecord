@@ -33,7 +33,6 @@ public class MainPanel extends RelativeLayout {
     private View mMask;
     private int mCurtainHeight, mHandlerHeight, mFilterHeight;
     private int mMaxTop, mMinTop;
-    private boolean mReadyToUser = false;
     private ArrayList<OnPanelSlideListener> mListenerList;
 
     public MainPanel(Context context) {
@@ -60,22 +59,19 @@ public class MainPanel extends RelativeLayout {
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        mCurtainHeight = mCurtain.getMeasuredHeight();
+        mHandlerHeight = mTopBar.getMeasuredHeight();
+        mFilterHeight = mFilter.getMeasuredHeight();
+        mMinTop = mHandlerHeight - mCurtainHeight;
+        mMaxTop = -mHandlerHeight;
+    }
+
+    @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if (mReadyToUser) {
-            int filterCurTop = mFilter.getTop();
-            int curtainCurTop = mCurtain.getTop();
-            super.onLayout(changed, l, t, r, b);
-            mCurtain.layout(l, curtainCurTop, r, curtainCurTop + mCurtain.getHeight());
-            mFilter.layout(l, filterCurTop, r, filterCurTop + mFilter.getHeight());
-        } else {
-            super.onLayout(changed, l, t, r, b);
-            mCurtainHeight = mCurtain.getHeight();
-            mHandlerHeight = mTopBar.getHeight();
-            mFilterHeight = mFilter.getHeight();
-            mMinTop = mHandlerHeight - mCurtainHeight;
-            mMaxTop = -mHandlerHeight;
-            mCurtain.layout(l, mMinTop, r, mMinTop + mCurtainHeight);
-        }
+        super.onLayout(changed, l, t, r, b);
+        mCurtain.layout(l, mMinTop, r, mMinTop + mCurtainHeight);
     }
 
     @Override
@@ -115,7 +111,6 @@ public class MainPanel extends RelativeLayout {
 
             @Override
             public void onPanelSlideStart(boolean isToOpen) {
-                mReadyToUser = true;
                 if (!isToOpen) {
                     mTopBar.findViewById(R.id.et_search).requestFocus();
                     mTopBar.setVisibility(VISIBLE);
@@ -160,7 +155,7 @@ public class MainPanel extends RelativeLayout {
         }
     }
 
-    private ViewDragHelper.Callback mCallback = new ViewDragHelper.Callback() {
+    private final ViewDragHelper.Callback mCallback = new ViewDragHelper.Callback() {
         private int mFormerState = ViewDragHelper.STATE_IDLE;
 
         @Override

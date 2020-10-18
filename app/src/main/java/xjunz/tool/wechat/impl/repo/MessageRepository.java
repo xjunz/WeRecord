@@ -17,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import xjunz.tool.wechat.impl.DatabaseModifier;
+import xjunz.tool.wechat.impl.model.message.BackupMessage;
 import xjunz.tool.wechat.impl.model.message.Message;
 import xjunz.tool.wechat.impl.model.message.MessageFactory;
 
@@ -105,6 +107,17 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
         }
         cursor.close();
         return null;
+    }
+
+    public List<BackupMessage> queryBackupMessages(String id) {
+        List<BackupMessage> queried = new ArrayList<>();
+        Cursor cursor = getDatabase().rawQuery("select type,isSend,createTime,content,imgPath,msgId,status,talker,edition from " + DatabaseModifier.TABLE_ORIGINAL_MESSAGE_BACKUP + " where talker=" + "'"
+                + id + "'", null);
+        while (cursor.moveToNext()) {
+            queried.add(new BackupMessage(buildMessageFromCursor(cursor).getValues()));
+        }
+        cursor.close();
+        return queried;
     }
 
     @NotNull

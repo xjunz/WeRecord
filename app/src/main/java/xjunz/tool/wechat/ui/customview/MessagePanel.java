@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import xjunz.tool.wechat.R;
 
 /**
+ * 消息页面面板
  *
+ * @see R.layout#activity_message
  */
 public class MessagePanel extends ConstraintLayout {
     private ViewDragHelper mHelper;
@@ -44,8 +46,6 @@ public class MessagePanel extends ConstraintLayout {
             public void onPanelSlideFinished(boolean isOpen) {
                 if (!isOpen) {
                     mEtSearch.setVisibility(GONE);
-                } else {
-                    mIbEdit.setVisibility(INVISIBLE);
                 }
             }
 
@@ -53,8 +53,8 @@ public class MessagePanel extends ConstraintLayout {
             public void onPanelSlide(float fraction) {
                 mEtSearch.setAlpha(fraction);
                 mBottomBar.setElevation(fraction * mBottomBarElevation);
-                mIbEdit.setAlpha(1 - fraction);
                 int containerWidth = (int) (mMinContainerWidth + (1 - fraction) * (mIbContainerWidth - mMinContainerWidth));
+                mIbContainer.setRight(containerWidth);
                 setWidth(mIbContainer, containerWidth);
                 setWidth(mIndicator, containerWidth / 3);
                 mEtSearch.setTranslationX(mIbContainerWidth - (mIbContainerWidth - mMinContainerWidth * (2f / 3f)) * fraction);
@@ -75,7 +75,8 @@ public class MessagePanel extends ConstraintLayout {
         });
     }
 
-    private void setWidth(View view, int width) {
+    //这个方法会调用onLayout，所以要在onLayout中增加处理逻辑
+    private void setWidth(@NotNull View view, int width) {
         ViewGroup.LayoutParams lp = view.getLayoutParams();
         lp.width = width;
         view.setLayoutParams(lp);
@@ -127,18 +128,18 @@ public class MessagePanel extends ConstraintLayout {
         mBottomBarElevation = mBottomBar.getElevation();
     }
 
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (!mReadyToUser) {
             super.onLayout(changed, left, top, right, bottom);
-            mCurtainHeight = mCurtain.getHeight();
-            mMaxTop = mCurtainHeight - mIbContainer.getHeight();
+            mCurtainHeight = mCurtain.getMeasuredHeight();
+            mMaxTop = mCurtainHeight - mIbContainer.getMeasuredHeight();
             mMinTop = 0;
-            mIbContainerWidth = mIbContainer.getWidth();
+            mIbContainerWidth = mIbContainer.getMeasuredWidth();
             mMinContainerWidth = (int) (mIbContainerWidth * 0.5);
-            mCurtain.setTop(mMaxTop);
             mCurtain.setBottom(mMaxTop + mCurtainHeight);
-
+            mCurtain.setTop(mMaxTop);
         } else {
             int curtainCurTop = mCurtain.getTop();
             super.onLayout(changed, left, top, right, bottom);
@@ -165,7 +166,7 @@ public class MessagePanel extends ConstraintLayout {
         }
     }
 
-    private ViewDragHelper.Callback mCallback = new ViewDragHelper.Callback() {
+    private final ViewDragHelper.Callback mCallback = new ViewDragHelper.Callback() {
         private int mFormerState = ViewDragHelper.STATE_IDLE;
 
         @Override

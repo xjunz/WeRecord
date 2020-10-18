@@ -72,7 +72,7 @@ public class MessageActivityBindingAdapter {
                 }
 
                 @Override
-                public void onSuccess(Bitmap bitmap) {
+                public void onSuccess(@NotNull Bitmap bitmap) {
                     imageView.setImageBitmap(bitmap);
                 }
             });
@@ -88,7 +88,7 @@ public class MessageActivityBindingAdapter {
 
     @SuppressLint("ClickableViewAccessibility")
     @BindingAdapter(value = {"android:contextMenu", "android:onClick"})
-    public static void setContextMenu(View view, boolean clickToShow, View.OnClickListener onClickListener) {
+    public static void setContextMenu(@NotNull View view, boolean clickToShow, View.OnClickListener onClickListener) {
         Activity activity = UniUtils.getHostActivity(view.getContext());
         activity.registerForContextMenu(view);
         if (clickToShow) {
@@ -146,4 +146,6 @@ public class MessageActivityBindingAdapter {
             textView.setText(item.message.getParsedContent());
         }
     }
+
+
 }

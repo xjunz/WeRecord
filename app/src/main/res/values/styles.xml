@@ -24,6 +24,8 @@
     <style name="Base.AppTheme">
         <item name="alertDialogTheme">@style/Theme.AppCompat.Light.Dialog.Alert.Material
         </item>
+        <item name="android:ambientShadowAlpha">.039</item>
+        <item name="android:spotShadowAlpha">.089</item>
     </style>
 
 

@@ -34,17 +34,18 @@
     <string name="rationale">说明</string>
     <string name="rationale_imei_permission">根据微信的数据库加密算法，我们需要该设备的IMEI以<b>解密数据库</b>从而提取您所需要的记录。从安卓10(Q)开始，我们获取的IMEI
     不再是设备真正的IMEI，而是系统随机生成的串号。</string>
-    <string name="caption_availability">您已完成了所有的准备工作，现在检测此应用是否能在您的设备上正常使用。</string>
+    <string name="caption_availability">应用已成功获取到了ROOT权限，现在检测此应用能否在您的设备上正常工作。\n请点击下方的“<b>开始检查</b>”</string>
     <string name="checking">正在检查…</string>
     <string name="availability">可用性</string>
     <string name="permission_access_wx_sandbox">访问微信的私有文件</string>
     <string name="caption_permission_wx_sandbox">如数据库、图片等</string>
     <string name="declaration">声明</string>
-    <string name="read_and_approved">我已阅读</string>
+    <string name="read_and_approved">我已阅读并同意</string>
     <!--debug-->
     <string name="qchat_feedback_tip">已复制错误信息到剪贴板，粘贴后发送即可反馈</string>
     <string name="error_occurred">发生错误</string>
     <string name="feedback">反馈</string>
+    <string name="basic_info">Basic Info</string>
     <string name="input_environment_serial">Input environment serial: </string>
     <string name="parse">parse</string>
     <string name="environment_info_output">Environment information output: </string>
@@ -58,6 +59,8 @@
     <string name="start">开始</string>
     <string name="statistics">统计</string>
     <string name="close">关闭</string>
+    <string name="navigate">定位</string>
+
     <!--alert message-->
     <string name="init_failed">初始化失败</string>
     <string name="msg_init_failed">很抱歉，应用初始化失败! 我们需要您重新进入设置向导页面，进行<b>检查或反馈</b>，点击确定以继续。</string>
@@ -158,13 +161,14 @@
     <string name="has_reached_the_top">到顶啦</string>
     <string name="has_copied_to_clipboard">已复制到剪贴板</string>
     <string name="tn_message_list">tn_message_list</string>
-    <string name="restore">恢复</string>
+    <string name="restore">还原</string>
     <string name="reply">回复</string>
     <string name="gif">GIF图片</string>
     <string name="notification">通知</string>
     <string name="position_share">位置共享</string>
     <string name="unsupport_to_preview">&lt;暂不支持预览&gt;</string>
     <string name="parse_failed">&lt;内容解析失败&gt;</string>
+    <string name="edited_messages">已编辑的消息</string>
     <!--editor-->
     <string name="reset">重置</string>
     <string name="sender">发送者</string>
@@ -185,4 +189,13 @@
     <string name="exceeded_start_limit">超过允许时间范围下限</string>
     <string name="timestamp_parse_failed">格式错误，解析失败</string>
     <string name="format_send_time_limit"><![CDATA[起始: <i>%s</i><br>结束: <i>%s</i>]]></string>
+    <string name="status_send_failed">发送失败</string>
+    <string name="status_send_suc">发送成功</string>
+
+    <string name="check_origin">查看原消息</string>
+    <string name="modified">内容更改</string>
+    <string name="deleted">被移除</string>
+    <string name="added">新增</string>
+    <string name="functions">功能</string>
+
 </resources>

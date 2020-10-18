@@ -5,7 +5,9 @@
 package xjunz.tool.wechat.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.ResultReceiver;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -19,6 +21,7 @@ import io.reactivex.Completable;
 import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.impl.Environment;
 import xjunz.tool.wechat.impl.model.account.User;
+import xjunz.tool.wechat.ui.outer.DebugActivity;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
@@ -28,6 +31,16 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (imm != null) {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            //  MasterToast.shortToast("菜单键按下");
+            Intent intent = new Intent(this, DebugActivity.class);
+            startActivity(intent);
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @SuppressWarnings("JavaReflectionMemberAccess")

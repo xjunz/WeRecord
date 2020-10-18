@@ -5,6 +5,7 @@ package xjunz.tool.wechat.data.viewmodel;
 
 import android.text.Editable;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
@@ -73,8 +74,13 @@ public class EditorViewModel extends ObservableViewModel {
      */
     public static final int EDIT_MODE_ADD_AFTER = 5;
 
+    @NonNull
+    private Message requireModifiedMessage() {
+        return Objects.requireNonNull(modifiedMessage.get());
+    }
+
     public void setModifiedContent(String modified) {
-        Objects.requireNonNull(modifiedMessage.get()).setContent(modified);
+        requireModifiedMessage().modifyContent(modified);
         modifiedMessage.notifyChange();
         contentChanged.set(!modified.equals(originalMessage.getContent()));
     }
@@ -83,6 +89,18 @@ public class EditorViewModel extends ObservableViewModel {
         return editMode == EDIT_MODE_EDIT;
     }
 
+    public void switchStatus() {
+        if (!requireModifiedMessage().getStatus().equals(originalMessage.getStatus())) {
+            requireModifiedMessage().setStatus(originalMessage.getStatus());
+        } else {
+            if (originalMessage.getStatus().equals(Message.STATUS_SEND_FAILED)) {
+                requireModifiedMessage().setStatus(Message.STATUS_SEND_SUC);
+            } else {
+                requireModifiedMessage().setStatus(Message.STATUS_SEND_FAILED);
+            }
+        }
+        modifiedMessage.notifyChange();
+    }
 
     public void setStartAndEndSendTimestampLimit(long start, long end) {
         this.sendTimestampStartLimit = start;
@@ -149,10 +167,12 @@ public class EditorViewModel extends ObservableViewModel {
         this.selectedSender.set(account);
     }
 
-    public void setSelectedSender(Account selectedSender) {
+    public void setSelectedSender(@NotNull Account selectedSender) {
+        requireModifiedMessage().modifySenderId(selectedSender.id);
         this.candidateSender.set(selectedSender);
         this.selectedSender.set(selectedSender);
         this.senderChanged.set(!selectedSender.equals(defSender));
+        modifiedMessage.notifyChange();
     }
 
     public void setCandidateSender(Account selectedSender) {
@@ -160,6 +180,7 @@ public class EditorViewModel extends ObservableViewModel {
     }
 
     public void setModifiedTimestamp(long modifiedTimestamp) {
+        requireModifiedMessage().setCreateTimeStamp(modifiedTimestamp);
         this.modifiedTimestamp.set(modifiedTimestamp);
         this.sendTimestampChanged.set(modifiedTimestamp != defSendTimestamp);
     }

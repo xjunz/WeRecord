@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="model"
+            type="xjunz.tool.wechat.data.viewmodel.MessageViewModel" />
+
+        <variable
+            name="item"
+            type="xjunz.tool.wechat.ui.message.fragment.EditionFragment.EditionItem" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_selectable_item_white"
+        android:elevation="@dimen/z_item"
+        android:transitionGroup="false">
+
+        <TextView
+            android:id="@+id/tv_sender"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@{item.message.senderAccount.name??@string/system_msg}"
+            android:textColor="?colorAccent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="发送者" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/spacing_unit"
+            app:layout_constraintBottom_toTopOf="@+id/expandable"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_content" />
+
+        <TextView
+            android:id="@+id/tv_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:layout_marginEnd="@dimen/spacing_unit"
+            android:ellipsize="end"
+            android:maxLines="5"
+            android:text="@{item.message.parsedContent}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            app:layout_constraintEnd_toStartOf="@+id/tv_edition_status"
+            app:layout_constraintStart_toStartOf="@+id/tv_sender"
+            app:layout_constraintTop_toBottomOf="@+id/tv_sender"
+            tools:text="@tools:sample/lorem/random" />
+
+        <TextView
+            android:id="@+id/tv_edition_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:text="@{item.message.editionType.captionRes}"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_sender"
+            tools:text="已删除" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/expandable"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_content">
+
+            <Button
+                android:id="@+id/btn_check_origin"
+                style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/check_origin"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="查看原消息" />
+
+            <Button
+                android:id="@+id/btn_navigate"
+                style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="@{()->model.notifyNavigate(item.message)}"
+                android:text="@string/navigate"
+                app:layout_constraintEnd_toStartOf="@+id/btn_restore"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toEndOf="@+id/btn_check_origin"
+                app:layout_constraintTop_toTopOf="@+id/btn_check_origin"
+                tools:text="定位" />
+
+            <Button
+                android:id="@+id/btn_restore"
+                style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/restore"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/btn_navigate"
+                tools:text="还原" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

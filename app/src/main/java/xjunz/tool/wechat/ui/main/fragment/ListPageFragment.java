@@ -563,7 +563,7 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
                         //异步设置头像
                         RxJavaUtils.maybe(content::getAvatar).subscribe(new RxJavaUtils.MaybeObserverAdapter<Bitmap>() {
                             @Override
-                            public void onSuccess(Bitmap bitmap) {
+                            public void onSuccess(@NotNull Bitmap bitmap) {
                                 holder.ivAvatar.setImageBitmap(bitmap);
                             }
 

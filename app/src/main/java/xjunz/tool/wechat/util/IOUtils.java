@@ -6,6 +6,7 @@ package xjunz.tool.wechat.util;
 
 import org.apaches.commons.codec.DecoderException;
 import org.apaches.commons.codec.binary.Hex;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,6 +19,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 
 public class IOUtils {
 
@@ -109,5 +111,13 @@ public class IOUtils {
         return null;
     }
 
+    @NotNull
+    @Contract("_ -> new")
+    public static String readExceptionStackTrace(@NotNull Throwable e) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PrintStream stream = new PrintStream(out);
+        e.printStackTrace(stream);
+        return new String(out.toByteArray());
+    }
 
 }

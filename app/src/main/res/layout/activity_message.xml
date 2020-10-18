@@ -14,9 +14,6 @@
             name="model"
             type="xjunz.tool.wechat.data.viewmodel.MessageViewModel" />
 
-        <variable
-            name="talker"
-            type="xjunz.tool.wechat.impl.model.account.Talker" />
     </data>
 
     <xjunz.tool.wechat.ui.customview.MessagePanel

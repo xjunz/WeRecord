@@ -106,10 +106,6 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
         return mWechatMicroMsgPath;
     }
 
-    public String getCurrentUin() {
-        return mCurrentUin;
-    }
-
     public String getAvatarBackupPath() {
         return mAvatarBackupPath;
     }
@@ -150,7 +146,6 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
             mWechatDataPath = packageInfo.applicationInfo.dataDir;
             mWechatMicroMsgPath = mWechatDataPath + separator + "MicroMsg";
             mWechatSharedPrefsPath = mWechatDataPath + separator + "shared_prefs";
-            // initImei();
             mImei = readImei();
             initUins();
             initUsers();
@@ -263,7 +258,6 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
         }
     }
 
-    @Nullable
     private String readImei() {
         String keyInfoPath = mWechatDataPath + separator + "files" + separator + "KeyInfo.bin";
         String temp = mAppFilesDir + separator + "temp.bin";
@@ -288,11 +282,9 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
 
     private void tryOpenDatabaseOf(@NonNull User user, @NonNull String imei) {
         String possibleKey = DigestUtils.md5Hex(imei + user.uin).substring(0, 7).toLowerCase();
-        //UniUtils.copyPlainText("key", user.databasePragmaKey);
-        //7b04f0a
-        //name:db562df8
         mDatabaseOfCurUser = SQLiteDatabase.openDatabase(user.backupDatabaseFilePath, possibleKey, null, SQLiteDatabase.OPEN_READWRITE, this);
         user.databasePragmaKey = possibleKey;
+        //UniUtils.copyPlainText("key",possibleKey);
     }
 
     public DatabaseModifier modifyDatabase() {

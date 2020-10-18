@@ -51,9 +51,9 @@ public class IntroAvailabilityFragment extends IntroFragment implements View.OnC
         return view;
     }
 
-    private CompletableObserver mObserver = new CompletableObserver() {
+    private final CompletableObserver mObserver = new CompletableObserver() {
         @Override
-        public void onSubscribe(Disposable d) {
+        public void onSubscribe(@NotNull Disposable d) {
             mProgressDialog.show();
         }
 
@@ -107,6 +107,6 @@ public class IntroAvailabilityFragment extends IntroFragment implements View.OnC
 
     @Override
     public int getStepIndex() {
-        return 3;
+        return 2;
     }
 }

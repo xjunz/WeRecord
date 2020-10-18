@@ -3,6 +3,7 @@
  */
 package xjunz.tool.wechat.ui.message;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -10,6 +11,8 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -24,6 +27,9 @@ import xjunz.tool.wechat.ui.BaseActivity;
 import xjunz.tool.wechat.ui.message.fragment.dialog.ContentEditorDialog;
 import xjunz.tool.wechat.ui.message.fragment.dialog.SenderChooserDialog;
 import xjunz.tool.wechat.ui.message.fragment.dialog.TimestampEditorDialog;
+import xjunz.tool.wechat.util.RxJavaUtils;
+import xjunz.tool.wechat.util.ShellUtils;
+import xjunz.tool.wechat.util.UiUtils;
 
 public class EditorActivity extends BaseActivity {
     /**
@@ -78,11 +84,31 @@ public class EditorActivity extends BaseActivity {
     }
 
     public void confirmEdition(View view) {
+        Dialog progress = UiUtils.createProgressDialog(this, R.string.loading);
+        progress.show();
         Message modified = mModel.modifiedMessage.get();
         if (modified != null) {
-            DatabaseModifier modifier = getEnvironment().modifyDatabase();
-            modifier.replace(modified).commit();
-            finish();
+            RxJavaUtils.complete(() -> {
+                DatabaseModifier modifier = getEnvironment().modifyDatabase();
+                modifier.replace(modified).commit();
+                modifier.apply();
+            }).subscribe(new RxJavaUtils.CompletableObservableAdapter() {
+                @Override
+                public void onError(@NotNull Throwable e) {
+                    super.onError(e);
+                    progress.dismiss();
+                    UiUtils.toast(e.getMessage());
+                }
+
+                @Override
+                public void onComplete() {
+                    progress.dismiss();
+                    UiUtils.createAlert(EditorActivity.this, "是否重启微信?")
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .setPositiveButton(android.R.string.ok, (dialog, which) -> ShellUtils.restartWechat()).show();
+                    // finishAfterTransition();
+                }
+            });
         }
     }
 
@@ -90,4 +116,6 @@ public class EditorActivity extends BaseActivity {
     public void editTimestamp(View view) {
         new TimestampEditorDialog().show(getSupportFragmentManager(), "timestamp");
     }
+
+
 }

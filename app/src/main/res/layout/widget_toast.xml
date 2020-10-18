@@ -7,7 +7,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_toast"
-    android:letterSpacing="0.1"
+    android:letterSpacing="0.05"
     android:gravity="center|start"
     android:paddingHorizontal="@dimen/spacing_normal"
     android:paddingVertical="@dimen/spacing_unit"

@@ -11,6 +11,8 @@
             name="model"
             type="xjunz.tool.wechat.data.viewmodel.EditorViewModel" />
 
+        <import type="xjunz.tool.wechat.impl.model.message.Message" />
+
         <import type="xjunz.tool.wechat.util.UniUtils" />
     </data>
 
@@ -140,14 +142,14 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_sender"
-            android:onClick="editSender"
-            android:visible="@{!model.originalMessage.type.system}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_selectable_item_grey"
             android:clickable="true"
             android:elevation="@dimen/z_item"
             android:focusable="true"
+            android:onClick="editSender"
+            android:visible="@{!model.originalMessage.type.system}"
             app:layout_constraintStart_toStartOf="parent">
 
             <TextView
@@ -156,8 +158,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/spacing_unit"
                 android:layout_marginTop="@dimen/spacing_normal"
-                android:text="@string/sender"
                 android:changed="@{model.inEditMode&amp;&amp;model.senderChanged}"
+                android:text="@string/sender"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                 android:textColor="?colorAccent"
                 app:layout_constraintStart_toEndOf="@+id/iv_avatar"
@@ -202,13 +204,13 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_send_time"
-            android:onClick="editTimestamp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_selectable_item_grey"
             android:clickable="true"
             android:elevation="@dimen/z_item"
-            android:focusable="true">
+            android:focusable="true"
+            android:onClick="editTimestamp">
 
             <ImageView
                 android:id="@+id/iv_time"
@@ -228,8 +230,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/spacing_unit"
                 android:layout_marginTop="@dimen/spacing_normal"
-                android:text="@string/send_time"
                 android:changed="@{model.inEditMode&amp;&amp;model.sendTimestampChanged}"
+                android:text="@string/send_time"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                 android:textColor="?colorAccent"
                 app:layout_constraintStart_toEndOf="@+id/iv_time"
@@ -267,7 +269,9 @@
             android:background="@drawable/bg_selectable_item_grey"
             android:clickable="true"
             android:elevation="@dimen/z_item"
-            android:focusable="true">
+            android:focusable="true"
+            android:onClick="@{()->model.switchStatus()}"
+            android:visible="@{model.modifiedMessage.send}">
 
             <ImageView
                 android:id="@+id/iv_status"
@@ -288,6 +292,7 @@
                 android:layout_marginStart="@dimen/spacing_unit"
                 android:layout_marginTop="@dimen/spacing_normal"
                 android:text="@string/send_status"
+                android:changed="@{model.modifiedMessage.status!=model.originalMessage.status}"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                 android:textColor="?colorAccent"
                 app:layout_constraintStart_toEndOf="@+id/iv_status"
@@ -300,6 +305,7 @@
                 android:layout_marginStart="@dimen/spacing_unit"
                 android:layout_marginTop="@dimen/spacing_unit"
                 android:layout_marginEnd="@dimen/spacing_normal"
+                android:text="@{model.modifiedMessage.status==Message.STATUS_SEND_FAILED?@string/status_send_failed:@string/status_send_suc}"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/iv_status"

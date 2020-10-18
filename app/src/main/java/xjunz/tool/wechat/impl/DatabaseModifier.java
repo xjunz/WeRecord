@@ -15,9 +15,9 @@ import androidx.lifecycle.OnLifecycleEvent;
 import net.sqlcipher.Cursor;
 import net.sqlcipher.database.SQLiteDatabase;
 
-import org.apaches.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.NotNull;
 
+import xjunz.tool.wechat.impl.model.message.BackupMessage;
 import xjunz.tool.wechat.impl.model.message.Message;
 import xjunz.tool.wechat.util.ShellUtils;
 
@@ -33,73 +33,48 @@ public class DatabaseModifier implements LifecycleObserver {
     /**
      * 备份修改后的原消息的表名，该表用于判断某条消息是否被修改以及用于消息的恢复。
      */
-    private String TABLE_ORIGINAL_MESSAGE_BACKUP;
-    private SQLiteDatabase db;
-    private String databaseBackupPath;
-    private String databaseOriginalPath;
+    public static final String TABLE_ORIGINAL_MESSAGE_BACKUP = "WeBackup";
+    private final SQLiteDatabase db;
+    private final String databaseBackupPath;
+    private final String databaseOriginalPath;
+
+    private DatabaseModifier(@NotNull Environment environment) {
+        this.db = environment.getDatabaseOfCurrentUser();
+        this.databaseOriginalPath = environment.getCurrentUser().originalDatabaseFilePath;
+        this.databaseBackupPath = environment.getCurrentUser().backupDatabaseFilePath;
+    }
 
     @CheckResult
     static DatabaseModifier getInstance(Environment environment) {
         if (sInstance == null) {
             synchronized (DatabaseModifier.class) {
-                sInstance = new DatabaseModifier();
-                sInstance.db = environment.getDatabaseOfCurrentUser();
-                sInstance.databaseOriginalPath = environment.getCurrentUser().originalDatabaseFilePath;
-                sInstance.databaseBackupPath = environment.getCurrentUser().backupDatabaseFilePath;
-                //w-b= we-backup
-                sInstance.TABLE_ORIGINAL_MESSAGE_BACKUP = sInstance.generateBackupTableName("w-b" + environment.getCurrentUin());
+                sInstance = new DatabaseModifier(environment);
                 environment.getLifecycle().addObserver(sInstance);
             }
-        } else {
-            //如果获取实例时，数据库仍存在事务，说明上次事务并未被回滚或应用，我他妈直接回滚
-            if (sInstance.db.inTransaction()) {
-                sInstance.rollback();
-            }
         }
-        //创建备份表（如果不存在的话）
-        //即使sInstance不为null，这个表仍然可能没有被创建，因为事务可能没有提交
-        sInstance.createBackupTableIfNotExists();
         return sInstance;
     }
 
-    /**
-     * 生成备份表表名
-     * <p>
-     * 我们采用{@code md5}摘要，为了规避今后可能的撞表以及微信的检测
-     *
-     * @param identifier 标识，每个标识对应一个表名
-     * @return 备份表的表名
-     */
-    private String generateBackupTableName(String identifier) {
-        String raw = DigestUtils.md5Hex(identifier);
-        StringBuilder sb = new StringBuilder();
-        for (char c : raw.toCharArray()) {
-            if (c >= 'a' && c <= 'z') {
-                sb.append(c);
-            }
-        }
-        if (sb.toString().length() < 8) {
-            return generateBackupTableName("re" + identifier);
-        }
-        return sb.toString();
+    public void dropBackupTable() {
+        db.execSQL("drop table " + TABLE_ORIGINAL_MESSAGE_BACKUP);
     }
-
 
     /**
      * 创建消息备份表(如果不存在)，该表会复制{@code message}表的结构，但不会复制其内容
      *
      * @see DatabaseModifier#TABLE_ORIGINAL_MESSAGE_BACKUP
      */
-    private void createBackupTableIfNotExists() {
+    public void createBackupTableIfNotExists() {
         //判断备份表是否存在
-        //dbdfacdfde
         Cursor cursor = db.rawQuery("select name from sqlite_master where type='table' and name='" + TABLE_ORIGINAL_MESSAGE_BACKUP + "'", null);
         //如果不存在
         if (cursor.getCount() == 0) {
             //创建表
             db.execSQL("create table " + TABLE_ORIGINAL_MESSAGE_BACKUP + " as select * from message where 1<>1");
+            //创建"edition"字段
+            db.execSQL("alter table " + TABLE_ORIGINAL_MESSAGE_BACKUP + " add " + BackupMessage.KEY_EDITION + " int default 1");
             //为msgId创建唯一索引
-            db.execSQL("create unique index index" + TABLE_ORIGINAL_MESSAGE_BACKUP + "MsgId on " + TABLE_ORIGINAL_MESSAGE_BACKUP + "(msgId)");
+            db.execSQL("create unique index index" + TABLE_ORIGINAL_MESSAGE_BACKUP + "MsgId on " + TABLE_ORIGINAL_MESSAGE_BACKUP + " (msgId)");
         }
         cursor.close();
     }
@@ -110,9 +85,9 @@ public class DatabaseModifier implements LifecycleObserver {
      *
      * @param msgId 指定消息ID
      */
-    private void backupMessage(int msgId) {
-        transactUnless();
-        db.execSQL("replace into " + TABLE_ORIGINAL_MESSAGE_BACKUP + " select * from message where msgId=" + msgId);
+    private void backupMessage(int msgId, int editionFlag) {
+        createBackupTableIfNotExists();
+        db.execSQL("insert or ignore into " + TABLE_ORIGINAL_MESSAGE_BACKUP + " select *," + editionFlag + " from message where msgId=" + msgId);
     }
 
     /**
@@ -139,16 +114,16 @@ public class DatabaseModifier implements LifecycleObserver {
      */
     public DatabaseModifier insert(@NotNull Message msg) {
         transactUnless();
-        backupMessage(msg.getMsgId());
-        db.insert(TABLE_MESSAGE, "NULL", msg.getValues());
+        backupMessage(msg.getMsgId(), BackupMessage.EditionType.INSERT.flag);
+        db.insert(TABLE_MESSAGE, "content", msg.getValues());
         return this;
     }
 
 
     public DatabaseModifier replace(@NonNull Message msg) {
         transactUnless();
-        backupMessage(msg.getMsgId());
-        db.replace(TABLE_MESSAGE, "NULL", msg.getValues());
+        backupMessage(msg.getMsgId(), BackupMessage.EditionType.MODIFY.flag);
+        db.replace(TABLE_MESSAGE, "content", msg.getValues());
         return this;
     }
 
@@ -162,19 +137,17 @@ public class DatabaseModifier implements LifecycleObserver {
     @WorkerThread
     public void apply() throws ShellUtils.ShellException {
         if (db.inTransaction()) {
-            //确认所有更改
-            db.setTransactionSuccessful();
-            db.endTransaction();
-            Log.i("xjunz-", "========end transaction========");
-            //替换微信的原数据库为修改过的数据库
-            ShellUtils.cp(databaseBackupPath, databaseOriginalPath, "apply,1");
-            //删除原数据库运行时文件
-            //如不删除，微信会检测到数据库损坏，并执行数据库修复，修复数据可能导致数据丢失
-            ShellUtils.rmIfExists(databaseOriginalPath + "-shm", "apply,2");
-            ShellUtils.rmIfExists(databaseOriginalPath + "-wal", "apply,3");
-            ShellUtils.rmIfExists(databaseOriginalPath + ".ini", "apply,4");
-            ShellUtils.rmIfExists(databaseOriginalPath + ".sm", "apply,5");
+            throw new IllegalStateException("Changes are not confirmed, please call commit() first.");
         }
+        Log.i("xjunz-", "========end transaction========");
+        //替换微信的原数据库为修改过的数据库
+        ShellUtils.cp(databaseBackupPath, databaseOriginalPath, "apply,1");
+        //删除原数据库运行时文件
+        //如不删除，微信会检测到数据库损坏，并执行数据库修复，修复数据可能导致数据丢失
+        ShellUtils.rmIfExists(databaseOriginalPath + "-shm", "apply,2");
+        ShellUtils.rmIfExists(databaseOriginalPath + "-wal", "apply,3");
+        ShellUtils.rmIfExists(databaseOriginalPath + ".ini", "apply,4");
+        ShellUtils.rmIfExists(databaseOriginalPath + ".sm", "apply,5");
     }
 
     public void commit() {

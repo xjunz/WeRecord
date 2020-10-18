@@ -28,6 +28,15 @@ public class ExampleUnitTest {
         MessageParser.parseJoinGroupMessage("");
     }
 
+    @Test
+    public void testString() {
+        String wxid = "wxid_unknown";
+        String raw = "wxid_unknown:<hello:wxid_unknown>";
+        int index = raw.indexOf(':');
+        String newStr = "wxid_new" + raw.substring(index + wxid.length());
+        System.out.println(raw.substring(0, index));
+
+    }
 
     @Test
     public void testEdition() {

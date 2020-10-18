@@ -5,6 +5,7 @@ package xjunz.tool.wechat.util;
 
 import androidx.annotation.NonNull;
 
+import org.jetbrains.annotations.NotNull;
 import org.reactivestreams.Subscription;
 
 import java.util.concurrent.Callable;
@@ -110,17 +111,17 @@ public class RxJavaUtils {
     public static class SingleObserverAdapter<T> implements SingleObserver<T> {
 
         @Override
-        public void onSubscribe(Disposable d) {
+        public void onSubscribe(@NotNull Disposable d) {
 
         }
 
         @Override
-        public void onSuccess(T o) {
+        public void onSuccess(@NotNull T o) {
 
         }
 
         @Override
-        public void onError(Throwable e) {
+        public void onError(@NotNull Throwable e) {
 
         }
     }
@@ -133,17 +134,17 @@ public class RxJavaUtils {
     public static class MaybeObserverAdapter<T> implements MaybeObserver<T> {
 
         @Override
-        public void onSubscribe(Disposable d) {
+        public void onSubscribe(@NotNull Disposable d) {
 
         }
 
         @Override
-        public void onSuccess(T t) {
+        public void onSuccess(@NotNull T t) {
 
         }
 
         @Override
-        public void onError(Throwable e) {
+        public void onError(@NotNull Throwable e) {
 
         }
 
@@ -161,7 +162,7 @@ public class RxJavaUtils {
     public static class FlowableSubscriberAdapter<T> implements FlowableSubscriber<T> {
 
         @Override
-        public void onSubscribe(Subscription s) {
+        public void onSubscribe(@NotNull Subscription s) {
 
         }
 
@@ -187,7 +188,7 @@ public class RxJavaUtils {
     public static class CompletableObservableAdapter implements CompletableObserver {
 
         @Override
-        public void onSubscribe(Disposable d) {
+        public void onSubscribe(@NotNull Disposable d) {
 
         }
 
@@ -197,7 +198,7 @@ public class RxJavaUtils {
         }
 
         @Override
-        public void onError(Throwable e) {
+        public void onError(@NotNull Throwable e) {
 
         }
     }

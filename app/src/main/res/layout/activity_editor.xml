@@ -59,7 +59,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
                         android:letterSpacing=".05"
-                        android:text="编辑"
+                        android:text="@string/edit"
                         android:textColor="?colorAccent"
                         android:textSize="@dimen/ts_medium"
                         app:layout_constraintBottom_toBottomOf="parent"

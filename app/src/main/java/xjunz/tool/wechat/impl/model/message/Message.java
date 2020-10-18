@@ -25,11 +25,43 @@ import xjunz.tool.wechat.impl.repo.ContactRepository;
 import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 
 public class Message {
-    private ContentValues values;
+    private final ContentValues values;
+    /**
+     * 发送
+     */
     public static final Integer SEND = 1;
+    /**
+     * 对点接收
+     */
     public static final Integer RECEIVE_FROM_PEER = 0;
+    /**
+     * 全局对点接收
+     */
     public static final Integer RECEIVE_FROM_PEER_GLOBAL = 2;
+    /**
+     * 系统消息接收
+     */
     public static final Integer RECEIVE_FROM_SYSTEM = null;
+    /**
+     * 发送成功
+     */
+    public static final Integer STATUS_SEND_SUC = 2;
+    /**
+     * 接收成功
+     */
+    public static final Integer STATUS_RECEIVE_SUC = 3;
+    /**
+     * 全体可见的系统消息
+     */
+    public static final Integer STATUS_SYSTEM = 4;
+    /**
+     * 发送失败
+     */
+    public static final Integer STATUS_SEND_FAILED = 5;
+    /**
+     * 仅自己可见的一些系统消息
+     */
+    public static final Integer STATUS_LOCAL = null;
     public static final String KEY_MSG_ID = "msgId";
     public static final String KEY_CONTENT = "content";
     public static final String KEY_TYPE = "type";
@@ -98,6 +130,8 @@ public class Message {
         this.content = raw;
         if (!isSend()) {
             this.senderId = getTalkerId();
+        } else {
+            this.senderId = Environment.getInstance().getCurrentUser().id;
         }
     }
 
@@ -111,11 +145,11 @@ public class Message {
     }
 
 
-    public int getStatus() {
+    public Integer getStatus() {
         return values.getAsInteger(KEY_STATUS);
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         values.put(KEY_STATUS, status);
     }
 
@@ -123,8 +157,59 @@ public class Message {
         return values.getAsString(KEY_IMG_PATH);
     }
 
+    public void modifySenderId(@NonNull String newSenderId) {
+        if (senderId == null || newSenderId.equals(senderId)) {
+            return;
+        }
+        //如果消息内容不为空、不是用户本人发送的消息且是群聊
+        String raw = getRawContent();
+        String userId = Environment.getInstance().getCurrentUser().id;
+        //如果是群聊
+        if (isInGroupChat()) {
+            //如果是发送的消息
+            if (isSend()) {
+                //变成接收消息
+                values.put(KEY_IS_SEND, RECEIVE_FROM_PEER);
+                //在消息前加上ID和冒号
+                values.put(KEY_CONTENT, newSenderId + ":\n" + raw);
+            } else {
+                //如果是接收的消息
+                //且新的发送者为用户本身
+                if (newSenderId.equals(userId)) {
+                    //变成发送的消息
+                    values.put(KEY_IS_SEND, SEND);
+                    //删去消息前的ID和冒号
+                    //如果有换行，去掉换行
+                    String newMsg = raw.substring(requireSenderId().length() + 1);
+                    if (newMsg.startsWith("\n")) {
+                        values.put(KEY_CONTENT, newMsg.substring(1));
+                    } else {
+                        values.put(KEY_CONTENT, newMsg);
+                    }
+                } else {
+                    //替换掉原来的ID
+                    values.put(KEY_CONTENT, newSenderId + raw.substring(requireSenderId().length()));
+                }
+            }
+        } else {
+            //如果是单人聊天
+            //如果是发送
+            if (isSend()) {
+                //变成接收
+                values.put(KEY_IS_SEND, RECEIVE_FROM_PEER);
+            } else {
+                //否则变成发送
+                values.put(KEY_IS_SEND, SEND);
+            }
+        }
+        this.senderId = newSenderId;
+    }
+
     @Nullable
     public Account getSenderAccount() {
+        if (senderId == null) {
+            return null;
+        }
         if (senderAccount == null && !hasTriedFindingSender) {
             if (isSend()) {
                 senderAccount = Environment.getInstance().getCurrentUser();
@@ -139,11 +224,11 @@ public class Message {
 
     @NonNull
     public String requireSenderId() {
-        return Objects.requireNonNull(getSenderId(), "Got null senderId, this message may be sent by the user. ");
+        return Objects.requireNonNull(getSenderId(), "Got null senderId, this message may be a system message.");
     }
 
     /**
-     * 获取本条消息发送者ID，如果发送者为用户本人或者未找到发送者（如某些系统消息），返回NULL
+     * 获取本条消息发送者ID，如果未找到发送者（如某些系统消息），返回NULL
      *
      * @return 消息发送者ID
      */
@@ -203,12 +288,10 @@ public class Message {
         return content;
     }
 
-    public void setContent(String content) {
+    public void modifyContent(String content) {
         this.content = content;
-        if (isInGroupChat()) {
-            if (senderId != null) {
-                values.put(KEY_CONTENT, senderId + ":\n" + content);
-            }
+        if (isInGroupChat() && !isSend() && senderId != null) {
+            values.put(KEY_CONTENT, senderId + ":\n" + content);
         } else {
             values.put(KEY_CONTENT, content);
         }
@@ -257,7 +340,7 @@ public class Message {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Message)) {
             return false;
         }
         Message message = (Message) o;

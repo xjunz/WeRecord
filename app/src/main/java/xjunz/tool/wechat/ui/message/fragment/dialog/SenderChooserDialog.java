@@ -15,6 +15,8 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.Callable;
 
 import xjunz.tool.wechat.R;
@@ -96,7 +98,7 @@ public class SenderChooserDialog extends DialogFragment {
             if (id != null) {
                 RxJavaUtils.single((Callable<Account>) () -> repository.get(id)).subscribe(new RxJavaUtils.SingleObserverAdapter<Account>() {
                     @Override
-                    public void onSuccess(Account o) {
+                    public void onSuccess(@NotNull Account o) {
                         holder.binding.setAccount(o);
                         holder.binding.executePendingBindings();
                     }
@@ -109,7 +111,7 @@ public class SenderChooserDialog extends DialogFragment {
 
         @Override
         public int getItemCount() {
-            return mSenderIds.length;
+            return mSenderIds == null ? 0 : mSenderIds.length;
         }
     }
 

@@ -10,6 +10,8 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 
+import org.jetbrains.annotations.NotNull;
+
 import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -53,7 +55,7 @@ public class SplashActivity extends BaseActivity implements CompletableObserver 
     }
 
     @Override
-    public void onSubscribe(Disposable d) {
+    public void onSubscribe(@NotNull Disposable d) {
 
     }
 
@@ -74,7 +76,7 @@ public class SplashActivity extends BaseActivity implements CompletableObserver 
     }
 
     @Override
-    public void onError(Throwable e) {
+    public void onError(@NotNull Throwable e) {
         App.getSharedPrefsManager().setIsAppIntroDone(false);
         UiUtils.createDialog(this, R.string.init_failed, R.string.msg_init_failed).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override

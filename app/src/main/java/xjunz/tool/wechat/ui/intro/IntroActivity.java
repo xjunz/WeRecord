@@ -30,10 +30,10 @@ import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.ui.BaseActivity;
 import xjunz.tool.wechat.ui.intro.fragment.IntroAvailabilityFragment;
 import xjunz.tool.wechat.ui.intro.fragment.IntroFragment;
-import xjunz.tool.wechat.ui.intro.fragment.IntroPermissionFragment;
 import xjunz.tool.wechat.ui.intro.fragment.IntroSuFragment;
 import xjunz.tool.wechat.ui.intro.fragment.IntroWelcomeFragment;
 import xjunz.tool.wechat.ui.outer.SplashActivity;
+import xjunz.tool.wechat.util.UiUtils;
 
 public class IntroActivity extends BaseActivity implements IntroFragment.OnStepDoneListener {
     private ViewPager2 mViewPager;
@@ -45,7 +45,7 @@ public class IntroActivity extends BaseActivity implements IntroFragment.OnStepD
         @Override
         public void onPageSelected(int position) {
             IntroFragment fragment = mPages[position];
-            mTvTitle.setText(fragment.getTitleResource());
+            UiUtils.fadeSwitchText(mTvTitle, fragment.getTitleResource());
             mIvIcon.setImageResource(fragment.getIconResource());
             mTvIndicator.setText(String.format(getString(R.string.indicator_text), position + 1, mPages.length));
             if (position == 0) {
@@ -93,11 +93,11 @@ public class IntroActivity extends BaseActivity implements IntroFragment.OnStepD
     }
 
     private void initPages() {
-        mPages = new IntroFragment[4];
+        mPages = new IntroFragment[3];
         mPages[0] = new IntroWelcomeFragment();
         mPages[1] = new IntroSuFragment();
-        mPages[2] = new IntroPermissionFragment();
-        mPages[3] = new IntroAvailabilityFragment();
+        //  mPages[2] = new IntroPermissionFragment();
+        mPages[2] = new IntroAvailabilityFragment();
         IntroFragment.setOnStepDoneListener(this);
     }
 
@@ -136,25 +136,24 @@ public class IntroActivity extends BaseActivity implements IntroFragment.OnStepD
 
     public void gotoNext(View view) {
         if (mViewPager.getCurrentItem() == mPages.length - 1) {
-            App.getSharedPrefsManager().setIsAppIntroDone(true);
-            Intent i = new Intent(this, SplashActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
-        }
-        if (mViewPager.getCurrentItem() == 0) {
             try {
-                InputStream inputStream = getAssets().open("dc-191013-01.html");
+                InputStream inputStream = getAssets().open("dc-20-09-07.html");
                 byte[] all = new byte[inputStream.available()];
                 if (inputStream.read(all) == all.length) {
                     new AlertDialog.Builder(this, R.style.Theme_AppCompat_Light_DialogWhenLarge_Material).setTitle(R.string.declaration)
                             .setMessage(Html.fromHtml(new String(all)))
-                            .setPositiveButton(R.string.read_and_approved, new DialogInterface.OnClickListener() {
+                            .setPositiveButton(R.string.read_and_approved, (dialog, which) -> {
+                                App.getSharedPrefsManager().setIsAppIntroDone(true);
+                                Intent i = new Intent(this, SplashActivity.class);
+                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(i);
+                            })
+                            .setNegativeButton(R.string.exit, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
+                                    finish();
                                 }
                             })
-                            .setNegativeButton(android.R.string.cancel, null)
                             .show();
                 }
             } catch (IOException e) {

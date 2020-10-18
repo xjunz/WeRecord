@@ -7,7 +7,6 @@ package xjunz.tool.wechat.util;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.jaredrummler.android.shell.BuildConfig;
 import com.jaredrummler.android.shell.CommandResult;
 import com.jaredrummler.android.shell.Shell;
 
@@ -15,6 +14,8 @@ import org.apaches.commons.codec.binary.Hex;
 
 import java.io.File;
 import java.io.IOException;
+
+import xjunz.tool.wechat.BuildConfig;
 
 public class ShellUtils {
 
@@ -48,6 +49,7 @@ public class ShellUtils {
      *
      * @param srcPath 源文件路径
      * @param tarPath 目标路径
+     * @param overwriteIfExists 如果目标文件已存在，是否重写
      */
     public static void cp2data(String srcPath, String tarPath, boolean overwriteIfExists, String msgWhenFail) throws IOException, ShellException {
         File target = new File(tarPath);
