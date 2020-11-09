@@ -32,10 +32,24 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/spacing_normal"
             android:labelFor="@+id/et_editor"
-            android:text="编辑发送时间"
+            android:text="@string/edit_send_timestamp"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/ib_help"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_unit"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/help"
+            android:tint="?android:textColorSecondary"
+            android:help="@{@string/help_send_timestamp}"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_title"
+            app:layout_constraintStart_toEndOf="@+id/tv_title"
+            app:layout_constraintTop_toTopOf="@+id/tv_title"
+            app:srcCompat="@drawable/ic_help_outline_black_20dp" />
 
         <EditText
             android:id="@+id/et_editor"
@@ -75,18 +89,19 @@
             android:layout_height="@dimen/dp_20"
             android:layout_marginStart="@dimen/spacing_normal"
             android:layout_marginTop="@dimen/spacing_normal"
+            android:contentDescription="@string/alert"
             android:src="@drawable/ic_baseline_info_24dp"
-            android:tint="?colorAccent"
             android:visible="@{!model.inEditMode}"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_hint" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_hint"
+            app:tint="?colorAccent" />
 
         <TextView
             android:id="@+id/tv_caption_info"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:padding="@dimen/dp_4"
-            android:text="允许设置的时间范围"
+            android:text="@string/allowed_timestamp_range"
             android:textStyle="bold"
             android:visible="@{!model.inEditMode}"
             app:layout_constraintBottom_toBottomOf="@+id/iv_info"

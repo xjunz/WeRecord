@@ -52,6 +52,11 @@ public class ViewUniversalBindingAdapter {
         }
     }
 
+    @BindingAdapter("android:help")
+    public static void setHelp(@NotNull View view, String helpText) {
+        view.setOnClickListener(v -> UiUtils.createHelp(view.getContext(), helpText).show());
+    }
+
     @BindingAdapter("android:error")
     public static void setError(@NotNull EditText editText, String errorText) {
         editText.setError(errorText);

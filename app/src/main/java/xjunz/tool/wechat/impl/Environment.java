@@ -8,6 +8,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
+import android.os.Process;
+import android.text.TextUtils;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -69,7 +71,7 @@ import xjunz.tool.wechat.util.UniUtils;
  * </p>
  */
 public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleOwner {
-    private LifecycleRegistry mLifecycle;
+    private final LifecycleRegistry mLifecycle;
     private static Environment sEnvironment;
     private transient final String DEF_IMEI = "1234567890ABCDEF";
     private transient String mWechatDataPath;
@@ -87,6 +89,7 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
     private List<String> mUinList;
     private SQLiteDatabase mDatabaseOfCurUser;
     private User mCurrentUser;
+
 
     public SQLiteDatabase getDatabaseOfCurrentUser() {
         if (!initialized()) {
@@ -215,13 +218,15 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
 
     private void initUins() throws ShellUtils.ShellException {
         String out = ShellUtils.cat(mWechatSharedPrefsPath + separator + "app_brand_global_sp.xml", "initUins,1");
+        // /data/user/0/com.tencent.mm/shared_prefs/app_brand_global_sp.xml
         mUinList = UniUtils.extract(out, ">(\\d+)<");
         if (mUinList.size() == 0) {
             throw new RuntimeException("No uin set found");
         }
-        out = ShellUtils.cat(mWechatSharedPrefsPath + separator + "system_config_prefs.xml", "initUins,2");
-        mCurrentUin = UniUtils.extractFirst(out, "default_uin\" value=\"(\\d+)");
-        if (mCurrentUin == null) {
+        out = ShellUtils.cat(mWechatSharedPrefsPath + separator + "com.tencent.mm_preferences.xml", "initUins,2");
+        mCurrentUin = UniUtils.extractFirst(out, "last_login_uin\">(\\d+)<");
+        //out = ShellUtils.cat(mWechatSharedPrefsPath + separator + "system_config_prefs.xml", "initUins,2");
+        if (TextUtils.isEmpty(mCurrentUin)) {
             throw new RuntimeException("No last login uin found");
         }
     }
@@ -258,26 +263,20 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
         }
     }
 
-    private String readImei() {
+    private String readImei() throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, ShellUtils.ShellException, InvalidKeyException {
         String keyInfoPath = mWechatDataPath + separator + "files" + separator + "KeyInfo.bin";
+        SecretKeySpec secretKeySpec = new SecretKeySpec("_wEcHAT_".getBytes(), "RC4");
+        Cipher cipher = Cipher.getInstance("RC4");
+        cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
         String temp = mAppFilesDir + separator + "temp.bin";
         File tempFile = new File(temp);
-        try {
-            SecretKeySpec secretKeySpec = new SecretKeySpec("_wEcHAT_".getBytes(), "RC4");
-            Cipher cipher = Cipher.getInstance("RC4");
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
-            ShellUtils.cp2data(keyInfoPath, temp, false, "readImei");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new CipherInputStream(new FileInputStream(temp), cipher)));
-            String key = reader.readLine();
-            reader.close();
-            return key;
-        } catch (NoSuchPaddingException | NoSuchAlgorithmException | IOException | ShellUtils.ShellException | InvalidKeyException e) {
-            e.printStackTrace();
-        } finally {
-            //noinspection ResultOfMethodCallIgnored
-            tempFile.delete();
-        }
-        return DEF_IMEI;
+        ShellUtils.cp2data(keyInfoPath, temp, false, "readImei");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new CipherInputStream(new FileInputStream(temp), cipher)));
+        String key = reader.readLine();
+        reader.close();
+        //noinspection ResultOfMethodCallIgnored
+        tempFile.delete();
+        return key;
     }
 
     private void tryOpenDatabaseOf(@NonNull User user, @NonNull String imei) {
@@ -345,7 +344,8 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
     @Contract(pure = true)
     private static String getVersionInfo() {
         return "<b>version_name</b>: " + App.VERSION_NAME + "<br/>" +
-                "<b>version_code</b>: " + App.VERSION_CODE;
+                "<b>version_code</b>: " + App.VERSION_CODE + "<br/>" + "<b>pid:</>" + Process.myPid()
+                + "<br/>" + "<b>uid:</b>" + Process.myUid();
     }
 
 

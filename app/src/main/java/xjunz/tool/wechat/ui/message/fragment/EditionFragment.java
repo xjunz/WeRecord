@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
@@ -26,7 +27,10 @@ import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.data.viewmodel.MessageViewModel;
 import xjunz.tool.wechat.databinding.FragmentEditionBinding;
 import xjunz.tool.wechat.databinding.ItemEditionBinding;
+import xjunz.tool.wechat.impl.DatabaseModifier;
+import xjunz.tool.wechat.impl.Environment;
 import xjunz.tool.wechat.impl.model.message.BackupMessage;
+import xjunz.tool.wechat.impl.model.message.Edition;
 import xjunz.tool.wechat.impl.repo.MessageRepository;
 import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 import xjunz.tool.wechat.util.RxJavaUtils;
@@ -46,14 +50,30 @@ public class EditionFragment extends Fragment {
         mModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(MessageViewModel.class);
     }
 
+    public void restoreMessage(int msgId) {
+        DatabaseModifier modifier = Environment.getInstance().modifyDatabase();
+
+    }
+
     private void loadAllBackupMessages() {
         RxJavaUtils.complete(() -> {
             MessageRepository repository = RepositoryFactory.get(MessageRepository.class);
-            List<BackupMessage> messages = repository.queryBackupMessages(mModel.currentTalker.id);
-            for (int i = 0; i < messages.size(); i++) {
-                EditionItem item = new EditionItem(messages.get(i));
-                mItemList.add(item);
+            List<BackupMessage> messages = repository.queryAllBackupMessages(mModel.currentTalker.id);
+            for (BackupMessage backup : messages) {
+                Edition edition;
+                switch (backup.getEditionFlag()) {
+                    case Edition.FLAG_DELETION:
+                        edition = Edition.delete(backup);
+                        break;
+                    case Edition.FLAG_INSERTION:
+                        edition = Edition.insert(backup);
+                        break;
+                    case Edition.FLAG_REPLACEMENT:
+                        edition = Edition.replace(backup, repository.queryMessageByMsgId(backup.getMsgId()));
+                        break;
+                }
             }
+
         }).subscribe(new RxJavaUtils.CompletableObservableAdapter() {
             @Override
             public void onComplete() {
@@ -65,16 +85,30 @@ public class EditionFragment extends Fragment {
     }
 
     public static class EditionItem {
-        public BackupMessage message;
+        public Edition edition;
         public boolean expanded;
 
         public void collapseOrExpand() {
             expanded = !expanded;
         }
 
-        public EditionItem(BackupMessage message) {
-            this.message = message;
+        public EditionItem(Edition edition) {
+            this.edition = edition;
         }
+
+        @StringRes
+        public int getEditionFlagCaption() {
+            switch (edition.getFlag()) {
+                case Edition.FLAG_DELETION:
+                    return R.string.edition_type_deleted;
+                case Edition.FLAG_INSERTION:
+                    return R.string.edition_type_insertion;
+                case Edition.FLAG_REPLACEMENT:
+                    return R.string.edition_type_rep;
+            }
+            throw new IllegalArgumentException("Unknown edition flag: " + edition.getFlag());
+        }
+
     }
 
     @Nullable
@@ -128,8 +162,8 @@ public class EditionFragment extends Fragment {
                 super(binding.getRoot());
                 this.binding = binding;
                 this.binding.setModel(mModel);
+                this.binding.btnRestore.setOnClickListener(v -> restoreMessage(binding.getItem().edition.getOrigin().getMsgId()));
                 this.itemView.setOnClickListener(v -> {
-                    /* TransitionManager.beginDelayedTransition(mBinding.rvEdition);*/
                     binding.getItem().collapseOrExpand();
                     binding.expandable.setVisibility(binding.getItem().expanded ? View.VISIBLE : View.GONE);
                     TransitionManager.go(new Scene(mBinding.rvEdition), transition);

@@ -32,6 +32,7 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_avatar"
+            style="@style/SelectableCircleImageView"
             android:layout_width="@dimen/fab_small"
             android:layout_height="@dimen/fab_small"
             android:layout_marginStart="@dimen/spacing_normal"
@@ -106,6 +107,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:maxWidth="@dimen/max_bubble_width"
+                android:visible="@{message.title!=null}"
                 android:text="@{message.title??@string/parse_failed}"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="?android:textColorPrimary"

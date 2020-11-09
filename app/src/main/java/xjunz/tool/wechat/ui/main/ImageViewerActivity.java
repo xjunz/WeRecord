@@ -15,12 +15,12 @@ import androidx.annotation.Nullable;
 import java.util.Objects;
 
 import xjunz.tool.wechat.R;
-import xjunz.tool.wechat.impl.model.account.Contact;
+import xjunz.tool.wechat.impl.model.account.Account;
 import xjunz.tool.wechat.ui.BaseActivity;
 import xjunz.tool.wechat.util.UiUtils;
 
 public class ImageViewerActivity extends BaseActivity {
-    public static final String EXTRA_CONTACT = "ImageViewerActivity.extra.contact";
+    public static final String EXTRA_ACCOUNT = "ImageViewerActivity.extra.account";
     ImageView mIvAvatar;
 
     @Override
@@ -30,7 +30,7 @@ public class ImageViewerActivity extends BaseActivity {
         mIvAvatar = findViewById(R.id.iv_avatar);
         setWithAndHeight();
         Intent intent = getIntent();
-        Contact contact = (Contact) Objects.requireNonNull(intent.getSerializableExtra(EXTRA_CONTACT), "Got null contact");
+        Account contact = (Account) Objects.requireNonNull(intent.getSerializableExtra(EXTRA_ACCOUNT), "Got null account");
         Bitmap bitmap = contact.getAvatar();
         if (bitmap == null) {
             UiUtils.toast(R.string.no_local_avatar_found);

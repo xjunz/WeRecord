@@ -14,9 +14,9 @@ import java.util.List;
 
 import xjunz.tool.wechat.impl.model.account.Account;
 
-public abstract class AccountRepository<T extends Account> extends LifecyclePerceptiveRepository {
+abstract class AccountRepository<T extends Account> extends LifecyclePerceptiveRepository {
     private List<T> mAll = new ArrayList<>();
-    private LruCache<String, T> mCache;
+    private final LruCache<String, T> mCache;
 
     AccountRepository() {
         mCache = new LruCache<>(getCacheCapacity());

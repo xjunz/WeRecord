@@ -40,7 +40,7 @@ public class UniUtils {
     private static final String feedbackQGroupNum = "561721325";
     private static final String feedbackQNum = "3285680362";
 
-    public static boolean feedbackJoinQGroup(Activity context) {
+    public static boolean feedbackJoinQGroup(Context context) {
         try {
             context.startActivity(new Intent().setData(Uri.parse("mqqapi://card/show_pslcard?src_type=internal&version=1&uin=" + feedbackQGroupNum + "&card_type=group&source=qrcode")));
         } catch (Exception e) {
@@ -104,7 +104,7 @@ public class UniUtils {
         }
     }
 
-    public static boolean feedbackTempQChat(Activity context) {
+    public static boolean feedbackTempQChat(Context context) {
         try {
             context.startActivity(new Intent().setData(Uri.parse("mqqwpa://im/chat?chat_type=wpa&uin=" + feedbackQNum)));
         } catch (Exception e) {
@@ -172,7 +172,7 @@ public class UniUtils {
         }
         Date date = new Date(timestamp);
         SimpleDateFormat format = (SimpleDateFormat) SimpleDateFormat.getDateTimeInstance();
-        format.applyPattern("yyyy-MM-dd HH:mm:ss");
+        format.applyPattern("yyyy-MM-dd HH:mm:ss:SSS");
         return format.format(date);
     }
 
@@ -183,7 +183,7 @@ public class UniUtils {
         }
         Date date = new Date(timestamp);
         SimpleDateFormat format = (SimpleDateFormat) SimpleDateFormat.getDateTimeInstance();
-        format.applyPattern("yyyy年MM月dd日 HH时mm分ss秒");
+        format.applyPattern("yyyy年MM月dd日 HH时mm分ss秒SSS毫秒");
         return format.format(date);
     }
 

@@ -42,7 +42,7 @@
     <string name="declaration">声明</string>
     <string name="read_and_approved">我已阅读并同意</string>
     <!--debug-->
-    <string name="qchat_feedback_tip">已复制错误信息到剪贴板，粘贴后发送即可反馈</string>
+    <string name="q_chat_feedback_tip">已复制错误信息到剪贴板，粘贴后发送即可反馈</string>
     <string name="error_occurred">发生错误</string>
     <string name="feedback">反馈</string>
     <string name="basic_info">Basic Info</string>
@@ -60,13 +60,14 @@
     <string name="statistics">统计</string>
     <string name="close">关闭</string>
     <string name="navigate">定位</string>
-
+    <string name="help">帮助</string>
     <!--alert message-->
     <string name="init_failed">初始化失败</string>
     <string name="msg_init_failed">很抱歉，应用初始化失败! 我们需要您重新进入设置向导页面，进行<b>检查或反馈</b>，点击确定以继续。</string>
     <string name="msg_exit_confirmation">是否退出本应用？</string>
     <string name="reading">读取中…</string>
     <string name="loading">加载中…</string>
+    <string name="please_wait">请稍等…</string>
     <!--main pages-->
     <string name="chat">会话</string>
     <string name="contact">联系人</string>
@@ -193,9 +194,13 @@
     <string name="status_send_suc">发送成功</string>
 
     <string name="check_origin">查看原消息</string>
-    <string name="modified">内容更改</string>
-    <string name="deleted">被移除</string>
-    <string name="added">新增</string>
+    <string name="edition_type_rep">更改</string>
+    <string name="edition_type_deleted">移除</string>
+    <string name="edition_type_insertion">新增</string>
     <string name="functions">功能</string>
-
+    <string name="apply_changes">应用更改</string>
+    <string name="press_again_to_quit">再次点击以退出</string>
+    <string name="edit_send_timestamp">编辑发送时间</string>
+    <string name="allowed_timestamp_range">允许设置的时间范围</string>
+    <string name="help_send_timestamp">时间戳精确到毫秒，一秒包含1000毫秒。设置不正常的时间戳（太远的过去或未来）可能导致错误，请谨慎设置。</string>
 </resources>

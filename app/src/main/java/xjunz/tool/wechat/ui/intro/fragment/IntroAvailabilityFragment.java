@@ -74,7 +74,7 @@ public class IntroAvailabilityFragment extends IntroFragment implements View.OnC
                     .setPositiveButton(R.string.feedback, (dialog, which) -> {
                         if (UniUtils.feedbackTempQChat(requireActivity())) {
                             UniUtils.copyPlainText("feedback message", log);
-                            UiUtils.toast(R.string.qchat_feedback_tip);
+                            UiUtils.toast(R.string.q_chat_feedback_tip);
                         }
                     });
             if (BuildConfig.DEBUG) {

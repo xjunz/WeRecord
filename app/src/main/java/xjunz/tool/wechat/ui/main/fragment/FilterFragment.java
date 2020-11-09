@@ -32,7 +32,6 @@ public class FilterFragment extends Fragment implements PageViewModel.EventHandl
         mModel.addEventHandler(this);
     }
 
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

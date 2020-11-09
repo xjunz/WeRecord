@@ -87,7 +87,7 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
      */
     protected List<String> mCurrentDescList = new ArrayList<>();
     /**
-     * 原始配置信息描述符的缓存，用于判断配置是否发生变化
+     * 原始配置信息描述符的，用于判断配置是否发生变化
      *
      * @see ListPageFragment#hasFilterConfigChanged()
      */
@@ -95,7 +95,7 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
     /**
      * 管理{@link Disposable}的集合
      */
-    private CompositeDisposable mDisposables = new CompositeDisposable();
+    private final CompositeDisposable mDisposables = new CompositeDisposable();
 
     /**
      * 获取当前的主布局资源ID
@@ -131,13 +131,12 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
      */
     public abstract void resetFilterConfig(PageConfig config);
 
-
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         initPageConfig(mConfig);
-        PageViewModel mModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(PageViewModel.class);
-        mModel.updateCurrentConfig(mConfig);
+        PageViewModel model = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(PageViewModel.class);
+        model.updateCurrentConfig(mConfig);
     }
 
     @NonNull
@@ -610,6 +609,16 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
             bottomDivider = itemView.findViewById(R.id.divider_bottom);
             itemView.setOnClickListener(v -> {
                 if (getItemViewType() == Item.TYPE_DATA) {
+                    // DetailFragment fragment = new DetailFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable(DetailActivity.EXTRA_CONTACT, mItemList.get(getAdapterPosition()).content);
+                    /*bundle.putInt("tn", getAdapterPosition());
+                    fragment.setArguments(bundle);
+                    fragment.setSharedElementEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.move));
+                    fragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(R.transition.detail_enter));
+                    getFragmentManager().beginTransaction().addSharedElement(ivAvatar, ivAvatar.getTransitionName())
+                            .setReorderingAllowed(true).replace(R.id.fragment_container, fragment)
+                            .addToBackStack("detail").commit();*/
                     ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(requireActivity(), this.ivAvatar, this.ivAvatar.getTransitionName());
                     Intent i = new Intent(requireActivity(), DetailActivity.class);
                     i.putExtra(DetailActivity.EXTRA_CONTACT, mItemList.get(getAdapterPosition()).content);

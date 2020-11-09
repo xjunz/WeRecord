@@ -5,9 +5,12 @@ package xjunz.tool.wechat;
 
 import org.junit.Test;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import xjunz.tool.wechat.util.ShellUtils;
 
 import static org.junit.Assert.assertEquals;
 
@@ -29,6 +32,15 @@ public class ExampleUnitTest {
     }
 
     @Test
+    public void testRoot() throws ShellUtils.ShellException {
+        String out = ShellUtils.cat("/data/user/0/com.tencent.mm/shared_prefs/app_brand_global_sp.xml", "test");
+    }
+
+    @Test
+    public void testWeakReference() {
+    }
+
+    @Test
     public void testString() {
         String wxid = "wxid_unknown";
         String raw = "wxid_unknown:<hello:wxid_unknown>";
@@ -36,6 +48,11 @@ public class ExampleUnitTest {
         String newStr = "wxid_new" + raw.substring(index + wxid.length());
         System.out.println(raw.substring(0, index));
 
+    }
+
+    private class A {
+        String b = "xjunz";
+        WeakReference<String> weakB = new WeakReference<>("xjunz");
     }
 
     @Test

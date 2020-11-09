@@ -103,15 +103,29 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
     public Message queryMessageByMsgId(int msgId) {
         Cursor cursor = getDatabase().rawQuery("select * from message where msgId=" + msgId, null);
         if (cursor.moveToNext()) {
-            return buildMessageFromCursor(cursor);
+            Message message = buildMessageFromCursor(cursor);
+            cursor.close();
+            return message;
         }
         cursor.close();
         return null;
     }
 
-    public List<BackupMessage> queryBackupMessages(String id) {
+
+    public BackupMessage queryBackupMessageById(int msgId) {
+        Cursor cursor = getDatabase().rawQuery("select * from " + DatabaseModifier.TABLE_ORIGINAL_MESSAGE_BACKUP + " where msgId=" + msgId, null);
+        if (cursor.moveToNext()) {
+            BackupMessage message = new BackupMessage(buildMessageFromCursor(cursor).getValues());
+            cursor.close();
+            return message;
+        }
+        cursor.close();
+        return null;
+    }
+
+    public List<BackupMessage> queryAllBackupMessages(String id) {
         List<BackupMessage> queried = new ArrayList<>();
-        Cursor cursor = getDatabase().rawQuery("select type,isSend,createTime,content,imgPath,msgId,status,talker,edition from " + DatabaseModifier.TABLE_ORIGINAL_MESSAGE_BACKUP + " where talker=" + "'"
+        Cursor cursor = getDatabase().rawQuery("select * from " + DatabaseModifier.TABLE_ORIGINAL_MESSAGE_BACKUP + " where talker=" + "'"
                 + id + "'", null);
         while (cursor.moveToNext()) {
             queried.add(new BackupMessage(buildMessageFromCursor(cursor).getValues()));

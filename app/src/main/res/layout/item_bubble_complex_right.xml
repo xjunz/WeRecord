@@ -32,6 +32,7 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_avatar"
+            style="@style/SelectableCircleImageView"
             android:layout_width="@dimen/fab_small"
             android:layout_height="@dimen/fab_small"
             android:layout_marginTop="@{message.inGroupChat?@dimen/spacing_normal:@dimen/spacing_unit}"
@@ -102,10 +103,11 @@
                 android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/spacing_unit"
                 android:text="@{message.title??@string/parse_failed}"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="?android:textColorPrimary"
+                android:visible="@{message.title!=null}"
                 app:layout_constraintStart_toStartOf="@+id/tv_caption"
                 app:layout_constraintTop_toBottomOf="@+id/tv_caption"
                 tools:text="@tools:sample/lorem" />

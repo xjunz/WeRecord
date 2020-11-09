@@ -33,6 +33,7 @@ public class MainPanel extends RelativeLayout {
     private View mMask;
     private int mCurtainHeight, mHandlerHeight, mFilterHeight;
     private int mMaxTop, mMinTop;
+    private boolean mReadyToUser;
     private ArrayList<OnPanelSlideListener> mListenerList;
 
     public MainPanel(Context context) {
@@ -70,8 +71,16 @@ public class MainPanel extends RelativeLayout {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-        mCurtain.layout(l, mMinTop, r, mMinTop + mCurtainHeight);
+        if (mReadyToUser) {
+            int filterCurTop = mFilter.getTop();
+            int curtainCurTop = mCurtain.getTop();
+            super.onLayout(changed, l, t, r, b);
+            mCurtain.layout(l, curtainCurTop, r, curtainCurTop + mCurtain.getHeight());
+            mFilter.layout(l, filterCurTop, r, filterCurTop + mFilter.getHeight());
+        } else {
+            super.onLayout(changed, l, t, r, b);
+            mCurtain.layout(l, mMinTop, r, mMinTop + mCurtainHeight);
+        }
     }
 
     @Override
@@ -111,6 +120,7 @@ public class MainPanel extends RelativeLayout {
 
             @Override
             public void onPanelSlideStart(boolean isToOpen) {
+                mReadyToUser = true;
                 if (!isToOpen) {
                     mTopBar.findViewById(R.id.et_search).requestFocus();
                     mTopBar.setVisibility(VISIBLE);
@@ -121,6 +131,7 @@ public class MainPanel extends RelativeLayout {
                 }
             }
         });
+
     }
 
     @Override
@@ -166,7 +177,6 @@ public class MainPanel extends RelativeLayout {
         @Override
         public void onViewCaptured(@NonNull View capturedChild, int activePointerId) {
             super.onViewCaptured(capturedChild, activePointerId);
-
         }
 
         @Override

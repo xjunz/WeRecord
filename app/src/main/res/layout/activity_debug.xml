@@ -42,11 +42,22 @@
             style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="显示环境信息"
             android:onClick="showEnvInfo"
+            android:text="显示环境信息"
             app:layout_constraintBottom_toBottomOf="@+id/button3"
             app:layout_constraintStart_toEndOf="@+id/button3"
             app:layout_constraintTop_toTopOf="@+id/button3" />
+
+        <Button
+            android:id="@+id/button5"
+            style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="exportDatabase"
+            android:text="导出数据库"
+            app:layout_constraintBottom_toBottomOf="@+id/button4"
+            app:layout_constraintStart_toEndOf="@+id/button4"
+            app:layout_constraintTop_toTopOf="@+id/button4" />
 
         <TextView
             android:id="@+id/tv_title_1"

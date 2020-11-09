@@ -4,10 +4,12 @@
 package xjunz.tool.wechat.impl;
 
 import android.util.Log;
+import android.util.SparseArray;
 
 import androidx.annotation.CheckResult;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
+import androidx.databinding.ObservableBoolean;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
@@ -18,8 +20,15 @@ import net.sqlcipher.database.SQLiteDatabase;
 import org.jetbrains.annotations.NotNull;
 
 import xjunz.tool.wechat.impl.model.message.BackupMessage;
+import xjunz.tool.wechat.impl.model.message.Edition;
 import xjunz.tool.wechat.impl.model.message.Message;
+import xjunz.tool.wechat.impl.repo.MessageRepository;
+import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 import xjunz.tool.wechat.util.ShellUtils;
+
+import static xjunz.tool.wechat.impl.model.message.Edition.FLAG_DELETION;
+import static xjunz.tool.wechat.impl.model.message.Edition.FLAG_INSERTION;
+import static xjunz.tool.wechat.impl.model.message.Edition.FLAG_REPLACEMENT;
 
 /**
  * 数据库修改器，实现了数据库修改的各个方法
@@ -37,11 +46,20 @@ public class DatabaseModifier implements LifecycleObserver {
     private final SQLiteDatabase db;
     private final String databaseBackupPath;
     private final String databaseOriginalPath;
+    /**
+     * 对于数据库的更改是否已同步到微信的数据库
+     */
+    private final ObservableBoolean mHasPendingChanges;
+
+
+    private final SparseArray<Edition> mPendingEditions;
 
     private DatabaseModifier(@NotNull Environment environment) {
         this.db = environment.getDatabaseOfCurrentUser();
         this.databaseOriginalPath = environment.getCurrentUser().originalDatabaseFilePath;
         this.databaseBackupPath = environment.getCurrentUser().backupDatabaseFilePath;
+        this.mHasPendingChanges = new ObservableBoolean(false);
+        this.mPendingEditions = new SparseArray<>();
     }
 
     @CheckResult
@@ -55,12 +73,48 @@ public class DatabaseModifier implements LifecycleObserver {
         return sInstance;
     }
 
+    public void putPendingEdition(Edition edition) {
+        mPendingEditions.put(edition.getOrigin().getMsgId(), edition);
+        mHasPendingChanges.set(true);
+    }
+
+    public void removeAllPendingEditions() {
+        mPendingEditions.removeAtRange(0, mPendingEditions.size() - 1);
+        mHasPendingChanges.set(false);
+    }
+
+    public SparseArray<Edition> getAllPendingEditions() {
+        return mPendingEditions;
+    }
+
+    public void applyAllPendingEditions() throws ShellUtils.ShellException {
+        for (int i = 0; i < mPendingEditions.size(); i++) {
+            Edition edition = mPendingEditions.valueAt(i);
+            switch (edition.getFlag()) {
+                case FLAG_DELETION:
+                    delete(edition.getReplacement());
+                    break;
+                case FLAG_INSERTION:
+                    insert(edition.getReplacement());
+                    break;
+                case FLAG_REPLACEMENT:
+                    replace(edition.getReplacement());
+                    break;
+            }
+        }
+        apply();
+        removeAllPendingEditions();
+    }
+
+    /**
+     * 删除备份表
+     */
     public void dropBackupTable() {
         db.execSQL("drop table " + TABLE_ORIGINAL_MESSAGE_BACKUP);
     }
 
     /**
-     * 创建消息备份表(如果不存在)，该表会复制{@code message}表的结构，但不会复制其内容
+     * 创建消息备份表(如果不存在)，该表会复制{@code message}表的结构，但不会复制其内容。
      *
      * @see DatabaseModifier#TABLE_ORIGINAL_MESSAGE_BACKUP
      */
@@ -69,6 +123,7 @@ public class DatabaseModifier implements LifecycleObserver {
         Cursor cursor = db.rawQuery("select name from sqlite_master where type='table' and name='" + TABLE_ORIGINAL_MESSAGE_BACKUP + "'", null);
         //如果不存在
         if (cursor.getCount() == 0) {
+            //以下的数据库操作不使用execSQL方法，而是使用
             //创建表
             db.execSQL("create table " + TABLE_ORIGINAL_MESSAGE_BACKUP + " as select * from message where 1<>1");
             //创建"edition"字段
@@ -90,39 +145,78 @@ public class DatabaseModifier implements LifecycleObserver {
         db.execSQL("insert or ignore into " + TABLE_ORIGINAL_MESSAGE_BACKUP + " select *," + editionFlag + " from message where msgId=" + msgId);
     }
 
+
     /**
      * 恢复某条消息
      *
      * @param msgId 指定消息ID
      */
     @CheckResult
-    private DatabaseModifier restoreMessage(int msgId) {
+    public DatabaseModifier restore(int msgId) {
         transactUnless();
-        //先从备份表恢复
-        db.execSQL("replace into message select * from " + TABLE_ORIGINAL_MESSAGE_BACKUP + " where msgId=" + msgId);
-        //然后备份表中已恢复的记录
+        BackupMessage message = RepositoryFactory.get(MessageRepository.class).queryBackupMessageById(msgId);
+        message.removeEditionFlag();
+        //恢复记录
+        db.replace(TABLE_MESSAGE, "content", message.getValues());
+        //然后删除备份表中已恢复的记录
         db.execSQL("delete from " + TABLE_ORIGINAL_MESSAGE_BACKUP + " where msgId = " + msgId);
+        return this;
+    }
+
+    /**
+     * 恢复某条消息
+     *
+     * @param message 指定消息
+     */
+    @CheckResult
+    public DatabaseModifier restore(@NotNull BackupMessage message) {
+        transactUnless();
+        message.removeEditionFlag();
+        db.replace(TABLE_MESSAGE, "content", message.getValues());
+        db.execSQL("delete from " + TABLE_ORIGINAL_MESSAGE_BACKUP + " where msgId = " + message.getMsgId());
+        return this;
+    }
+
+    /**
+     * @return 是否已经将当前数据库的更改同步到微信数据库
+     */
+    public ObservableBoolean hasPendingChanges() {
+        return mHasPendingChanges;
+    }
+
+    /**
+     * 向数据库中的message表中插入一条{@link Message}
+     *
+     * @param msg 欲插入的消息
+     * @return 当前对象，便于链式调用
+     */
+    @CheckResult
+    public DatabaseModifier insert(@NotNull Message msg) {
+        transactUnless();
+        backupMessage(msg.getMsgId(), FLAG_INSERTION);
+        db.insert(TABLE_MESSAGE, "content", msg.getValues());
+        return this;
+    }
+
+    @CheckResult
+    public DatabaseModifier delete(@NonNull Message msg) {
+        transactUnless();
+        backupMessage(msg.getMsgId(), FLAG_DELETION);
+        db.execSQL("delete from message where msgId=" + msg.getMsgId());
         return this;
     }
 
 
     /**
-     * 向数据库中的message表中插入一条{@link Message}
+     * 替换数据库中的message表中的一条{@link Message}，
+     * 以{@link Message#getMsgId()}为替换依据
      *
-     * @param msg 欲插入的数据
+     * @param msg 用于替换的消息
      * @return 当前对象，便于链式调用
      */
-    public DatabaseModifier insert(@NotNull Message msg) {
-        transactUnless();
-        backupMessage(msg.getMsgId(), BackupMessage.EditionType.INSERT.flag);
-        db.insert(TABLE_MESSAGE, "content", msg.getValues());
-        return this;
-    }
-
-
     public DatabaseModifier replace(@NonNull Message msg) {
         transactUnless();
-        backupMessage(msg.getMsgId(), BackupMessage.EditionType.MODIFY.flag);
+        backupMessage(msg.getMsgId(), FLAG_REPLACEMENT);
         db.replace(TABLE_MESSAGE, "content", msg.getValues());
         return this;
     }

@@ -30,6 +30,7 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_avatar"
+            style="@style/SelectableCircleImageView"
             android:layout_width="@dimen/fab_small"
             android:layout_height="@dimen/fab_small"
             android:layout_marginTop="@dimen/spacing_unit"

@@ -12,6 +12,10 @@
             type="xjunz.tool.wechat.data.viewmodel.MessageViewModel" />
 
         <variable
+            name="fragment"
+            type="xjunz.tool.wechat.ui.message.fragment.EditionFragment" />
+
+        <variable
             name="item"
             type="xjunz.tool.wechat.ui.message.fragment.EditionFragment.EditionItem" />
     </data>
@@ -27,9 +31,9 @@
             android:id="@+id/tv_sender"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:text="@{item.message.senderAccount.name??@string/system_msg}"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:text="@{item.edition.origin.senderAccount.name??@string/system_msg}"
             android:textColor="?colorAccent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -51,7 +55,7 @@
             android:layout_marginEnd="@dimen/spacing_unit"
             android:ellipsize="end"
             android:maxLines="5"
-            android:text="@{item.message.parsedContent}"
+            android:text="@{item.edition.origin.parsedContent}"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             app:layout_constraintEnd_toStartOf="@+id/tv_edition_status"
             app:layout_constraintStart_toStartOf="@+id/tv_sender"
@@ -62,11 +66,11 @@
             android:id="@+id/tv_edition_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:text="@{item.message.editionType.captionRes}"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:text="@{item.editionFlagCaption}"
             app:layout_constraintBottom_toBottomOf="@+id/tv_content"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_sender"
+            app:layout_constraintTop_toTopOf="@+id/tv_content"
             tools:text="已删除" />
 
         <View
@@ -76,8 +80,7 @@
             android:background="?android:attr/listDivider"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="parent" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/expandable"
@@ -90,7 +93,7 @@
 
             <Button
                 android:id="@+id/btn_check_origin"
-                style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -101,11 +104,11 @@
 
             <Button
                 android:id="@+id/btn_navigate"
-                style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:onClick="@{()->model.notifyNavigate(item.message)}"
+                android:onClick="@{()->model.notifyNavigate(item.edition.origin)}"
                 android:text="@string/navigate"
                 app:layout_constraintEnd_toStartOf="@+id/btn_restore"
                 app:layout_constraintHorizontal_bias="1.0"
@@ -115,10 +118,11 @@
 
             <Button
                 android:id="@+id/btn_restore"
-                style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored.Small"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:onClick="@{()->fragment.restoreMessage(item.edition.origin.msgId)}"
                 android:text="@string/restore"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/btn_navigate"

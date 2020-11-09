@@ -180,7 +180,7 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
     }
 
     private class ScrollerAdapter extends RecyclerView.Adapter<ScrollerAdapter.ScrollerViewHolder> {
-        private List<String> indicatorSerial;
+        private final List<String> indicatorSerial;
         private int selectedItemIndex = -1;
 
         int getIndexOfIndicator(String indicator) {
@@ -242,11 +242,7 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
             String cur = indicatorSerial.get(position);
             holder.tvText.setText(cur);
             holder.tvText.setEnabled(mCurrentDescList.contains(cur));
-            if (position == selectedItemIndex) {
-                holder.tvText.setSelected(true);
-            } else {
-                holder.tvText.setSelected(false);
-            }
+            holder.tvText.setSelected(position == selectedItemIndex);
         }
 
         @Override

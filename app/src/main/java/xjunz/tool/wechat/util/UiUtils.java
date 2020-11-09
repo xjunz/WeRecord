@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.AttrRes;
+import androidx.annotation.CheckResult;
 import androidx.annotation.ColorInt;
 import androidx.annotation.Dimension;
 import androidx.annotation.NonNull;
@@ -50,13 +51,27 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static xjunz.tool.wechat.App.getContext;
 
 public class UiUtils {
-
+    @CheckResult
     public static AlertDialog.Builder createRationale(Context context, Object msg) {
         return createDialog(context, R.string.rationale, msg).setPositiveButton(android.R.string.ok, null);
     }
 
+    @CheckResult
     public static AlertDialog.Builder createAlert(Context context, Object msg) {
         return createDialog(context, R.string.alert, msg).setPositiveButton(android.R.string.ok, null);
+    }
+
+    @CheckResult
+    public static AlertDialog.Builder createHelp(Context context, Object msg) {
+        return createDialog(context, R.string.help, msg).setPositiveButton(android.R.string.ok, null);
+    }
+
+    @CheckResult
+    public static AlertDialog.Builder createError(Context context, Object msg) {
+        return createDialog(context, R.string.error_occurred, msg).setPositiveButton(R.string.feedback, (dialog, which) -> {
+            //TODO:反馈方式
+            // UniUtils.feedbackJoinQGroup(context);
+        }).setNegativeButton(android.R.string.ok, null);
     }
 
     /**
@@ -88,7 +103,7 @@ public class UiUtils {
 
     @NotNull
     public static AlertDialog.Builder createDialog(Context context, @Nullable Object title, @Nullable Object msg) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.Theme_AppCompat_Light_Dialog_Alert_Material);
         if (title != null) {
             if (title instanceof Integer) {
                 builder.setTitle((Integer) title);
@@ -208,6 +223,7 @@ public class UiUtils {
         target.animate().translationX(transX).setInterpolator(AnimUtils.getFastOutSlowInInterpolator()).start();
     }
 
+    @CheckResult
     @NotNull
     public static Dialog createProgressDialog(Context context, int titleRes) {
         @SuppressLint("InflateParams") View content = LayoutInflater.from(context).inflate(R.layout.dialog_progress, null);

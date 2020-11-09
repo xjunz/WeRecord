@@ -16,11 +16,14 @@ import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.databinding.ActivityDetailBinding;
 import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.model.account.Talker;
+import xjunz.tool.wechat.impl.repo.ContactRepository;
+import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 import xjunz.tool.wechat.ui.BaseActivity;
 import xjunz.tool.wechat.ui.message.MessageActivity;
 
 public class DetailActivity extends BaseActivity {
     public static final String EXTRA_CONTACT = "DetailActivity.extra.contact";
+    public static final String EXTRA_CONTACT_ID = "DetailActivity.extra.contact_id";
     private Contact mData;
 
     @Override
@@ -35,6 +38,10 @@ public class DetailActivity extends BaseActivity {
                 if (mData instanceof Talker) {
                     binding.setTalker((Talker) mData);
                 }
+            } else {
+                String id = intent.getStringExtra(EXTRA_CONTACT_ID);
+                mData = RepositoryFactory.get(ContactRepository.class).get(id);
+                binding.setContact(mData);
             }
         }
     }
@@ -43,7 +50,7 @@ public class DetailActivity extends BaseActivity {
     public void viewImage(View view) {
         ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, view, view.getTransitionName());
         Intent i = new Intent(this, ImageViewerActivity.class);
-        i.putExtra(ImageViewerActivity.EXTRA_CONTACT, mData);
+        i.putExtra(ImageViewerActivity.EXTRA_ACCOUNT, mData);
         startActivity(i, options.toBundle());
     }
 

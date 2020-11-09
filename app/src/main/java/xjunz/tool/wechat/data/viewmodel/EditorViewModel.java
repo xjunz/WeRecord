@@ -206,7 +206,7 @@ public class EditorViewModel extends ObservableViewModel {
 
     private long parseDate(String dateStr) {
         SimpleDateFormat format = (SimpleDateFormat) SimpleDateFormat.getDateTimeInstance();
-        format.applyPattern("yyyy-MM-dd HH:mm:ss");
+        format.applyPattern("yyyy-MM-dd HH:mm:ss:SSS");
         try {
             Date date = format.parse(dateStr);
             if (date == null) {

@@ -8,6 +8,7 @@ import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 
 import xjunz.tool.wechat.impl.model.account.Talker;
+import xjunz.tool.wechat.impl.model.message.BackupMessage;
 import xjunz.tool.wechat.impl.model.message.Message;
 
 /**
@@ -18,6 +19,7 @@ public class MessageViewModel extends ObservableViewModel {
     public ObservableInt currentPageIndex = new ObservableInt(0);
     public ObservableBoolean hasLoadAll = new ObservableBoolean(false);
     public List<Message> currentLoadedMessages = new ArrayList<>();
+    public List<BackupMessage> allBackupMessages = new ArrayList<>();
     public int actualMessageCount;
     public int selectedMessagePosition;
     private final ArrayList<EventHandler> eventHandlers = new ArrayList<>();
@@ -43,6 +45,15 @@ public class MessageViewModel extends ObservableViewModel {
         for (EventHandler eventHandler : eventHandlers) {
             eventHandler.onAllLoaded(preCount);
         }
+    }
+
+    /**
+     * 向所有{@link EventHandler}发布消息变更事件
+     *
+     * @param msgId 变更的消息ID
+     */
+    public void notifyMessageChanged(int msgId) {
+
     }
 
     public void setSelectedMessagePosition(int position) {

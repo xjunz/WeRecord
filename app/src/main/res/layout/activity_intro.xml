@@ -67,8 +67,8 @@
 
         <ImageButton
             android:id="@+id/ib_previous_step"
-            android:layout_width="@dimen/fab_small"
-            android:layout_height="@dimen/fab_small"
+            android:layout_width="@dimen/fab_medium"
+            android:layout_height="@dimen/fab_medium"
             android:layout_gravity="start"
             android:layout_marginStart="@dimen/spacing_normal"
             android:layout_marginTop="@dimen/dp_4"
@@ -91,8 +91,8 @@
 
         <ImageButton
             android:id="@+id/ib_next_step"
-            android:layout_width="@dimen/fab_small"
-            android:layout_height="@dimen/fab_small"
+            android:layout_width="@dimen/fab_medium"
+            android:layout_height="@dimen/fab_medium"
             android:layout_gravity="end"
             android:layout_marginTop="@dimen/dp_4"
             android:layout_marginEnd="@dimen/spacing_normal"

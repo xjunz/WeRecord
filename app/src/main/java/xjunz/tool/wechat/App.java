@@ -77,6 +77,7 @@ public class App extends Application implements ViewModelStoreOwner {
         return sApplicationContext.get();
     }
 
+
     @ColorInt
     public static int getColorOf(@ColorRes int colorRes) {
         return getContext().getResources().getColor(colorRes);

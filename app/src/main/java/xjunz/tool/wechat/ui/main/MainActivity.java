@@ -4,6 +4,7 @@
 
 package xjunz.tool.wechat.ui.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -25,6 +26,7 @@ import xjunz.tool.wechat.ui.customview.MasterToast;
 import xjunz.tool.wechat.ui.main.fragment.ChatFragment;
 import xjunz.tool.wechat.ui.main.fragment.ContactFragment;
 import xjunz.tool.wechat.ui.main.fragment.PageFragment;
+import xjunz.tool.wechat.ui.outer.DebugActivity;
 import xjunz.tool.wechat.util.UiUtils;
 
 public class MainActivity extends BaseActivity {
@@ -38,10 +40,8 @@ public class MainActivity extends BaseActivity {
      */
     private PageFragment[] mPages;
     private PageViewModel mFilterModel;
-    private ChatFragment mChatFragment;
-    private ContactFragment mContactFragment;
     private ActivityMainBinding mBinding;
-    private PageViewModel.EventHandler mFilterEventHandler = new PageViewModel.EventHandler() {
+    private final PageViewModel.EventHandler mFilterEventHandler = new PageViewModel.EventHandler() {
         @Override
         public void onConfirmFilter() {
             mBinding.mainPanel.closePanel();
@@ -78,21 +78,14 @@ public class MainActivity extends BaseActivity {
 
 
     private void initPages() {
-        mChatFragment = new ChatFragment();
-        mContactFragment = new ContactFragment();
-        mPages = new PageFragment[]{mChatFragment, mContactFragment, new ContactFragment()};
+        ChatFragment chat = new ChatFragment();
+        ContactFragment contact = new ContactFragment();
+        mPages = new PageFragment[]{chat, contact, new ContactFragment()};
         mBinding.vpMain.setAdapter(new MainFragmentAdapter(this));
-
     }
 
 
-    public void enterMultiSelectionMode() {
-        UiUtils.fadeSwitchText(mBinding.tvTopBarTitle, "已选择1项");
-        UiUtils.fadeSwitchImage(mBinding.ibSearch, R.drawable.ic_close_24dp);
-    }
-
-
-    public void enterSearchMode(View view) {
+    public void autoSearchMode(View view) {
         //当数据变化后，数据绑定默认会在下一帧执行，导致requestFocus()时EditText实际上处于disabled的状态，
         //实际上并未获取到焦点，因此当EditText被设置为enabled时，就不会显示光标。可以调用此方法可以立即刷新数据绑定。
         mBinding.executePendingBindings();
@@ -113,13 +106,17 @@ public class MainActivity extends BaseActivity {
     }
 
 
-    public void onItemSelect(int position, CharSequence caption, boolean unchanged) {
+    public void onItemSelected(int position, CharSequence caption, boolean unchanged) {
         if (!unchanged) {
             PageConfig config = mPages[position].getCurrentConfig();
             if (config != null) {
                 mFilterModel.updateCurrentConfig(config);
             }
         }
+    }
+
+    public void gotoDebugActivity(View view) {
+        startActivity(new Intent(this, DebugActivity.class));
     }
 
 
@@ -141,25 +138,22 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (getEnvironment() != null) {
-            getEnvironment().purge();
-        }
-    }
-
     private long lastPressedTimestamp;
 
     @Override
     public void onBackPressed() {
         if (mBinding.mainPanel.isOpen()) {
             mBinding.mainPanel.closePanel();
+        } else if (mFilterModel.getCurrentConfig().isInSearchMode.get()) {
+            mBinding.ibSearch.performClick();
         } else {
             if (lastPressedTimestamp != 0 && System.currentTimeMillis() - lastPressedTimestamp < 2000) {
+                if (getEnvironment() != null) {
+                    getEnvironment().purge();
+                }
                 super.onBackPressed();
             } else {
-                MasterToast.longToast("再次点击以退出");
+                MasterToast.longToast(R.string.press_again_to_quit);
                 lastPressedTimestamp = System.currentTimeMillis();
             }
         }

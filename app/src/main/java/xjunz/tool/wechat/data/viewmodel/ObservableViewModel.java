@@ -17,7 +17,7 @@ import androidx.lifecycle.ViewModel;
  * </p>
  */
 public class ObservableViewModel extends ViewModel implements Observable {
-    private PropertyChangeRegistry mCallbacks = new PropertyChangeRegistry();
+    private final PropertyChangeRegistry mCallbacks = new PropertyChangeRegistry();
 
     @Override
     public void addOnPropertyChangedCallback(OnPropertyChangedCallback callback) {

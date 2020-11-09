@@ -51,9 +51,7 @@
     </style>
 
     <style name="Base.AppTheme.Main.Translucent.Editor">
-        <item name="android:windowSharedElementsUseOverlay">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowEnterTransition">@transition/editor_enter</item>
     </style>
 
     <style name="Base.AppTheme.Main.Translucent.Dialog">
@@ -94,6 +92,13 @@
     </style>
 
     <style name="Base.AlertDialog"></style>
+
+    <style name="SelectableCircleImageView">
+        <item name="android:transitionName">@string/tn_avatar</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:foreground">@drawable/bg_selectable_circle</item>
+    </style>
 
     <style name="Theme.AppCompat.Light.Dialog.Alert.Material">
         <item name="colorButtonNormal">@color/button_normal</item>
