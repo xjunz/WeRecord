@@ -5,6 +5,9 @@ package xjunz.tool.wechat.impl.repo;
 
 import java.util.HashMap;
 
+/**
+ * 构造并管理单例{@link LifecyclePerceptiveRepository}的工厂类
+ */
 public final class RepositoryFactory {
     private static final HashMap<Class<? extends LifecyclePerceptiveRepository>, LifecyclePerceptiveRepository> sInstanceMap = new HashMap<>();
 

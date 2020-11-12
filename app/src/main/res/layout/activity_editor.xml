@@ -30,7 +30,7 @@
             android:id="@+id/elastic"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/colorBackgroundWhiteGrey"
+            android:background="?android:colorBackground"
             android:onDismiss="@{()->UniUtils.getHostActivity(context).finishAfterTransition()}"
             android:transitionGroup="false"
             app:dragDismissDistance="112dp"

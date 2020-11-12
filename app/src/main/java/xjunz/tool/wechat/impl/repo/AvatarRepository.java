@@ -108,10 +108,4 @@ public class AvatarRepository extends LifecyclePerceptiveRepository {
         }
     }
 
-
-    @Override
-    public void purge() {
-
-    }
-
 }

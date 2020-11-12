@@ -16,6 +16,7 @@ public class BackupMessage extends Message {
         super(values);
     }
 
+    @Override
     public int getEditionFlag() {
         return getValues().getAsInteger(KEY_EDITION);
     }
@@ -27,8 +28,8 @@ public class BackupMessage extends Message {
     @NonNull
     public Edition toEdition(@Nullable Message rep) {
         switch (this.getEditionFlag()) {
-            case Edition.FLAG_DELETION:
-                return Edition.delete(this);
+            case Edition.FLAG_REMOVAL:
+                return Edition.remove(this);
             case Edition.FLAG_INSERTION:
                 return Edition.insert(this);
             case Edition.FLAG_REPLACEMENT:

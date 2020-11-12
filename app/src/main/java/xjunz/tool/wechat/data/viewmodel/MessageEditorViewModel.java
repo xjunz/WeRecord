@@ -8,21 +8,23 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.ViewModelProvider;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.impl.model.message.Message;
 
-public class MessageEditorViewModel extends AndroidViewModel {
+public class MessageEditorViewModel extends AndroidViewModel implements LifecycleObserver {
     private static final String MODEL_KEY = "AndroidViewModel.key.MessageEditor";
 
     private WeakReference<Message> mMessageToEdit;
 
-    private WeakReference<EventHandler> mEventHandler;
+    private final ArrayList<EditorEventHandler> mEditorEventHandlers = new ArrayList<>();
 
     /**
      * 请勿通过此方法直接构造实例，此方法构造的实例不具备{@link Activity}间
@@ -34,13 +36,14 @@ public class MessageEditorViewModel extends AndroidViewModel {
         super(application);
     }
 
+
     @NotNull
     public static MessageEditorViewModel get(Application application) {
         return new ViewModelProvider((App) application, new ViewModelProvider.AndroidViewModelFactory(application)).get(MODEL_KEY, MessageEditorViewModel.class);
     }
 
-    public void registerEventHandler(@NonNull EventHandler handler) {
-        mEventHandler = new WeakReference<>(handler);
+    public void registerEventHandler(@NonNull EditorEventHandler handler) {
+        mEditorEventHandlers.add(handler);
     }
 
     public void passMessageToEdit(@NonNull Message message) {
@@ -54,29 +57,36 @@ public class MessageEditorViewModel extends AndroidViewModel {
         return null;
     }
 
-    public void notifyMessageChanged(Message message) {
-        if (mEventHandler != null) {
-            mEventHandler.get().onMessageChanged(message);
+    public void notifyMessageChanged(boolean timestampChanged, Message message) {
+        for (EditorEventHandler handler : mEditorEventHandlers) {
+            handler.onMessageChanged(timestampChanged, message);
         }
     }
 
-    public void notifyMessageInserted() {
-        if (mEventHandler != null) {
-            mEventHandler.get().onMessageInserted(mMessageToEdit.get());
+    public void notifyMessageInserted(boolean addBefore, Message message) {
+        for (EditorEventHandler handler : mEditorEventHandlers) {
+            handler.onMessageInserted(addBefore, message);
         }
     }
 
     public void notifyMessageDeleted() {
-        if (mEventHandler != null) {
-            mEventHandler.get().onMessageDeleted(mMessageToEdit.get());
+        for (EditorEventHandler handler : mEditorEventHandlers) {
+            handler.onMessageDeleted();
         }
     }
 
-    public interface EventHandler {
-        void onMessageChanged(Message changed);
+    public interface EditorEventHandler {
+        void onMessageChanged(boolean timestampChanged, Message changed);
 
-        void onMessageInserted(Message inserted);
+        void onMessageInserted(boolean addBefore, Message inserted);
 
-        void onMessageDeleted(Message deleted);
+        void onMessageDeleted();
+    }
+
+    public void purge() {
+        if (mMessageToEdit != null) {
+            mMessageToEdit.clear();
+        }
+        mEditorEventHandlers.clear();
     }
 }

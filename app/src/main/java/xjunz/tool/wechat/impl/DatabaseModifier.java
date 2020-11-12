@@ -26,8 +26,8 @@ import xjunz.tool.wechat.impl.repo.MessageRepository;
 import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 import xjunz.tool.wechat.util.ShellUtils;
 
-import static xjunz.tool.wechat.impl.model.message.Edition.FLAG_DELETION;
 import static xjunz.tool.wechat.impl.model.message.Edition.FLAG_INSERTION;
+import static xjunz.tool.wechat.impl.model.message.Edition.FLAG_REMOVAL;
 import static xjunz.tool.wechat.impl.model.message.Edition.FLAG_REPLACEMENT;
 
 /**
@@ -74,12 +74,12 @@ public class DatabaseModifier implements LifecycleObserver {
     }
 
     public void putPendingEdition(Edition edition) {
-        mPendingEditions.put(edition.getOrigin().getMsgId(), edition);
+        mPendingEditions.put(edition.getTargetMsgId(), edition);
         mHasPendingChanges.set(true);
     }
 
     public void removeAllPendingEditions() {
-        mPendingEditions.removeAtRange(0, mPendingEditions.size() - 1);
+        mPendingEditions.removeAtRange(0, mPendingEditions.size());
         mHasPendingChanges.set(false);
     }
 
@@ -91,14 +91,14 @@ public class DatabaseModifier implements LifecycleObserver {
         for (int i = 0; i < mPendingEditions.size(); i++) {
             Edition edition = mPendingEditions.valueAt(i);
             switch (edition.getFlag()) {
-                case FLAG_DELETION:
-                    delete(edition.getReplacement());
+                case FLAG_REMOVAL:
+                    delete(edition.getFiller());
                     break;
                 case FLAG_INSERTION:
-                    insert(edition.getReplacement());
+                    insert(edition.getFiller());
                     break;
                 case FLAG_REPLACEMENT:
-                    replace(edition.getReplacement());
+                    replace(edition.getFiller());
                     break;
             }
         }
@@ -113,16 +113,23 @@ public class DatabaseModifier implements LifecycleObserver {
         db.execSQL("drop table " + TABLE_ORIGINAL_MESSAGE_BACKUP);
     }
 
+    public boolean backupTableExists() {
+        //判断备份表是否存在
+        Cursor cursor = db.rawQuery("select name from sqlite_master where type='table' and name='" + TABLE_ORIGINAL_MESSAGE_BACKUP + "'", null);
+        //如果不存在
+        int count = cursor.getCount();
+        cursor.close();
+        return count == 1;
+    }
+
     /**
      * 创建消息备份表(如果不存在)，该表会复制{@code message}表的结构，但不会复制其内容。
      *
      * @see DatabaseModifier#TABLE_ORIGINAL_MESSAGE_BACKUP
      */
     public void createBackupTableIfNotExists() {
-        //判断备份表是否存在
-        Cursor cursor = db.rawQuery("select name from sqlite_master where type='table' and name='" + TABLE_ORIGINAL_MESSAGE_BACKUP + "'", null);
-        //如果不存在
-        if (cursor.getCount() == 0) {
+        //如果备份表不存在
+        if (!backupTableExists()) {
             //以下的数据库操作不使用execSQL方法，而是使用
             //创建表
             db.execSQL("create table " + TABLE_ORIGINAL_MESSAGE_BACKUP + " as select * from message where 1<>1");
@@ -131,7 +138,6 @@ public class DatabaseModifier implements LifecycleObserver {
             //为msgId创建唯一索引
             db.execSQL("create unique index index" + TABLE_ORIGINAL_MESSAGE_BACKUP + "MsgId on " + TABLE_ORIGINAL_MESSAGE_BACKUP + " (msgId)");
         }
-        cursor.close();
     }
 
 
@@ -201,7 +207,7 @@ public class DatabaseModifier implements LifecycleObserver {
     @CheckResult
     public DatabaseModifier delete(@NonNull Message msg) {
         transactUnless();
-        backupMessage(msg.getMsgId(), FLAG_DELETION);
+        backupMessage(msg.getMsgId(), FLAG_REMOVAL);
         db.execSQL("delete from message where msgId=" + msg.getMsgId());
         return this;
     }

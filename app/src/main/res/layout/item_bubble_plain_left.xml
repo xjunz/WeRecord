@@ -6,8 +6,9 @@
     <data>
 
         <variable
-            name="position"
-            type="int" />
+            name="vh"
+            type="xjunz.tool.wechat.ui.message.MessageActivity.MessageViewHolder" />
+
 
         <variable
             name="model"
@@ -39,6 +40,7 @@
             android:clickable="true"
             android:focusable="true"
             android:foreground="@drawable/bg_selectable_circle"
+            android:onClick="@{v->vh.gotoDetail(v)}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@tools:sample/avatars" />
@@ -67,7 +69,7 @@
             android:focusable="true"
             android:gravity="start"
             android:maxWidth="@dimen/max_bubble_width"
-            android:onClick="@{()->model.setSelectedMessagePosition(position)}"
+            android:onClick="@{()->model.setSelectedMessagePosition(vh.adapterPosition)}"
             android:paddingStart="@dimen/spacing_normal"
             android:paddingTop="@dimen/spacing_unit"
             android:paddingEnd="@dimen/spacing_normal"

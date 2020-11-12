@@ -10,8 +10,9 @@
         <import type="android.text.TextUtils" />
 
         <variable
-            name="position"
-            type="int" />
+            name="vh"
+            type="xjunz.tool.wechat.ui.message.MessageActivity.MessageViewHolder" />
+
 
         <variable
             name="model"
@@ -38,6 +39,7 @@
             android:layout_marginStart="@dimen/spacing_normal"
             android:layout_marginTop="@{message.inGroupChat?@dimen/spacing_normal:@dimen/spacing_unit}"
             android:avatar="@{account}"
+            android:onClick="@{v->vh.gotoDetail(v)}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@tools:sample/avatars" />
@@ -65,7 +67,7 @@
             android:contextMenu="@{true}"
             android:elevation="@dimen/z_bubble"
             android:focusable="true"
-            android:onClick="@{()->model.setSelectedMessagePosition(position)}"
+            android:onClick="@{()->model.setSelectedMessagePosition(vh.adapterPosition)}"
             android:padding="@dimen/dp_12"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/iv_avatar"
@@ -107,10 +109,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:maxWidth="@dimen/max_bubble_width"
-                android:visible="@{message.title!=null}"
                 android:text="@{message.title??@string/parse_failed}"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="?android:textColorPrimary"
+                android:visible="@{message.title!=null}"
                 app:layout_constraintBottom_toTopOf="@+id/tv_description"
                 app:layout_constraintStart_toStartOf="@+id/tv_caption"
                 app:layout_constraintTop_toBottomOf="@+id/tv_caption"

@@ -4,12 +4,23 @@
 package xjunz.tool.wechat;
 
 import org.junit.Test;
+import org.reactivestreams.Publisher;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
+import io.reactivex.FlowableEmitter;
+import io.reactivex.FlowableOnSubscribe;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.util.ShellUtils;
 
 import static org.junit.Assert.assertEquals;
@@ -37,7 +48,39 @@ public class ExampleUnitTest {
     }
 
     @Test
-    public void testWeakReference() {
+    public void testParallel() {
+        final long[] start = new long[1];
+        ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3);
+     /*   Flowable.fromArray(1, 2, 3).parallel().map(integer -> {
+            Thread.sleep(1000);
+            return integer;
+        }).runOn(Schedulers.computation()).sequential().forEach(integer -> {
+            System.out.println(integer + ":" + (Thread.currentThread()));
+        });*/
+        Flowable.fromArray(1, 2, 3).flatMap(new Function<Integer, Publisher<Integer>>() {
+            @Override
+            public Publisher<Integer> apply(@NonNull Integer integer) throws Exception {
+                return Flowable.create(new FlowableOnSubscribe<Integer>() {
+                    @Override
+                    public void subscribe(@NonNull FlowableEmitter<Integer> emitter) throws Exception {
+                        Thread.sleep(1);
+                        System.out.println(integer + " next:" + (Thread.currentThread()));
+                        emitter.onNext(integer);
+                    }
+                }, BackpressureStrategy.BUFFER).subscribeOn(Schedulers.computation());
+            }
+        }).subscribe(new Consumer<Integer>() {
+            @Override
+            public void accept(Integer integer) throws Exception {
+                // System.out.println(integer + " next:" + (Thread.currentThread()));
+            }
+        }, new Consumer<Throwable>() {
+
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                System.out.println(" error:" + (Thread.currentThread()));
+            }
+        });
     }
 
     @Test

@@ -24,6 +24,19 @@ public class MessageViewModel extends ObservableViewModel {
     public int selectedMessagePosition;
     private final ArrayList<EventHandler> eventHandlers = new ArrayList<>();
 
+    //EditionFragment variables
+
+    /**
+     * 选中确认的Editions（0）还是未确认的Editions（1）
+     */
+    public final ObservableInt editionSetSelection = new ObservableInt(0);
+    /**
+     * 选中的Edition类型
+     *
+     * @see xjunz.tool.wechat.impl.model.message.Edition
+     */
+    public final ObservableInt editionFlagSelection = new ObservableInt(0);
+
     public void addEventHandler(EventHandler eventHandler) {
         eventHandlers.add(eventHandler);
     }

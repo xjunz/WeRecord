@@ -123,15 +123,13 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
         return null;
     }
 
-    public List<BackupMessage> queryAllBackupMessages(String id) {
-        List<BackupMessage> queried = new ArrayList<>();
+    public void queryBackupMessagesByTalker(String id, @NonNull List<BackupMessage> backupMessages) {
         Cursor cursor = getDatabase().rawQuery("select * from " + DatabaseModifier.TABLE_ORIGINAL_MESSAGE_BACKUP + " where talker=" + "'"
                 + id + "'", null);
         while (cursor.moveToNext()) {
-            queried.add(new BackupMessage(buildMessageFromCursor(cursor).getValues()));
+            backupMessages.add(new BackupMessage(buildMessageFromCursor(cursor).getValues()));
         }
         cursor.close();
-        return queried;
     }
 
     @NotNull

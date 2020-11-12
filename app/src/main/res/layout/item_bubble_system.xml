@@ -6,8 +6,9 @@
     <data>
 
         <variable
-            name="position"
-            type="int" />
+            name="vh"
+            type="xjunz.tool.wechat.ui.message.MessageActivity.MessageViewHolder" />
+
 
         <variable
             name="model"
@@ -37,7 +38,7 @@
             android:contextMenu="@{true}"
             android:focusable="true"
             android:gravity="center"
-            android:onClick="@{()->model.setSelectedMessagePosition(position)}"
+            android:onClick="@{()->model.setSelectedMessagePosition(vh.adapterPosition)}"
             android:paddingStart="@dimen/spacing_normal"
             android:paddingTop="@dimen/spacing_unit"
             android:paddingEnd="@dimen/spacing_normal"

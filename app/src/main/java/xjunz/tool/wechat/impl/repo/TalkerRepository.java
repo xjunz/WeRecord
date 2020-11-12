@@ -20,7 +20,7 @@ import xjunz.tool.wechat.impl.model.account.Talker;
 
 public class TalkerRepository extends AccountRepository<Talker> {
     private static final int CACHE_CAPACITY = 50;
-    private SimpleArrayMap<Contact.Type, List<Talker>> mMap = new SimpleArrayMap<>();
+    private final SimpleArrayMap<Contact.Type, List<Talker>> mMap = new SimpleArrayMap<>();
 
     TalkerRepository() {
     }
@@ -37,7 +37,7 @@ public class TalkerRepository extends AccountRepository<Talker> {
     public void queryAllInternal(@NonNull List<Talker> all) {
         SQLiteDatabase database = getDatabase();
         Cursor talkerQueryCursor = database.rawQuery("select username,conversationTime,msgCount from rconversation where not msgcount = 0", null);
-        while (!talkerQueryCursor.isClosed() && talkerQueryCursor.moveToNext()) {
+        while (talkerQueryCursor.moveToNext()) {
             String id = talkerQueryCursor.getString(0);
             if (!TextUtils.isEmpty(id)) {
                 Talker talker = new Talker(id);
@@ -48,17 +48,15 @@ public class TalkerRepository extends AccountRepository<Talker> {
                     talker.nickname = contactQueryCursor.getString(2);
                     talker.rawType = contactQueryCursor.getInt(3);
                     talker.judgeType();
-                    contactQueryCursor.close();
                 }
+                contactQueryCursor.close();
                 talker.lastMsgTimestamp = talkerQueryCursor.getLong(1);
                 talker.messageCount = talkerQueryCursor.getInt(2);
                 getAllOfType(talker.type).add(talker);
                 all.add(talker);
             }
-            if (talkerQueryCursor.isLast()) {
-                talkerQueryCursor.close();
-            }
         }
+        talkerQueryCursor.close();
     }
 
     /**
@@ -66,7 +64,7 @@ public class TalkerRepository extends AccountRepository<Talker> {
      */
     @Override
     protected Talker query(String id) {
-        throw new IllegalArgumentException("This method should not be called!\n When this exception occurred, " +
+        throw new IllegalArgumentException("This method is not expected to be called!\n When this exception occurred, " +
                 "it means you are calling get(String id) with an id (here it is " + id + ") that doesn't exist in the database. " +
                 "Pls check the id you passed in. ");
     }

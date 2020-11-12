@@ -75,9 +75,17 @@ public class EditorActivity extends BaseActivity {
         Message modified = mModel.modifiedMessage.get();
         if (modified != null) {
             DatabaseModifier modifier = Environment.getInstance().modifyDatabase();
-            modifier.putPendingEdition(Edition.replace(mModel.originalMessage, modified));
-            mMessageEditorViewModel.notifyMessageChanged(modified);
+            if (mModel.editMode == EditorViewModel.EDIT_MODE_EDIT) {
+                modified.setEditionFlag(Edition.FLAG_REPLACEMENT);
+                modifier.putPendingEdition(Edition.replace(mModel.originalMessage, modified));
+                mMessageEditorViewModel.notifyMessageChanged(mModel.sendTimestampChanged.get(), modified);
+            } else {
+                modified.setEditionFlag(Edition.FLAG_INSERTION);
+                modifier.putPendingEdition(Edition.insert(modified));
+                mMessageEditorViewModel.notifyMessageInserted(mModel.editMode == EditorViewModel.EDIT_MODE_ADD_BEFORE, modified);
+            }
         }
+        finishAfterTransition();
     }
 
 

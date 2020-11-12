@@ -21,7 +21,7 @@ import xjunz.tool.wechat.impl.model.account.Contact;
 
 public class ContactRepository extends AccountRepository<Contact> {
     private static final int CACHE_CAPACITY = 500;
-    private SimpleArrayMap<Contact.Type, List<Contact>> mMap = new SimpleArrayMap<>();
+    private final SimpleArrayMap<Contact.Type, List<Contact>> mMap = new SimpleArrayMap<>();
 
     ContactRepository() {
     }
@@ -46,10 +46,8 @@ public class ContactRepository extends AccountRepository<Contact> {
                 getAllOfType(contact.type).add(contact);
                 all.add(contact);
             }
-            if (cursor.isLast()) {
-                cursor.close();
-            }
         }
+        cursor.close();
     }
 
     @Nullable
@@ -62,11 +60,10 @@ public class ContactRepository extends AccountRepository<Contact> {
             contact.nickname = cursor.getString(2);
             contact.rawType = cursor.getInt(3);
             contact.judgeType();
-            if (cursor.isLast()) {
-                cursor.close();
-            }
+            cursor.close();
             return contact;
         }
+        cursor.close();
         return null;
     }
 

@@ -6,6 +6,8 @@ package xjunz.tool.wechat.impl.model.message;
 
 import android.content.ContentValues;
 import android.os.Parcel;
+import android.text.Html;
+import android.text.Spanned;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
@@ -105,6 +107,8 @@ public class Message {
     @NonNull
     protected MessageFactory.Type type = MessageFactory.Type.OTHERS;
 
+    protected int editionFlag = Edition.FLAG_NONE;
+
     public ContentValues getValues() {
         return values;
     }
@@ -135,6 +139,17 @@ public class Message {
         }
     }
 
+    public void setEditionFlag(int editionFlag) {
+        this.editionFlag = editionFlag;
+    }
+
+    public boolean isEdited() {
+        return this.editionFlag == Edition.FLAG_NONE;
+    }
+
+    public int getEditionFlag() {
+        return editionFlag;
+    }
 
     public boolean isInGroupChat() {
         return getTalkerId().endsWith("@chatroom");
@@ -224,7 +239,7 @@ public class Message {
 
     @NonNull
     public String requireSenderId() {
-        return Objects.requireNonNull(getSenderId(), "Got null senderId, this message may be a system message.");
+        return Objects.requireNonNull(getSenderId(), "Got null senderId, this message might be a system message.");
     }
 
     /**
@@ -364,6 +379,19 @@ public class Message {
             sb.append(name).append("=").append(value);
         }
         return sb.toString();
+    }
+
+    @NotNull
+    public Spanned toSpannedString() {
+        StringBuilder sb = new StringBuilder();
+        for (String name : values.keySet()) {
+            String value = values.getAsString(name);
+            if (sb.length() > 0) {
+                sb.append("<br/>");
+            }
+            sb.append("<b>").append(name).append(":").append("</b>").append(value);
+        }
+        return Html.fromHtml(sb.toString());
     }
 
     @NonNull

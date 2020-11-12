@@ -1,26 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2020 xjunz. 保留所有权利
   -->
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
+        <variable
+            name="model"
+            type="xjunz.tool.wechat.data.viewmodel.MessageViewModel" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView xmlns:tools="http://schemas.android.com/tools"
+        <Spinner
+            android:id="@+id/sp_edition_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/spacing_unit"
+            android:layout_marginVertical="@dimen/spacing_normal"
+            android:entries="@array/type_edition"
+            android:selection="@={model.editionSetSelection}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Spinner
+            android:id="@+id/sp_edition_flag_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/spacing_unit"
+            android:layout_marginVertical="@dimen/spacing_normal"
+            android:entries="@array/type_edition_flag"
+            android:selection="@={model.editionFlagSelection}"
+            app:layout_constraintStart_toEndOf="@+id/sp_edition_type"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/ib_help"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_unit"
+            android:layout_marginEnd="16dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/help"
+            android:help="@{@string/help_edition}"
+            android:tint="?android:textColorSecondary"
+            app:layout_constraintBottom_toBottomOf="@+id/sp_edition_flag_type"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/sp_edition_flag_type"
+            app:srcCompat="@drawable/ic_help_outline_black_20dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_edition"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:background="?colorBackgroundFloating"
+            android:elevation="@dimen/z_card"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/sp_edition_type"
             tools:itemCount="10"
             tools:listitem="@layout/item_edition" />
 

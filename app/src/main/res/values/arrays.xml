@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2020 xjunz. 保留所有权利
   -->
-
 <resources>
     <string-array name="talker_sorts">
         <item>按名称</item>
@@ -47,5 +46,15 @@
         <item>@string/search</item>
         <item>@string/edit</item>
         <item>@string/statistics</item>
+    </string-array>
+    <string-array name="type_edition">
+        <item>已应用的更改</item>
+        <item>未应用的更改</item>
+    </string-array>
+    <string-array name="type_edition_flag">
+        <item>@string/bracketed_all</item>
+        <item>@string/edition_type_rep</item>
+        <item>@string/edition_type_insertion</item>
+        <item>@string/edition_type_removal</item>
     </string-array>
 </resources>
