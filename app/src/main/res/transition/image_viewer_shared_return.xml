@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="@android:integer/config_shortAnimTime"
+    android:interpolator="@android:interpolator/fast_out_slow_in">
+    <changeBounds />
+    <changeImageTransform />
+    <changeClipBounds />
+    <transition xmlns:app="http://schemas.android.com/apk/res-auto"
+        class="xjunz.tool.wechat.ui.transition.ChangeCorners"
+        app:endCornerRadius="@dimen/r_fab_normal"
+        app:startCornerRadius="0dp" />
+    <targets>
+        <target android:targetId="@+id/iv_avatar" />
+    </targets>
+
+</transitionSet>

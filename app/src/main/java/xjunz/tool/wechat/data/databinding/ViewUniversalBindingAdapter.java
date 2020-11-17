@@ -19,6 +19,8 @@ import androidx.databinding.adapters.ListenerUtil;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
+
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.util.UiUtils;
 
@@ -29,6 +31,16 @@ public class ViewUniversalBindingAdapter {
     @BindingAdapter({"android:visible"})
     public static void setVisible(@NotNull View view, boolean isVisible) {
         view.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+    }
+
+    @BindingAdapter({"android:invisible"})
+    public static void setInvisible(@NotNull View view, boolean invisible) {
+        view.setVisibility(invisible ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    @BindingAdapter({"android:gone"})
+    public static void setGone(@NotNull View view, boolean gone) {
+        view.setVisibility(gone ? View.GONE : View.VISIBLE);
     }
 
     @BindingAdapter("android:tooltip")
@@ -60,6 +72,30 @@ public class ViewUniversalBindingAdapter {
     @BindingAdapter("android:error")
     public static void setError(@NotNull EditText editText, String errorText) {
         editText.setError(errorText);
+    }
+
+    @BindingAdapter(value = "android:marginTop")
+    public static void setMarginTop(@NotNull View view, float marginTop) {
+        ViewGroup.LayoutParams lp = view.getLayoutParams();
+        try {
+            Field field = lp.getClass().getField("topMargin");
+            field.set(lp, (int) marginTop);
+            view.setLayoutParams(lp);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @BindingAdapter(value = "android:marginBottom")
+    public static void setMarginBottom(@NotNull View view, float marginTop) {
+        ViewGroup.LayoutParams lp = view.getLayoutParams();
+        try {
+            Field field = lp.getClass().getField("bottomMargin");
+            field.set(lp, (int) marginTop);
+            view.setLayoutParams(lp);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

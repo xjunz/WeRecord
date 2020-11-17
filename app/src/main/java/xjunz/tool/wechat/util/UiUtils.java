@@ -19,6 +19,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.transition.Transition;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +40,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -123,6 +125,35 @@ public class UiUtils {
             }
         }
         return builder;
+    }
+
+    public static int getBottomMargin(@NotNull View view) {
+        ViewGroup.LayoutParams lp = view.getLayoutParams();
+        try {
+            return (int) lp.getClass().getField("bottomMargin").get(lp);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public static int getTopMargin(@NotNull View view) {
+        ViewGroup.LayoutParams lp = view.getLayoutParams();
+        try {
+            return (int) lp.getClass().getField("topMargin").get(lp);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @NotNull
+    @Contract("_ -> new")
+    public static Drawable getDrawingCacheOf(@NotNull View target) {
+        Bitmap bitmap = Bitmap.createBitmap(target.getWidth(), target.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        target.draw(canvas);
+        return new BitmapDrawable(target.getResources(), bitmap);
     }
 
     public static void fadeSwitchText(@NonNull final TextView target, final Object text) {
@@ -334,6 +365,15 @@ public class UiUtils {
         }
     }
 
+    public static void getLocationCoordinateTo(@NotNull View src, @NotNull View anchor, @NotNull int[] out) {
+        int[] srcPos = new int[2];
+        src.getLocationInWindow(srcPos);
+        int[] anchorPos = new int[2];
+        anchor.getLocationInWindow(anchorPos);
+        out[0] = srcPos[0] - anchorPos[0];
+        out[1] = srcPos[1] - anchorPos[1];
+    }
+
     /**
      * Determine if the navigation bar will be on the bottom of the screen, based on logic in
      * PhoneWindowManager.
@@ -377,5 +417,33 @@ public class UiUtils {
         return sTextColorSecondary;
     }
 
+    public static class TransitionListenerAdapter implements Transition.TransitionListener {
+
+
+        @Override
+        public void onTransitionStart(@NonNull Transition transition) {
+
+        }
+
+        @Override
+        public void onTransitionEnd(@NonNull Transition transition) {
+
+        }
+
+        @Override
+        public void onTransitionCancel(@NonNull Transition transition) {
+
+        }
+
+        @Override
+        public void onTransitionPause(@NonNull Transition transition) {
+
+        }
+
+        @Override
+        public void onTransitionResume(@NonNull Transition transition) {
+
+        }
+    }
 
 }

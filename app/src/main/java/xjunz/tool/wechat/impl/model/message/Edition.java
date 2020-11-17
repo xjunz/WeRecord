@@ -4,8 +4,11 @@
 package xjunz.tool.wechat.impl.model.message;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 
 import org.jetbrains.annotations.NotNull;
+
+import xjunz.tool.wechat.R;
 
 /**
  * 消息修改的抽象类
@@ -108,5 +111,21 @@ public class Edition {
         throw new RuntimeException("Unexpected instruction: " + flag);
     }
 
+    @StringRes
+    public static int getEditionFlagCaptionOf(int flag) {
+        switch (flag) {
+            case Edition.FLAG_REMOVAL:
+                return R.string.edition_type_removal;
+            case Edition.FLAG_INSERTION:
+                return R.string.edition_type_insertion;
+            case Edition.FLAG_REPLACEMENT:
+                return R.string.edition_type_rep;
+        }
+        throw new IllegalArgumentException("Unknown edition flag: " + flag);
+    }
 
+    @StringRes
+    public int getEditionFlagCaption() {
+        return getEditionFlagCaptionOf(getFlag());
+    }
 }

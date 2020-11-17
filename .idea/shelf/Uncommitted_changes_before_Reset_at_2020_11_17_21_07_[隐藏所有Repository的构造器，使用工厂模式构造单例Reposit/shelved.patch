@@ -1,0 +1,1294 @@
+Index: app/src/main/java/xjunz/tool/wechat/ui/customview/MessagePanel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\n * Copyright (c) 2020 xjunz. 保留所有权利\r\n */\r\n\r\npackage xjunz.tool.wechat.ui.customview;\r\n\r\nimport android.annotation.SuppressLint;\r\nimport android.content.Context;\r\nimport android.util.AttributeSet;\r\nimport android.view.MotionEvent;\r\nimport android.view.View;\r\nimport android.view.ViewGroup;\r\n\r\nimport androidx.annotation.NonNull;\r\nimport androidx.constraintlayout.widget.ConstraintLayout;\r\nimport androidx.customview.widget.ViewDragHelper;\r\n\r\nimport org.jetbrains.annotations.NotNull;\r\n\r\nimport java.util.ArrayList;\r\n\r\nimport xjunz.tool.wechat.R;\r\n\r\n/**\r\n * 消息页面面板\r\n *\r\n * @see R.layout#activity_message\r\n */\r\npublic class MessagePanel extends ConstraintLayout {\r\n    private ViewDragHelper mHelper;\r\n    private View mIndicator, mIbStats, mIbSearch, mEtSearch, mIbEdit;\r\n    private ViewGroup mViewPager, mBottomBar, mCurtain, mIbContainer;\r\n    private int mCurtainHeight;\r\n    private int mMaxTop, mMinTop;\r\n    private int mIbContainerWidth, mMinContainerWidth;\r\n    private boolean mReadyToUser = false;\r\n    private float mBottomBarElevation;\r\n    private ArrayList<OnPanelSlideListener> mListenerList;\r\n\r\n    private void init() {\r\n        mHelper = ViewDragHelper.create(this, 1.0f, mCallback);\r\n        mListenerList = new ArrayList<>();\r\n\r\n        this.addOnPanelSlideListener(new OnPanelSlideListener() {\r\n            @Override\r\n            public void onPanelSlideFinished(boolean isOpen) {\r\n                if (!isOpen) {\r\n                    mEtSearch.setVisibility(GONE);\r\n                }\r\n            }\r\n\r\n            @Override\r\n            public void onPanelSlide(float fraction) {\r\n                mEtSearch.setAlpha(fraction);\r\n                mBottomBar.setElevation(fraction * mBottomBarElevation);\r\n                int containerWidth = (int) (mMinContainerWidth + (1 - fraction) * (mIbContainerWidth - mMinContainerWidth));\r\n                mIbContainer.setRight(containerWidth);\r\n                setWidth(mIbContainer, containerWidth);\r\n                setWidth(mIndicator, containerWidth / 3);\r\n                mEtSearch.setTranslationX(mIbContainerWidth - (mIbContainerWidth - mMinContainerWidth * (2f / 3f)) * fraction);\r\n            }\r\n\r\n            @Override\r\n            public void onPanelSlideStart(boolean isToOpen) {\r\n                mReadyToUser = true;\r\n                if (isToOpen) {\r\n                    mEtSearch.setAlpha(0f);\r\n                    setWidth(mEtSearch, mIbContainerWidth - mMinContainerWidth);\r\n                    mEtSearch.setTranslationX(mIbContainerWidth);\r\n                    mEtSearch.setVisibility(VISIBLE);\r\n                } else {\r\n                    mIbEdit.setVisibility(VISIBLE);\r\n                }\r\n            }\r\n        });\r\n    }\r\n\r\n    //这个方法会调用onLayout，所以要在onLayout中增加处理逻辑\r\n    private void setWidth(@NotNull View view, int width) {\r\n        ViewGroup.LayoutParams lp = view.getLayoutParams();\r\n        lp.width = width;\r\n        view.setLayoutParams(lp);\r\n    }\r\n\r\n    public MessagePanel(Context context) {\r\n        super(context);\r\n        init();\r\n    }\r\n\r\n    public MessagePanel(Context context, AttributeSet attrs) {\r\n        super(context, attrs);\r\n        init();\r\n    }\r\n\r\n    public MessagePanel(Context context, AttributeSet attrs, int defStyleAttr) {\r\n        super(context, attrs, defStyleAttr);\r\n        init();\r\n    }\r\n\r\n    public void addOnPanelSlideListener(@NonNull OnPanelSlideListener listener) {\r\n        this.mListenerList.add(listener);\r\n    }\r\n\r\n    @Override\r\n    public boolean onInterceptTouchEvent(MotionEvent event) {\r\n        return mHelper.shouldInterceptTouchEvent(event);\r\n    }\r\n\r\n    @SuppressLint(\"ClickableViewAccessibility\")\r\n    @Override\r\n    public boolean onTouchEvent(MotionEvent event) {\r\n        mHelper.processTouchEvent(event);\r\n        return true;\r\n    }\r\n\r\n    @Override\r\n    protected void onFinishInflate() {\r\n        super.onFinishInflate();\r\n        mViewPager = findViewById(R.id.vp_message);\r\n        mBottomBar = findViewById(R.id.bottom_bar);\r\n        mCurtain = findViewById(R.id.ll_curtain);\r\n        mIndicator = findViewById(R.id.indicator);\r\n        mIbEdit = findViewById(R.id.ib_edit);\r\n        mIbSearch = findViewById(R.id.ib_search);\r\n        mIbStats = findViewById(R.id.ib_stats);\r\n        mEtSearch = findViewById(R.id.et_search);\r\n        mIbContainer = findViewById(R.id.ll_ib_container);\r\n        mBottomBarElevation = mBottomBar.getElevation();\r\n    }\r\n\r\n\r\n    @Override\r\n    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {\r\n        if (!mReadyToUser) {\r\n            super.onLayout(changed, left, top, right, bottom);\r\n            mCurtainHeight = mCurtain.getMeasuredHeight();\r\n            mMaxTop = mCurtainHeight - mIbContainer.getMeasuredHeight();\r\n            mMinTop = 0;\r\n            mIbContainerWidth = mIbContainer.getMeasuredWidth();\r\n            mMinContainerWidth = (int) (mIbContainerWidth * 0.5);\r\n            mCurtain.setBottom(mMaxTop + mCurtainHeight);\r\n            mCurtain.setTop(mMaxTop);\r\n        } else {\r\n            int curtainCurTop = mCurtain.getTop();\r\n            super.onLayout(changed, left, top, right, bottom);\r\n            mCurtain.layout(left, curtainCurTop, right, curtainCurTop + mCurtainHeight);\r\n        }\r\n    }\r\n\r\n    public void openPanel() {\r\n        if (mHelper.smoothSlideViewTo(mCurtain, 0, mMinTop)) {\r\n            postInvalidateOnAnimation();\r\n        }\r\n    }\r\n\r\n    public void closePanel() {\r\n        if (mHelper.smoothSlideViewTo(mCurtain, 0, mMaxTop)) {\r\n            postInvalidateOnAnimation();\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public void computeScroll() {\r\n        if (mHelper.continueSettling(true)) {\r\n            postInvalidateOnAnimation();\r\n        }\r\n    }\r\n\r\n    private final ViewDragHelper.Callback mCallback = new ViewDragHelper.Callback() {\r\n        private int mFormerState = ViewDragHelper.STATE_IDLE;\r\n\r\n        @Override\r\n        public boolean tryCaptureView(@NonNull View child, int pointerId) {\r\n            return child.getId() == mCurtain.getId();\r\n        }\r\n\r\n\r\n        @Override\r\n        public int clampViewPositionVertical(@NonNull View child, int top, int dy) {\r\n            return Math.min(mMaxTop, Math.max(top, mMinTop));\r\n        }\r\n\r\n        @Override\r\n        public void onViewDragStateChanged(int state) {\r\n            super.onViewDragStateChanged(state);\r\n            if (mFormerState == ViewDragHelper.STATE_IDLE && (state == ViewDragHelper.STATE_DRAGGING || state == ViewDragHelper.STATE_SETTLING)) {\r\n                int top = mCurtain.getTop();\r\n                for (OnPanelSlideListener listener : mListenerList) {\r\n                    listener.onPanelSlideStart(mMaxTop - top < top - mMinTop);\r\n                }\r\n            } else if (state == ViewDragHelper.STATE_IDLE) {\r\n                for (OnPanelSlideListener listener : mListenerList) {\r\n                    listener.onPanelSlideFinished(mCurtain.getTop() == mMinTop);\r\n                }\r\n            }\r\n            mFormerState = state;\r\n        }\r\n\r\n        @Override\r\n        public void onViewPositionChanged(@NonNull View changedView, int left, int top, int dx, int dy) {\r\n            super.onViewPositionChanged(changedView, left, top, dx, dy);\r\n            float fraction = (float) (mMaxTop - top) / (mMaxTop - mMinTop);\r\n            for (OnPanelSlideListener listener : mListenerList) {\r\n                listener.onPanelSlide(fraction);\r\n            }\r\n        }\r\n\r\n        @Override\r\n        public int getViewVerticalDragRange(@NonNull View child) {\r\n            return mCurtainHeight;\r\n        }\r\n\r\n        @Override\r\n        public void onViewReleased(@NotNull View releasedChild, float xvel, float yvel) {\r\n            if (yvel > 0) {\r\n                closePanel();\r\n            } else if (yvel < 0) {\r\n                openPanel();\r\n            } else {\r\n                if (((float) releasedChild.getTop() - mMinTop) / (mMaxTop - mMinTop) > .5f) {\r\n                    closePanel();\r\n                } else {\r\n                    openPanel();\r\n                }\r\n            }\r\n            super.onViewReleased(releasedChild, xvel, yvel);\r\n        }\r\n    };\r\n\r\n    public interface OnPanelSlideListener {\r\n        void onPanelSlideFinished(boolean isOpen);\r\n\r\n        void onPanelSlide(float fraction);\r\n\r\n        void onPanelSlideStart(boolean isToOpen);\r\n    }\r\n\r\n    public boolean isOpen() {\r\n        return mCurtain.getTop() == mMinTop;\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/xjunz/tool/wechat/ui/customview/MessagePanel.java	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/java/xjunz/tool/wechat/ui/customview/MessagePanel.java	(date 1605618119471)
+@@ -14,12 +14,15 @@
+ import androidx.annotation.NonNull;
+ import androidx.constraintlayout.widget.ConstraintLayout;
+ import androidx.customview.widget.ViewDragHelper;
++import androidx.recyclerview.widget.RecyclerView;
++import androidx.viewpager2.widget.ViewPager2;
+ 
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.ArrayList;
+ 
+ import xjunz.tool.wechat.R;
++import xjunz.tool.wechat.util.UiUtils;
+ 
+ /**
+  * 消息页面面板
+@@ -28,8 +31,9 @@
+  */
+ public class MessagePanel extends ConstraintLayout {
+     private ViewDragHelper mHelper;
+-    private View mIndicator, mIbStats, mIbSearch, mEtSearch, mIbEdit;
+-    private ViewGroup mViewPager, mBottomBar, mCurtain, mIbContainer;
++    private View mIndicator, mEtSearch, mIbEdit;
++    private ViewPager2 mViewPager;
++    private ViewGroup mBottomBar, mCurtain, mIbContainer;
+     private int mCurtainHeight;
+     private int mMaxTop, mMinTop;
+     private int mIbContainerWidth, mMinContainerWidth;
+@@ -56,8 +60,10 @@
+                 int containerWidth = (int) (mMinContainerWidth + (1 - fraction) * (mIbContainerWidth - mMinContainerWidth));
+                 mIbContainer.setRight(containerWidth);
+                 setWidth(mIbContainer, containerWidth);
+-                setWidth(mIndicator, containerWidth / 3);
+-                mEtSearch.setTranslationX(mIbContainerWidth - (mIbContainerWidth - mMinContainerWidth * (2f / 3f)) * fraction);
++                int indicatorWidth = containerWidth / 3;
++                setWidth(mIndicator, indicatorWidth);
++                mIndicator.setTranslationX(mViewPager.getCurrentItem() * indicatorWidth);
++                mEtSearch.setTranslationX(mIbContainerWidth - (mIbContainerWidth - mMinContainerWidth /* *(2f / 3f)*/) * fraction);
+             }
+ 
+             @Override
+@@ -102,13 +108,19 @@
+     }
+ 
+     @Override
+-    public boolean onInterceptTouchEvent(MotionEvent event) {
++    public boolean onInterceptTouchEvent(@NotNull MotionEvent event) {
++        mX = event.getX();
++        mY = event.getY();
+         return mHelper.shouldInterceptTouchEvent(event);
+     }
+ 
++    private float mX, mY;
++
+     @SuppressLint("ClickableViewAccessibility")
+     @Override
+-    public boolean onTouchEvent(MotionEvent event) {
++    public boolean onTouchEvent(@NotNull MotionEvent event) {
++        mX = event.getX();
++        mY = event.getY();
+         mHelper.processTouchEvent(event);
+         return true;
+     }
+@@ -120,12 +132,37 @@
+         mBottomBar = findViewById(R.id.bottom_bar);
+         mCurtain = findViewById(R.id.ll_curtain);
+         mIndicator = findViewById(R.id.indicator);
+-        mIbEdit = findViewById(R.id.ib_edit);
+-        mIbSearch = findViewById(R.id.ib_search);
+-        mIbStats = findViewById(R.id.ib_stats);
+         mEtSearch = findViewById(R.id.et_search);
++        mIbEdit = findViewById(R.id.ib_edit);
+         mIbContainer = findViewById(R.id.ll_ib_container);
+         mBottomBarElevation = mBottomBar.getElevation();
++        findViewById(R.id.ib_stats).setOnClickListener(v -> {
++            mViewPager.setCurrentItem(0, true);
++            if (!isOpen()) {
++                openPanel();
++            }
++        });
++        findViewById(R.id.ib_search).setOnClickListener(v -> {
++            mViewPager.setCurrentItem(2, true);
++            if (!isOpen()) {
++                openPanel();
++            }
++        });
++        findViewById(R.id.ib_edit).setOnClickListener(v -> {
++            mViewPager.setCurrentItem(1, true);
++            if (!isOpen()) {
++                openPanel();
++            }
++        });
++        mViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
++            @Override
++            public void onPageSelected(int position) {
++                super.onPageSelected(position);
++                if (isOpen()) {
++                    UiUtils.animateTranslateX(mIndicator, mIndicator.getWidth() * position);
++                }
++            }
++        });
+     }
+ 
+ 
+@@ -171,7 +208,20 @@
+ 
+         @Override
+         public boolean tryCaptureView(@NonNull View child, int pointerId) {
+-            return child.getId() == mCurtain.getId();
++            if (child.getId() == mCurtain.getId()) {
++                //当我们的搜索结果列表在点击范围内且不能下滑时，才返回true
++                //不然我们的列表没法下滑
++                RecyclerView list = mCurtain.findViewById(R.id.rv_result);
++                if (list != null) {
++                    int[] lt = new int[2];
++                    list.getLocationInWindow(lt);
++                    if (mX >= lt[0] && mX <= lt[0] + list.getWidth() && mY >= lt[1] && mY <= lt[1] + list.getHeight()) {
++                        return !list.canScrollVertically(-1);
++                    }
++                }
++                return true;
++            }
++            return false;
+         }
+ 
+ 
+@@ -223,7 +273,6 @@
+                     openPanel();
+                 }
+             }
+-            super.onViewReleased(releasedChild, xvel, yvel);
+         }
+     };
+ 
+Index: app/src/main/res/layout/activity_image_viewer.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<androidx.constraintlayout.widget.ConstraintLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\">\r\n\r\n    <com.bm.library.PhotoView\r\n        android:transitionName=\"@string/tn_avatar\"\r\n        android:id=\"@+id/photo_view\"\r\n        android:scaleType=\"centerCrop\"\r\n        android:layout_width=\"500dp\"\r\n        android:layout_height=\"500dp\"\r\n        app:layout_constraintBottom_toBottomOf=\"parent\"\r\n        app:layout_constraintEnd_toEndOf=\"parent\"\r\n        app:layout_constraintStart_toStartOf=\"parent\"\r\n        app:layout_constraintTop_toTopOf=\"parent\" />\r\n</androidx.constraintlayout.widget.ConstraintLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_image_viewer.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/layout/activity_image_viewer.xml	(date 1605618119480)
+@@ -7,12 +7,13 @@
+     android:layout_width="match_parent"
+     android:layout_height="match_parent">
+ 
+-    <com.bm.library.PhotoView
+-        android:transitionName="@string/tn_avatar"
+-        android:id="@+id/photo_view"
++    <ImageView
++        android:id="@+id/iv_avatar"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:contentDescription="@string/cd_avatar"
+         android:scaleType="centerCrop"
+-        android:layout_width="500dp"
+-        android:layout_height="500dp"
++        android:transitionName="@string/tn_avatar"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintStart_toStartOf="parent"
+Index: app/src/main/java/xjunz/tool/wechat/ui/main/MessageActivity.java
+===================================================================
+--- app/src/main/java/xjunz/tool/wechat/ui/main/MessageActivity.java	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/java/xjunz/tool/wechat/ui/main/MessageActivity.java	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
+@@ -1,248 +0,0 @@
+-/*
+- * Copyright (c) 2020 xjunz. 保留所有权利
+- */
+-
+-package xjunz.tool.wechat.ui.main;
+-
+-import android.os.Bundle;
+-import android.view.ContextMenu;
+-import android.view.MenuItem;
+-import android.view.View;
+-import android.view.ViewGroup;
+-import android.view.animation.AccelerateDecelerateInterpolator;
+-
+-import androidx.annotation.NonNull;
+-import androidx.annotation.Nullable;
+-import androidx.databinding.DataBindingUtil;
+-import androidx.databinding.ViewDataBinding;
+-import androidx.lifecycle.ViewModelProvider;
+-import androidx.recyclerview.widget.RecyclerView;
+-
+-import java.util.ArrayList;
+-import java.util.List;
+-
+-import xjunz.tool.wechat.BR;
+-import xjunz.tool.wechat.R;
+-import xjunz.tool.wechat.data.viewmodel.MessageViewModel;
+-import xjunz.tool.wechat.databinding.ActivityMessageBinding;
+-import xjunz.tool.wechat.impl.Environment;
+-import xjunz.tool.wechat.impl.model.account.Talker;
+-import xjunz.tool.wechat.impl.model.message.Message;
+-import xjunz.tool.wechat.impl.repo.ContactRepository;
+-import xjunz.tool.wechat.impl.repo.MessageRepository;
+-import xjunz.tool.wechat.ui.BaseActivity;
+-import xjunz.tool.wechat.ui.customview.MasterToast;
+-import xjunz.tool.wechat.util.RxJavaUtils;
+-import xjunz.tool.wechat.util.UiUtils;
+-
+-public class MessageActivity extends BaseActivity {
+-    public static final String EXTRA_DATA = "MessageActivity.extra.data";
+-    private static final int INITIAL_LOAD_COUNT = 50;
+-    private static final int CONSEQUENT_LOAD_COUNT = 100;
+-    private Talker mTalker;
+-    private RecyclerView mRvMessage;
+-    private List<Message> mMessageList;
+-    private MessageRepository mMessageRepo;
+-    private ContactRepository mContactRepo;
+-    private MessageAdapter mAdapter;
+-    private ActivityMessageBinding mBinding;
+-    private MessageViewModel mModel;
+-    private int mItemShowingContextMenu = -1;
+-    private boolean mHasLoadAllMessages;
+-
+-    @Override
+-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+-        super.onCreate(savedInstanceState);
+-        mTalker = (Talker) getIntent().getSerializableExtra(EXTRA_DATA);
+-        if (mTalker == null) {
+-            MasterToast.shortToast("No data passed in, who are u?");
+-            finish();
+-        } else {
+-            mMessageRepo = MessageRepository.getInstance();
+-            mContactRepo = ContactRepository.getInstance();
+-            mBinding = DataBindingUtil.setContentView(this, R.layout.activity_message);
+-            mModel = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory()).get(MessageViewModel.class);
+-            mBinding.setTalker(mTalker);
+-            mBinding.setModel(mModel);
+-            mRvMessage = mBinding.rvMessage;
+-            initList();
+-        }
+-    }
+-
+-
+-    private void initList() {
+-        mMessageList = new ArrayList<>();
+-        RxJavaUtils.single(() -> mMessageRepo.queryMessageByTalkerLimit(mTalker.id, INITIAL_LOAD_COUNT, mMessageList)).subscribe(new RxJavaUtils.SingleObserverAdapter<Integer>() {
+-            @Override
+-            public void onSuccess(Integer o) {
+-                mHasLoadAllMessages = mMessageList.size() >= mTalker.messageCount;
+-                mAdapter = new MessageAdapter();
+-                mRvMessage.setAdapter(mAdapter);
+-                //回到最底部，显示最新的消息记录（因为是reverseLayout的）
+-                mRvMessage.scrollToPosition(0);
+-            }
+-        });
+-        mBinding.rvMessage.addOnScrollListener(new RecyclerView.OnScrollListener() {
+-            int formerState = RecyclerView.SCROLL_STATE_IDLE;
+-
+-            @Override
+-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+-                super.onScrollStateChanged(recyclerView, newState);
+-                formerState = newState;
+-            }
+-
+-            @Override
+-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+-                super.onScrolled(recyclerView, dx, dy);
+-                //当用户滑动到顶部的时候
+-                if (formerState != RecyclerView.SCROLL_STATE_IDLE && !mBinding.rvMessage.canScrollVertically(-1)) {
+-                    //如果已经数据已经全部加载完
+-                    if (mHasLoadAllMessages) {
+-                        //提示
+-                        UiUtils.toast(R.string.has_loaded_all_msg);
+-                        return;
+-                    }
+-                    //否则显示加载进度条
+-                    UiUtils.fadeIn(mBinding.pbLoad);
+-                    RxJavaUtils.single(() -> {
+-                        //为了加载动画不一闪而过造成不好的用户体验，
+-                        //假装加载500毫秒，让动画跑一会儿，其实秒加载。
+-                        Thread.sleep(500);
+-                        return mMessageRepo.queryMessageByTalkerLimit(mTalker.id, INITIAL_LOAD_COUNT, mMessageList);
+-                    }).subscribe(new RxJavaUtils.SingleObserverAdapter<Integer>() {
+-                        @Override
+-                        public void onSuccess(Integer count) {
+-                            super.onSuccess(count);
+-                            //关闭加载进度条并更新数据
+-                            UiUtils.fadeOut(mBinding.pbLoad);
+-                            mHasLoadAllMessages = mMessageList.size() >= mTalker.messageCount;
+-                            mAdapter.notifyItemInserted(mMessageList.size() - count);
+-                            mBinding.rvMessage.smoothScrollBy(0, -100, new AccelerateDecelerateInterpolator());
+-                        }
+-                    });
+-                }
+-            }
+-        });
+-    }
+-
+-    @Override
+-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+-        super.onCreateContextMenu(menu, v, menuInfo);
+-        getMenuInflater().inflate(R.menu.message, menu);
+-    }
+-
+-    public void onMessageClicked(@NonNull Message message) {
+-        UiUtils.toast(message.getRawContent());
+-    }
+-
+-    @Override
+-    public boolean onContextItemSelected(@NonNull MenuItem item) {
+-        if (mItemShowingContextMenu != -1) {
+-            switch (item.getItemId()) {
+-                case R.id.item_add_before:
+-                    break;
+-                case R.id.item_add_after:
+-                    break;
+-                case R.id.item_delete:
+-                    break;
+-                case R.id.item_edit:
+-                    break;
+-                case R.id.item_check:
+-                    break;
+-            }
+-        }
+-        return super.onContextItemSelected(item);
+-    }
+-
+-
+-    private class MessageAdapter extends RecyclerView.Adapter<MessageViewHolder> {
+-        private final int FLAG_IS_SEND = 13;
+-        private final int ITEM_TYPE_PLAIN = 1;
+-        private final int ITEM_TYPE_SYSTEM = 2;
+-        private final int ITEM_TYPE_COMPLEX = 3;
+-
+-        private boolean isSend(int compositeType) {
+-            return compositeType % FLAG_IS_SEND == 0;
+-        }
+-
+-        private int getType(int compositeType) {
+-            return compositeType / (isSend(compositeType) ? FLAG_IS_SEND : 1);
+-        }
+-
+-        private int getResOf(int compositeType) {
+-            boolean left = !isSend(compositeType);
+-            int type = getType(compositeType);
+-            switch (type) {
+-                case ITEM_TYPE_SYSTEM:
+-                    return R.layout.item_bubble_system;
+-                case ITEM_TYPE_COMPLEX:
+-                    return left ? R.layout.item_bubble_complex_left : R.layout.item_bubble_complex_right;
+-                case ITEM_TYPE_PLAIN:
+-                    return left ? R.layout.item_bubble_plain_left : R.layout.item_bubble_plain_right;
+-
+-            }
+-            throw new IllegalArgumentException("No such type: " + compositeType);
+-        }
+-
+-        @Override
+-        public int getItemViewType(int position) {
+-            Message message = mMessageList.get(position);
+-            Message.Type type = message.getType();
+-            if (message.getType() == Message.Type.SYSTEM) {
+-                return ITEM_TYPE_SYSTEM;
+-            } else {
+-                if (type == null || type.isComplex()) {
+-                    return (message.isSend() ? FLAG_IS_SEND : 1) * ITEM_TYPE_COMPLEX;
+-                } else {
+-                    return (message.isSend() ? FLAG_IS_SEND : 1) * ITEM_TYPE_PLAIN;
+-                }
+-            }
+-        }
+-
+-        @NonNull
+-        @Override
+-        public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+-            ViewDataBinding binding = DataBindingUtil.inflate(getLayoutInflater(), getResOf(viewType), parent, false);
+-            return new MessageViewHolder(binding);
+-        }
+-
+-        @Override
+-        public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
+-            Message message = mMessageList.get(position);
+-            holder.binding.setVariable(BR.message, message);
+-            if (message.getType() != Message.Type.SYSTEM) {
+-                if (message.isSend()) {
+-                    holder.binding.setVariable(BR.account, Environment.getInstance().getCurrentUser());
+-                } else {
+-                    holder.binding.setVariable(BR.account, message.getGroupTalkerId() == null ? mTalker : ContactRepository.getInstance().get(message.requireSenderId()));
+-                }
+-            }
+-            holder.binding.executePendingBindings();
+-        }
+-
+-        @Override
+-        public int getItemCount() {
+-            return mMessageList.size();
+-        }
+-    }
+-
+-    private class MessageViewHolder extends RecyclerView.ViewHolder {
+-        ViewDataBinding binding;
+-
+-        public MessageViewHolder(@NonNull ViewDataBinding binding) {
+-            super(binding.getRoot());
+-            this.binding = binding;
+-            this.binding.setVariable(BR.activity, MessageActivity.this);
+-        }
+-    }
+-
+-    @Override
+-    public void onBackPressed() {
+-        if (mBinding.messagePanel.isOpen()) {
+-            mBinding.messagePanel.closePanel();
+-        } else {
+-            super.onBackPressed();
+-        }
+-    }
+-
+-}
+Index: app/src/main/java/xjunz/tool/wechat/ui/customview/CircularImageView.java
+===================================================================
+--- app/src/main/java/xjunz/tool/wechat/ui/customview/CircularImageView.java	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/java/xjunz/tool/wechat/ui/customview/CircularImageView.java	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
+@@ -1,27 +0,0 @@
+-/*
+- * Copyright (c) 2020 xjunz. 保留所有权利
+- */
+-
+-package xjunz.tool.wechat.ui.customview;
+-
+-import android.content.Context;
+-import android.graphics.Outline;
+-import android.util.AttributeSet;
+-import android.view.View;
+-import android.view.ViewOutlineProvider;
+-
+-import androidx.annotation.Nullable;
+-import androidx.appcompat.widget.AppCompatImageView;
+-
+-public class CircularImageView extends AppCompatImageView {
+-    public CircularImageView(Context context, @Nullable AttributeSet attrs) {
+-        super(context, attrs);
+-        setOutlineProvider(new ViewOutlineProvider() {
+-            @Override
+-            public void getOutline(View view, Outline outline) {
+-                outline.setOval(getPaddingLeft(), getPaddingTop(), getWidth() - getPaddingLeft(), getHeight() - getPaddingTop());
+-            }
+-        });
+-        setClipToOutline(true);
+-    }
+-}
+Index: app/src/main/res/drawable/bg_btn_small.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<inset xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    android:inset=\"@dimen/spacing_unit\">\r\n    <ripple android:color=\"@color/colorMask\">\r\n        <item>\r\n            <shape android:shape=\"rectangle\">\r\n                <corners android:radius=\"@dimen/corner_button\" />\r\n                <solid android:color=\"?colorButtonNormal\" />\r\n            </shape>\r\n        </item>\r\n    </ripple>\r\n</inset>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable/bg_btn_small.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/drawable/bg_btn_small.xml	(date 1605618120144)
+@@ -1,7 +1,6 @@
+ <?xml version="1.0" encoding="utf-8"?><!--
+   ~ Copyright (c) 2020 xjunz. 保留所有权利
+   -->
+-
+ <inset xmlns:android="http://schemas.android.com/apk/res/android"
+     android:inset="@dimen/spacing_unit">
+     <ripple android:color="@color/colorMask">
+@@ -9,6 +8,9 @@
+             <shape android:shape="rectangle">
+                 <corners android:radius="@dimen/corner_button" />
+                 <solid android:color="?colorButtonNormal" />
++                <padding
++                    android:left="@dimen/spacing_unit"
++                    android:right="@dimen/spacing_unit" />
+             </shape>
+         </item>
+     </ripple>
+Index: app/src/main/java/xjunz/tool/wechat/ui/transition/MorphFabToDialog.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\n * Copyright (c) 2020 xjunz. 保留所有权利\r\n */\r\n\r\npackage xjunz.tool.wechat.ui.transition;\r\n\r\nimport android.animation.Animator;\r\nimport android.animation.AnimatorSet;\r\nimport android.animation.ObjectAnimator;\r\nimport android.annotation.TargetApi;\r\nimport android.content.Context;\r\nimport android.content.res.TypedArray;\r\nimport android.graphics.Color;\r\nimport android.os.Build;\r\nimport android.transition.ChangeBounds;\r\nimport android.transition.TransitionValues;\r\nimport android.util.AttributeSet;\r\nimport android.view.View;\r\nimport android.view.ViewGroup;\r\n\r\nimport androidx.annotation.ColorInt;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.Arrays;\r\nimport java.util.Collections;\r\n\r\nimport xjunz.tool.wechat.R;\r\nimport xjunz.tool.wechat.util.AnimUtils;\r\n\r\n\r\n/**\r\n * A transition that morphs a circle into a rectangle, changing it's background color.\r\n * <p/>\r\n * Modified from Plaid\r\n */\r\n@TargetApi(Build.VERSION_CODES.LOLLIPOP)\r\npublic class MorphFabToDialog extends ChangeBounds {\r\n    private static final String PROPERTY_COLOR = \"plaid:circleMorph:color\";\r\n    private static final String PROPERTY_CORNER_RADIUS = \"plaid:circleMorph:cornerRadius\";\r\n    private static final String[] TRANSITION_PROPERTIES = {\r\n            PROPERTY_COLOR,\r\n            PROPERTY_CORNER_RADIUS\r\n    };\r\n    private\r\n    @ColorInt\r\n    int startColor = Color.TRANSPARENT;\r\n    private int endCornerRadius;\r\n    private int startCornerRadius;\r\n\r\n    public MorphFabToDialog(@ColorInt int startColor, int endCornerRadius) {\r\n        this(startColor, endCornerRadius, -1);\r\n    }\r\n\r\n    public MorphFabToDialog(@ColorInt int startColor, int endCornerRadius, int startCornerRadius) {\r\n        super();\r\n        setStartColor(startColor);\r\n        setEndCornerRadius(endCornerRadius);\r\n        setStartCornerRadius(startCornerRadius);\r\n    }\r\n\r\n    public MorphFabToDialog(Context context, AttributeSet attrs) {\r\n        super(context, attrs);\r\n        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.FabTransform);\r\n        startColor = typedArray.getColor(R.styleable.FabTransform_startColor, startColor);\r\n        endCornerRadius = typedArray.getDimensionPixelSize(R.styleable.FabTransform_endCornerRadius, endCornerRadius);\r\n        startCornerRadius = typedArray.getDimensionPixelSize(R.styleable.FabTransform_startCornerRadius, startCornerRadius);\r\n        typedArray.recycle();\r\n    }\r\n\r\n    public void setStartColor(@ColorInt int startColor) {\r\n        this.startColor = startColor;\r\n    }\r\n\r\n    public void setEndCornerRadius(int endCornerRadius) {\r\n        this.endCornerRadius = endCornerRadius;\r\n    }\r\n\r\n    public void setStartCornerRadius(int startCornerRadius) {\r\n        this.startCornerRadius = startCornerRadius;\r\n    }\r\n\r\n    @Override\r\n    public String[] getTransitionProperties() {\r\n        ArrayList<String> boundsTransitionProps = new ArrayList<>(Arrays.asList(super.getTransitionProperties()));\r\n        Collections.addAll(boundsTransitionProps, TRANSITION_PROPERTIES);\r\n        return boundsTransitionProps.toArray(new String[0]);\r\n    }\r\n\r\n    @Override\r\n    public void captureStartValues(TransitionValues transitionValues) {\r\n        super.captureStartValues(transitionValues);\r\n        final View view = transitionValues.view;\r\n        transitionValues.values.put(PROPERTY_COLOR, startColor);\r\n        transitionValues.values.put(PROPERTY_CORNER_RADIUS,\r\n                startCornerRadius > 0 ? startCornerRadius : view.getHeight() / 2);\r\n    }\r\n\r\n    @Override\r\n    public void captureEndValues(TransitionValues transitionValues) {\r\n        super.captureEndValues(transitionValues);\r\n        transitionValues.values.put(PROPERTY_COLOR, Color.WHITE);\r\n        transitionValues.values.put(PROPERTY_CORNER_RADIUS, endCornerRadius);\r\n    }\r\n\r\n    @Override\r\n    public Animator createAnimator(final ViewGroup sceneRoot,\r\n                                   TransitionValues startValues,\r\n                                   final TransitionValues endValues) {\r\n        Animator changeBounds = super.createAnimator(sceneRoot, startValues, endValues);\r\n        if (startValues == null || endValues == null || changeBounds == null) {\r\n            return null;\r\n        }\r\n\r\n        Integer startColor = (Integer) startValues.values.get(PROPERTY_COLOR);\r\n        Integer startCornerRadius = (Integer) startValues.values.get(PROPERTY_CORNER_RADIUS);\r\n        Integer endColor = (Integer) endValues.values.get(PROPERTY_COLOR);\r\n        Integer endCornerRadius = (Integer) endValues.values.get(PROPERTY_CORNER_RADIUS);\r\n\r\n        if (startColor == null || startCornerRadius == null || endColor == null ||\r\n                endCornerRadius == null) {\r\n            return null;\r\n        }\r\n\r\n        MorphDrawable background = new MorphDrawable(startColor, startCornerRadius);\r\n        endValues.view.setBackground(background);\r\n        Animator color = ObjectAnimator.ofArgb(background, MorphDrawable.COLOR, endColor);\r\n        Animator corners = ObjectAnimator.ofFloat(background, MorphDrawable.CORNER_RADIUS,\r\n                endCornerRadius);\r\n        // ease in the dialog's child views (slide up & fade in)\r\n        if (endValues.view instanceof ViewGroup) {\r\n            ViewGroup vg = (ViewGroup) endValues.view;\r\n            float offset = vg.getHeight() / 4f;\r\n            for (int i = 0; i < vg.getChildCount(); i++) {\r\n                View v = vg.getChildAt(i);\r\n                //v.setTranslationY(offset);\r\n                v.setAlpha(0f);\r\n                v.animate()\r\n                        .alpha(1f)\r\n                        // .translationY(0f)\r\n                        .setDuration(150)\r\n                        .setStartDelay(180)\r\n                        .setInterpolator(AnimUtils.getFastOutSlowInInterpolator());\r\n                offset *= 1.5f;\r\n            }\r\n        }\r\n\r\n        AnimatorSet transition = new AnimatorSet();\r\n        transition.playTogether(changeBounds, corners, color);\r\n        /// transition.setInterpolator(AnimUtils.getFastOutSlowInInterpolator());\r\n        return transition;\r\n    }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/xjunz/tool/wechat/ui/transition/MorphFabToDialog.java	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/java/xjunz/tool/wechat/ui/transition/MorphFabToDialog.java	(date 1605618120172)
+@@ -60,10 +60,10 @@
+ 
+     public MorphFabToDialog(Context context, AttributeSet attrs) {
+         super(context, attrs);
+-        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.FabTransform);
+-        startColor = typedArray.getColor(R.styleable.FabTransform_startColor, startColor);
+-        endCornerRadius = typedArray.getDimensionPixelSize(R.styleable.FabTransform_endCornerRadius, endCornerRadius);
+-        startCornerRadius = typedArray.getDimensionPixelSize(R.styleable.FabTransform_startCornerRadius, startCornerRadius);
++        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.Transform);
++        startColor = typedArray.getColor(R.styleable.Transform_startColor, startColor);
++        endCornerRadius = typedArray.getDimensionPixelSize(R.styleable.Transform_endCornerRadius, endCornerRadius);
++        startCornerRadius = typedArray.getDimensionPixelSize(R.styleable.Transform_startCornerRadius, startCornerRadius);
+         typedArray.recycle();
+     }
+ 
+Index: app/src/main/java/xjunz/tool/wechat/ui/transition/MorphDialogToFab.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\n * Copyright (c) 2020 xjunz. 保留所有权利\r\n */\r\n\r\npackage xjunz.tool.wechat.ui.transition;\r\n\r\nimport android.animation.Animator;\r\nimport android.animation.AnimatorSet;\r\nimport android.animation.ObjectAnimator;\r\nimport android.annotation.TargetApi;\r\nimport android.content.Context;\r\nimport android.content.res.TypedArray;\r\nimport android.graphics.Color;\r\nimport android.os.Build;\r\nimport android.transition.ChangeBounds;\r\nimport android.transition.TransitionValues;\r\nimport android.util.AttributeSet;\r\nimport android.view.View;\r\nimport android.view.ViewGroup;\r\n\r\nimport androidx.annotation.ColorInt;\r\nimport androidx.annotation.Keep;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.Arrays;\r\nimport java.util.Collections;\r\n\r\nimport xjunz.tool.wechat.R;\r\nimport xjunz.tool.wechat.util.AnimUtils;\r\n\r\n\r\n/**\r\n * A transition that morphs a rectangle into a circle, changing it's background color.\r\n * <p/>\r\n * Modified from Plaid\r\n */\r\n@TargetApi(Build.VERSION_CODES.LOLLIPOP)\r\npublic class MorphDialogToFab extends ChangeBounds {\r\n\r\n    private static final String PROPERTY_COLOR = \"plaid:rectMorph:color\";\r\n    private static final String PROPERTY_CORNER_RADIUS = \"plaid:rectMorph:cornerRadius\";\r\n    private static final String[] TRANSITION_PROPERTIES = {\r\n            PROPERTY_COLOR,\r\n            PROPERTY_CORNER_RADIUS\r\n    };\r\n    private\r\n    @ColorInt\r\n    int endColor = Color.TRANSPARENT;\r\n    private int endCornerRadius = -1;\r\n\r\n    public MorphDialogToFab(@ColorInt int endColor) {\r\n        super();\r\n        setEndColor(endColor);\r\n    }\r\n\r\n    public MorphDialogToFab(@ColorInt int endColor, int endCornerRadius) {\r\n        super();\r\n        setEndColor(endColor);\r\n        setEndCornerRadius(endCornerRadius);\r\n    }\r\n\r\n    @Keep\r\n    public MorphDialogToFab(Context context, AttributeSet attrs) {\r\n        super(context, attrs);\r\n        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.FabTransform);\r\n        endColor = typedArray.getColor(R.styleable.FabTransform_endColor, endColor);\r\n        endCornerRadius = typedArray.getDimensionPixelSize(R.styleable.FabTransform_endCornerRadius, endCornerRadius);\r\n        typedArray.recycle();\r\n    }\r\n\r\n    public void setEndColor(@ColorInt int endColor) {\r\n        this.endColor = endColor;\r\n    }\r\n\r\n    public void setEndCornerRadius(int endCornerRadius) {\r\n        this.endCornerRadius = endCornerRadius;\r\n    }\r\n\r\n    @Override\r\n    public String[] getTransitionProperties() {\r\n        ArrayList<String> boundsTransitionProps = new ArrayList<>(Arrays.asList(super.getTransitionProperties()));\r\n        Collections.addAll(boundsTransitionProps, TRANSITION_PROPERTIES);\r\n        return boundsTransitionProps.toArray(new String[0]);\r\n    }\r\n\r\n    @Override\r\n    public void captureStartValues(TransitionValues transitionValues) {\r\n        super.captureStartValues(transitionValues);\r\n        final View view = transitionValues.view;\r\n        if (view.getWidth() <= 0 || view.getHeight() <= 0) {\r\n            return;\r\n        }\r\n        transitionValues.values.put(PROPERTY_COLOR, Color.WHITE);\r\n        transitionValues.values.put(PROPERTY_CORNER_RADIUS, 0);\r\n    }\r\n\r\n    @Override\r\n    public void captureEndValues(TransitionValues transitionValues) {\r\n        super.captureEndValues(transitionValues);\r\n        final View view = transitionValues.view;\r\n        if (view.getWidth() <= 0 || view.getHeight() <= 0) {\r\n            return;\r\n        }\r\n        transitionValues.values.put(PROPERTY_COLOR, endColor);\r\n        transitionValues.values.put(PROPERTY_CORNER_RADIUS,\r\n                endCornerRadius >= 0 ? endCornerRadius : view.getHeight() / 2);\r\n    }\r\n\r\n    @Override\r\n    public Animator createAnimator(final ViewGroup sceneRoot,\r\n                                   TransitionValues startValues,\r\n                                   TransitionValues endValues) {\r\n        Animator changeBounds = super.createAnimator(sceneRoot, startValues, endValues);\r\n        if (startValues == null || endValues == null || changeBounds == null) {\r\n            return null;\r\n        }\r\n\r\n        Integer startColor = (Integer) startValues.values.get(PROPERTY_COLOR);\r\n        Integer startCornerRadius = (Integer) startValues.values.get(PROPERTY_CORNER_RADIUS);\r\n        Integer endColor = (Integer) endValues.values.get(PROPERTY_COLOR);\r\n        Integer endCornerRadius = (Integer) endValues.values.get(PROPERTY_CORNER_RADIUS);\r\n\r\n        if (startColor == null || startCornerRadius == null || endColor == null ||\r\n                endCornerRadius == null) {\r\n            return null;\r\n        }\r\n\r\n        MorphDrawable background = new MorphDrawable(startColor, startCornerRadius);\r\n        endValues.view.setBackground(background);\r\n\r\n        Animator color = ObjectAnimator.ofArgb(background, MorphDrawable.COLOR, endColor);\r\n        Animator corners = ObjectAnimator.ofFloat(background, MorphDrawable.CORNER_RADIUS,\r\n                endCornerRadius);\r\n\r\n        // hide child views (offset down & fade out)\r\n        if (endValues.view instanceof ViewGroup) {\r\n            ViewGroup vg = (ViewGroup) endValues.view;\r\n            for (int i = 0; i < vg.getChildCount(); i++) {\r\n                View v = vg.getChildAt(i);\r\n                v.setVisibility(View.GONE);\r\n                // This clips the children to the final FAB size, so we only see the small part animate\r\n                v.animate()\r\n                        .alpha(0f)\r\n                        .translationY(v.getHeight() / 3f)\r\n                        .setStartDelay(0L)\r\n                        .setDuration(50L)\r\n                        .setInterpolator(AnimUtils.getFastOutLinearInInterpolator())\r\n                        .start();\r\n            }\r\n        }\r\n\r\n        AnimatorSet transition = new AnimatorSet();\r\n        transition.playTogether(changeBounds, corners, color);\r\n        transition.setDuration(500);\r\n        transition.setInterpolator(AnimUtils.getFastOutSlowInInterpolator());\r\n        return transition;\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/xjunz/tool/wechat/ui/transition/MorphDialogToFab.java	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/java/xjunz/tool/wechat/ui/transition/MorphDialogToFab.java	(date 1605618120180)
+@@ -62,9 +62,9 @@
+     @Keep
+     public MorphDialogToFab(Context context, AttributeSet attrs) {
+         super(context, attrs);
+-        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.FabTransform);
+-        endColor = typedArray.getColor(R.styleable.FabTransform_endColor, endColor);
+-        endCornerRadius = typedArray.getDimensionPixelSize(R.styleable.FabTransform_endCornerRadius, endCornerRadius);
++        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.Transform);
++        endColor = typedArray.getColor(R.styleable.Transform_endColor, endColor);
++        endCornerRadius = typedArray.getDimensionPixelSize(R.styleable.Transform_endCornerRadius, endCornerRadius);
+         typedArray.recycle();
+     }
+ 
+Index: app/src/main/res/drawable/ic_close_24dp.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<vector android:height=\"24dp\"\r\n    android:tint=\"#FFFFFF\"\r\n    android:viewportHeight=\"24.0\"\r\n    android:viewportWidth=\"24.0\"\r\n    android:width=\"24dp\"\r\n    xmlns:android=\"http://schemas.android.com/apk/res/android\">\r\n    <path\r\n        android:fillColor=\"#FF000000\"\r\n        android:pathData=\"M19,6.41L17.59,5 12,10.59 6.41,5 5,6.41 10.59,12 5,17.59 6.41,19 12,13.41 17.59,19 19,17.59 13.41,12z\" />\r\n</vector>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable/ic_close_24dp.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/drawable/ic_close_24dp.xml	(date 1605618119593)
+@@ -2,12 +2,11 @@
+   ~ Copyright (c) 2020 xjunz. 保留所有权利
+   -->
+ 
+-<vector android:height="24dp"
+-    android:tint="#FFFFFF"
+-    android:viewportHeight="24.0"
+-    android:viewportWidth="24.0"
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
+     android:width="24dp"
+-    xmlns:android="http://schemas.android.com/apk/res/android">
++    android:height="24dp"
++    android:viewportWidth="24.0"
++    android:viewportHeight="24.0">
+     <path
+         android:fillColor="#FF000000"
+         android:pathData="M19,6.41L17.59,5 12,10.59 6.41,5 5,6.41 10.59,12 5,17.59 6.41,19 12,13.41 17.59,19 19,17.59 13.41,12z" />
+Index: app/src/main/res/drawable/bg_bubble_left.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<ripple xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    android:color=\"?colorControlHighlight\">\r\n    <item>\r\n        <shape android:shape=\"rectangle\">\r\n            <corners\r\n                android:bottomLeftRadius=\"@dimen/r_bubble_obtuse\"\r\n                android:bottomRightRadius=\"@dimen/r_bubble_obtuse\"\r\n                android:topLeftRadius=\"@dimen/r_bubble_acute\"\r\n                android:topRightRadius=\"@dimen/r_bubble_obtuse\" />\r\n            <solid android:color=\"?colorPrimary\" />\r\n        </shape>\r\n    </item>\r\n</ripple>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable/bg_bubble_left.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/drawable/bg_bubble_left.xml	(date 1605618120198)
+@@ -1,7 +1,6 @@
+ <?xml version="1.0" encoding="utf-8"?><!--
+   ~ Copyright (c) 2020 xjunz. 保留所有权利
+   -->
+-
+ <ripple xmlns:android="http://schemas.android.com/apk/res/android"
+     android:color="?colorControlHighlight">
+     <item>
+Index: app/src/main/res/values/colors.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<resources>\r\n    <color name=\"colorAccent\">#008577</color>\r\n    <color name=\"colorAccentWeak\">#30008577</color>\r\n    <color name=\"colorAccentDark\">#00574B</color>\r\n    <color name=\"colorMask\">#40000000</color>\r\n    <color name=\"colorToast\">#A0000000</color>\r\n    <color name=\"colorPrimary\">@android:color/white</color>\r\n    <color name=\"colorPrimaryDark\">#BCBCBC</color>\r\n    <color name=\"colorAccentBlind\">#80C0BB</color>\r\n    <color name=\"colorTintDark\">#626262</color>\r\n    <color name=\"colorTintDarkDisabled\">#BEBEBE</color>\r\n    <color name=\"colorBackgroundLightGrey\">#04000000</color>\r\n</resources>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/colors.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/values/colors.xml	(date 1605618119609)
+@@ -13,5 +13,7 @@
+     <color name="colorAccentBlind">#80C0BB</color>
+     <color name="colorTintDark">#626262</color>
+     <color name="colorTintDarkDisabled">#BEBEBE</color>
+-    <color name="colorBackgroundLightGrey">#04000000</color>
++    <color name="colorBackgroundMask">#05000000</color>
++    <color name="colorError">#FFEBEE</color>
++    <color name="colorOk">#B2DFDB</color>
+ </resources>
+Index: app/src/main/res/values/attrs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<resources>\r\n    <declare-styleable name=\"FabTransform\">\r\n        <attr name=\"startColor\" format=\"color|reference\" />\r\n        <attr name=\"endColor\" format=\"color|reference\" />\r\n        <attr name=\"endCornerRadius\" format=\"dimension|reference\" />\r\n        <attr name=\"startCornerRadius\" format=\"dimension|reference\" />\r\n\r\n    </declare-styleable>\r\n    <declare-styleable name=\"FabRevealTransform\">\r\n        <attr name=\"fabColor\" format=\"color|reference\" />\r\n        <attr name=\"fabIcon\" format=\"reference\" />\r\n    </declare-styleable>\r\n    <declare-styleable name=\"BottomBar\">\r\n        <attr name=\"imageEntries\" format=\"reference\" />\r\n        <attr name=\"captionEntries\" format=\"reference\" />\r\n    </declare-styleable>\r\n</resources>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/attrs.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/values/attrs.xml	(date 1605618119628)
+@@ -3,12 +3,12 @@
+   -->
+ 
+ <resources>
+-    <declare-styleable name="FabTransform">
++    <declare-styleable name="Transform">
+         <attr name="startColor" format="color|reference" />
+         <attr name="endColor" format="color|reference" />
+         <attr name="endCornerRadius" format="dimension|reference" />
+         <attr name="startCornerRadius" format="dimension|reference" />
+-
++        <attr name="opticalButtonColor" format="color|reference" />
+     </declare-styleable>
+     <declare-styleable name="FabRevealTransform">
+         <attr name="fabColor" format="color|reference" />
+@@ -18,4 +18,11 @@
+         <attr name="imageEntries" format="reference" />
+         <attr name="captionEntries" format="reference" />
+     </declare-styleable>
++    <declare-styleable name="ElasticDragDismissFrameLayout">
++        <attr name="dragDismissTarget" format="reference" />
++        <attr name="dragDismissDistance" format="dimension" />
++        <attr name="dragDismissFraction" format="float" />
++        <attr name="dragDismissScale" format="float" />
++        <attr name="dragElasticity" format="float" />
++    </declare-styleable>
+ </resources>
+\ No newline at end of file
+Index: app/src/main/res/drawable/bg_bubble_complex.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<ripple xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    android:color=\"@color/colorMask\">\r\n    <item>\r\n        <shape android:shape=\"rectangle\">\r\n            <corners android:radius=\"@dimen/r_bubble_acute\" />\r\n            <solid android:color=\"?colorPrimary\" />\r\n        </shape>\r\n    </item>\r\n</ripple>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable/bg_bubble_complex.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/drawable/bg_bubble_complex.xml	(date 1605618120296)
+@@ -3,7 +3,7 @@
+   -->
+ 
+ <ripple xmlns:android="http://schemas.android.com/apk/res/android"
+-    android:color="@color/colorMask">
++    android:color="?colorControlHighlight">
+     <item>
+         <shape android:shape="rectangle">
+             <corners android:radius="@dimen/r_bubble_acute" />
+Index: app/src/main/res/layout/item_separator.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<RelativeLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"wrap_content\"\r\n    android:background=\"@color/colorBackgroundLightGrey\">\r\n\r\n    <ImageButton\r\n        android:id=\"@+id/ib_shutter\"\r\n        android:scaleType=\"centerInside\"\r\n        android:layout_width=\"@dimen/dp_20\"\r\n        android:layout_height=\"@dimen/dp_20\"\r\n        android:layout_alignParentStart=\"true\"\r\n        android:layout_centerVertical=\"true\"\r\n        android:layout_marginStart=\"@dimen/spacing_normal\"\r\n        android:layout_marginTop=\"@dimen/spacing_unit\"\r\n        android:layout_marginBottom=\"@dimen/spacing_unit\"\r\n        android:background=\"?selectableItemBackgroundBorderless\"\r\n        android:src=\"@drawable/ic_baseline_expand_more_24\"\r\n        android:tint=\"?colorAccent\" />\r\n\r\n\r\n    <TextView\r\n        android:id=\"@+id/tv_separator\"\r\n        android:layout_marginStart=\"@dimen/spacing_unit\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_centerVertical=\"true\"\r\n        android:layout_toEndOf=\"@+id/ib_shutter\"\r\n        android:letterSpacing=\"0.04\"\r\n        android:textAllCaps=\"true\"\r\n        android:textColor=\"?colorAccent\"\r\n        tools:text=\"@string/app_name\" />\r\n\r\n    <View\r\n        android:id=\"@+id/divider_bottom\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"1px\"\r\n        android:alpha=\"0.5\"\r\n        android:layout_below=\"@+id/ib_shutter\"\r\n        android:background=\"?android:listDivider\" />\r\n</RelativeLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/item_separator.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/layout/item_separator.xml	(date 1605618120310)
+@@ -5,12 +5,10 @@
+ <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:tools="http://schemas.android.com/tools"
+     android:layout_width="match_parent"
+-    android:layout_height="wrap_content"
+-    android:background="@color/colorBackgroundLightGrey">
++    android:layout_height="wrap_content">
+ 
+     <ImageButton
+         android:id="@+id/ib_shutter"
+-        android:scaleType="centerInside"
+         android:layout_width="@dimen/dp_20"
+         android:layout_height="@dimen/dp_20"
+         android:layout_alignParentStart="true"
+@@ -19,16 +17,18 @@
+         android:layout_marginTop="@dimen/spacing_unit"
+         android:layout_marginBottom="@dimen/spacing_unit"
+         android:background="?selectableItemBackgroundBorderless"
++        android:scaleType="centerInside"
+         android:src="@drawable/ic_baseline_expand_more_24"
+-        android:tint="?colorAccent" />
++        android:tint="?colorAccent"
++        android:contentDescription="@string/cd_shutter" />
+ 
+ 
+     <TextView
+         android:id="@+id/tv_separator"
+-        android:layout_marginStart="@dimen/spacing_unit"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_centerVertical="true"
++        android:layout_marginStart="@dimen/spacing_unit"
+         android:layout_toEndOf="@+id/ib_shutter"
+         android:letterSpacing="0.04"
+         android:textAllCaps="true"
+@@ -39,7 +39,7 @@
+         android:id="@+id/divider_bottom"
+         android:layout_width="match_parent"
+         android:layout_height="1px"
++        android:layout_below="@+id/ib_shutter"
+         android:alpha="0.5"
+-        android:layout_below="@+id/ib_shutter"
+         android:background="?android:listDivider" />
+ </RelativeLayout>
+\ No newline at end of file
+Index: app/src/main/res/transition/detail_shared_enter.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<transitionSet xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    android:duration=\"@android:integer/config_shortAnimTime\"\r\n    android:interpolator=\"@android:interpolator/fast_out_slow_in\">\r\n    <autoTransition>\r\n        <targets>\r\n            <target android:targetId=\"@+id/iv_avatar\" />\r\n        </targets>\r\n        <arcMotion />\r\n    </autoTransition>\r\n</transitionSet>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/transition/detail_shared_enter.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/transition/detail_shared_enter.xml	(date 1605618119727)
+@@ -6,9 +6,9 @@
+     android:duration="@android:integer/config_shortAnimTime"
+     android:interpolator="@android:interpolator/fast_out_slow_in">
+     <autoTransition>
+-        <targets>
+-            <target android:targetId="@+id/iv_avatar" />
+-        </targets>
+-        <arcMotion />
+-    </autoTransition>
++        <arcMotion />
++    </autoTransition>
++    <targets>
++        <target android:targetId="@+id/iv_avatar" />
++    </targets>
+ </transitionSet>
+\ No newline at end of file
+Index: app/src/main/res/transition/image_viewer_shared_enter.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<transitionSet xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    android:duration=\"@android:integer/config_shortAnimTime\"\r\n    android:interpolator=\"@android:interpolator/fast_out_slow_in\">\r\n    <changeBounds />\r\n    <changeImageTransform />\r\n    <changeClipBounds />\r\n    <targets>\r\n        <target android:targetId=\"@+id/photo_view\" />\r\n    </targets>\r\n\r\n</transitionSet>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/transition/image_viewer_shared_enter.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/transition/image_viewer_shared_enter.xml	(date 1605618119766)
+@@ -8,8 +8,12 @@
+     <changeBounds />
+     <changeImageTransform />
+     <changeClipBounds />
++    <transition xmlns:app="http://schemas.android.com/apk/res-auto"
++        class="xjunz.tool.wechat.ui.transition.ChangeCorners"
++        app:endCornerRadius="0dp"
++        app:startCornerRadius="@dimen/r_fab_normal" />
+     <targets>
+-        <target android:targetId="@+id/photo_view" />
++        <target android:targetId="@+id/iv_avatar" />
+     </targets>
+ 
+ </transitionSet>
+\ No newline at end of file
+Index: app/src/main/res/values/content_desc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<resources>\r\n    <string name=\"cd_no_result\">No Result</string>\r\n    <string name=\"cd_bottom_bar_item\">Bottom Bar Item</string>\r\n</resources>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/content_desc.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/values/content_desc.xml	(date 1605618119758)
+@@ -5,4 +5,6 @@
+ <resources>
+     <string name="cd_no_result">No Result</string>
+     <string name="cd_bottom_bar_item">Bottom Bar Item</string>
++    <string name="cd_shutter">展开/收起</string>
++    <string name="cd_avatar">Avatar</string>
+ </resources>
+\ No newline at end of file
+Index: app/src/main/java/xjunz/tool/wechat/data/viewmodel/MessageViewModel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\n * Copyright (c) 2020 xjunz. 保留所有权利\r\n */\r\n\r\npackage xjunz.tool.wechat.data.viewmodel;\r\n\r\nimport androidx.databinding.ObservableBoolean;\r\nimport androidx.databinding.ObservableField;\r\n\r\nimport xjunz.tool.wechat.impl.model.account.Talker;\r\nimport xjunz.tool.wechat.impl.model.message.BackupMessage;\r\nimport xjunz.tool.wechat.impl.model.message.Message;\r\n\r\n/**\r\n * @author xjunz 2020/7/13 00:47\r\n */\r\npublic class MessageViewModel extends ObservableViewModel {\r\n    public Talker currentTalker;\r\n    public ObservableInt currentPageIndex = new ObservableInt(0);\r\n    public ObservableBoolean hasLoadAll = new ObservableBoolean(false);\r\n    public List<Message> currentLoadedMessages = new ArrayList<>();\r\n    public List<BackupMessage> allBackupMessages = new ArrayList<>();\r\n    public int actualMessageCount;\r\n    public int selectedMessagePosition;\r\n    private final ArrayList<EventHandler> eventHandlers = new ArrayList<>();\r\n\r\n    //EditionFragment variables\r\n\r\n    /**\r\n     * 选中确认的Editions（0）还是未确认的Editions（1）\r\n     */\r\n    public final ObservableInt editionSetSelection = new ObservableInt(0);\r\n    /**\r\n     * 选中的Edition类型\r\n     *\r\n     * @see xjunz.tool.wechat.impl.model.message.Edition\r\n     */\r\n    public final ObservableInt editionFlagSelection = new ObservableInt(0);\r\n\r\n    public void addEventHandler(EventHandler eventHandler) {\r\n        eventHandlers.add(eventHandler);\r\n    }\r\n\r\n    public void notifySearch(String keyword) {\r\n        for (EventHandler eventHandler : eventHandlers) {\r\n            eventHandler.onSearch(keyword);\r\n        }\r\n    }\r\n\r\n    public void notifyNavigate(Message msg) {\r\n        for (EventHandler eventHandler : eventHandlers) {\r\n            eventHandler.onNavigate(msg);\r\n        }\r\n    }\r\n\r\n    public void notifyAllLoaded(int preCount) {\r\n        hasLoadAll.set(true);\r\n        for (EventHandler eventHandler : eventHandlers) {\r\n            eventHandler.onAllLoaded(preCount);\r\n        }\r\n    }\r\n\r\n    /**\r\n     * 向所有{@link EventHandler}发布消息变更事件\r\n     *\r\n     * @param msgId 变更的消息ID\r\n     */\r\n    public void notifyMessageChanged(int msgId) {\r\n\r\n    }\r\n\r\n    public void setSelectedMessagePosition(int position) {\r\n        this.selectedMessagePosition = position;\r\n    }\r\n\r\n    public Message getSelectedMessage() {\r\n        return currentLoadedMessages.get(selectedMessagePosition);\r\n    }\r\n\r\n    /**\r\n     * 事件处理者。处理需要{@link android.app.Activity}和{@link androidx.fragment.app.Fragment}或\r\n     * {@link androidx.fragment.app.Fragment}之间进行交互的事件。\r\n     */\r\n    public static class EventHandler {\r\n        public void onSearch(String keyword) {\r\n        }\r\n\r\n        public void onNavigate(Message msg) {\r\n        }\r\n\r\n        public void onAllLoaded(int preCount) {\r\n\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/xjunz/tool/wechat/data/viewmodel/MessageViewModel.java	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/java/xjunz/tool/wechat/data/viewmodel/MessageViewModel.java	(date 1605618120323)
+@@ -5,7 +5,10 @@
+ package xjunz.tool.wechat.data.viewmodel;
+ 
+ import androidx.databinding.ObservableBoolean;
+-import androidx.databinding.ObservableField;
++import androidx.databinding.ObservableInt;
++
++import java.util.ArrayList;
++import java.util.List;
+ 
+ import xjunz.tool.wechat.impl.model.account.Talker;
+ import xjunz.tool.wechat.impl.model.message.BackupMessage;
+Index: app/src/main/res/values/dimens.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<resources>\r\n    <!-- Default screen margins, per the Android Design guidelines. -->\r\n    <dimen name=\"dp_1\">1dp</dimen>\r\n    <dimen name=\"dp_2\">2dp</dimen>\r\n    <dimen name=\"dp_4\">4dp</dimen>\r\n    <dimen name=\"dp_6\">6dp</dimen>\r\n    <dimen name=\"dp_12\">12dp</dimen>\r\n    <dimen name=\"spacing_unit\">8dp</dimen>\r\n    <dimen name=\"spacing_normal\">16dp</dimen>\r\n    <dimen name=\"spacing_large\">32dp</dimen>\r\n    <dimen name=\"fab_small\">40dp</dimen>\r\n    <dimen name=\"r_fab_small\">20dp</dimen>\r\n    <dimen name=\"minus_r_fab_small\">-20dp</dimen>\r\n    <dimen name=\"fab_medium\">48dp</dimen>\r\n    <dimen name=\"fab_normal\">56dp</dimen>\r\n    <dimen name=\"fab_normal_radius\">28dp</dimen>\r\n    <dimen name=\"fab_normal_radius_minus\">-28dp</dimen>\r\n    <dimen name=\"z_toolbar\">2.5dp</dimen>\r\n    <dimen name=\"z_bottom_bar\">6dp</dimen>\r\n    <dimen name=\"z_popup\">3dp</dimen>\r\n    <dimen name=\"z_card\">2dp</dimen>\r\n    <dimen name=\"z_dialog\">10dp</dimen>\r\n    <dimen name=\"z_fab\">4dp</dimen>\r\n    <dimen name=\"z_item\">1dp</dimen>\r\n    <dimen name=\"z_float_bottom_bar\">2.5dp</dimen>\r\n    <dimen name=\"corner_card\">2dp</dimen>\r\n    <dimen name=\"corner_dialog\">4dp</dimen>\r\n    <dimen name=\"corner_button\">2dp</dimen>\r\n    <dimen name=\"ts_medium\">20sp</dimen>\r\n    <dimen name=\"dp_48\">48dp</dimen>\r\n    <dimen name=\"dp_20\">20dp</dimen>\r\n    <dimen name=\"divider_thickness\">.5dp</dimen>\r\n    <dimen name=\"z_bubble\">1dp</dimen>\r\n    <dimen name=\"max_bubble_width\">300dp</dimen>\r\n    <dimen name=\"r_bubble_obtuse\">20dp</dimen>\r\n    <dimen name=\"r_bubble_acute\">5dp</dimen>\r\n    <dimen name=\"min_complex_msg_width\">250dp</dimen>\r\n</resources>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/dimens.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/values/dimens.xml	(date 1605618120344)
+@@ -17,7 +17,7 @@
+     <dimen name="minus_r_fab_small">-20dp</dimen>
+     <dimen name="fab_medium">48dp</dimen>
+     <dimen name="fab_normal">56dp</dimen>
+-    <dimen name="fab_normal_radius">28dp</dimen>
++    <dimen name="r_fab_normal">28dp</dimen>
+     <dimen name="fab_normal_radius_minus">-28dp</dimen>
+     <dimen name="z_toolbar">2.5dp</dimen>
+     <dimen name="z_bottom_bar">6dp</dimen>
+Index: app/src/main/java/xjunz/tool/wechat/data/databinding/DetailActivityBindingAdapter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>/*\r\n * Copyright (c) 2020 xjunz. 保留所有权利\r\n */\r\n\r\npackage xjunz.tool.wechat.data.databinding;\r\n\r\nimport android.graphics.Bitmap;\r\nimport android.graphics.drawable.Drawable;\r\nimport android.widget.TextView;\r\n\r\nimport androidx.annotation.Nullable;\r\nimport androidx.databinding.BindingAdapter;\r\n\r\nimport de.hdodenhof.circleimageview.CircleImageView;\r\nimport xjunz.tool.wechat.R;\r\nimport xjunz.tool.wechat.util.UiUtils;\r\nimport xjunz.tool.wechat.util.UniUtils;\r\n\r\npublic class DetailActivityBindingAdapter {\r\n    @BindingAdapter(value = \"android:src\")\r\n    public static void setSrc(CircleImageView imageView, @Nullable Bitmap bitmap) {\r\n        if (bitmap == null) {\r\n            imageView.setImageResource(R.mipmap.avatar_default);\r\n        } else {\r\n            imageView.setImageBitmap(bitmap);\r\n        }\r\n    }\r\n\r\n\r\n    @BindingAdapter(\"android:copyable\")\r\n    public static void setCopyable(TextView textView, boolean isCopyable) {\r\n        if (isCopyable) {\r\n            Drawable drawable = textView.getContext().getTheme().getDrawable(R.drawable.bg_clickable_text).mutate();\r\n            textView.setClickable(true);\r\n            textView.setFocusable(true);\r\n            textView.setBackground(drawable);\r\n            textView.setOnClickListener(v -> {\r\n                UniUtils.copyPlainText(\"Contact info\", textView.getText());\r\n                UiUtils.toast(R.string.has_copied_to_clipboard);\r\n            });\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/xjunz/tool/wechat/data/databinding/DetailActivityBindingAdapter.java	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/java/xjunz/tool/wechat/data/databinding/DetailActivityBindingAdapter.java	(date 1605618120354)
+@@ -17,7 +17,8 @@
+ import xjunz.tool.wechat.util.UniUtils;
+ 
+ public class DetailActivityBindingAdapter {
+-    @BindingAdapter(value = "android:src")
++
++    @BindingAdapter(value = "android:avatar")
+     public static void setSrc(CircleImageView imageView, @Nullable Bitmap bitmap) {
+         if (bitmap == null) {
+             imageView.setImageResource(R.mipmap.avatar_default);
+Index: app/src/main/res/layout/activity_message.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<layout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\">\r\n\r\n    <data>\r\n\r\n        <import type=\"android.app.Activity\" />\r\n\r\n        <variable\r\n            name=\"model\"\r\n            type=\"xjunz.tool.wechat.data.viewmodel.MessageViewModel\" />\r\n\r\n        <variable\r\n            name=\"modifier\"\r\n            type=\"xjunz.tool.wechat.impl.DatabaseModifier\" />\r\n    </data>\r\n\r\n    <xjunz.tool.wechat.ui.customview.MessagePanel\r\n        android:id=\"@+id/message_panel\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"match_parent\">\r\n\r\n        <ProgressBar\r\n            android:id=\"@+id/pb_load\"\r\n            style=\"?android:attr/progressBarStyleHorizontal\"\r\n            android:layout_width=\"0dp\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:elevation=\"@dimen/z_bubble\"\r\n            android:indeterminate=\"true\"\r\n            android:translationY=\"-6dp\"\r\n            android:visibility=\"gone\"\r\n            app:layout_constraintEnd_toEndOf=\"parent\"\r\n            app:layout_constraintStart_toStartOf=\"parent\"\r\n            app:layout_constraintTop_toBottomOf=\"@+id/top_bar\" />\r\n\r\n        <androidx.recyclerview.widget.RecyclerView\r\n            android:id=\"@+id/rv_message\"\r\n            android:layout_width=\"0dp\"\r\n            android:layout_height=\"0dp\"\r\n            android:layout_marginBottom=\"?actionBarSize\"\r\n            android:background=\"@color/colorBackgroundLightGrey\"\r\n            android:clipToPadding=\"false\"\r\n            android:paddingTop=\"@dimen/spacing_normal\"\r\n            android:paddingBottom=\"@dimen/spacing_normal\"\r\n            android:scrollbars=\"vertical\"\r\n            app:layoutManager=\"androidx.recyclerview.widget.LinearLayoutManager\"\r\n            app:layout_constraintBottom_toBottomOf=\"parent\"\r\n            app:layout_constraintEnd_toEndOf=\"parent\"\r\n            app:layout_constraintStart_toStartOf=\"parent\"\r\n            app:layout_constraintTop_toBottomOf=\"@+id/top_bar\"\r\n            app:reverseLayout=\"true\"\r\n            app:stackFromEnd=\"true\"\r\n            tools:listitem=\"@layout/item_bubble_plain_left\" />\r\n\r\n        <androidx.constraintlayout.widget.ConstraintLayout\r\n            android:id=\"@+id/top_bar\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:background=\"?colorPrimary\"\r\n            android:elevation=\"@dimen/z_toolbar\"\r\n            android:minHeight=\"?actionBarSize\"\r\n            app:layout_constraintEnd_toEndOf=\"parent\"\r\n            app:layout_constraintStart_toStartOf=\"parent\"\r\n            app:layout_constraintTop_toTopOf=\"parent\">\r\n\r\n            <TextView\r\n                android:id=\"@+id/tv_top_bar_title\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:layout_marginStart=\"8dp\"\r\n                android:letterSpacing=\".05\"\r\n                android:text=\"@{talker.name}\"\r\n                android:textColor=\"?colorAccent\"\r\n                android:textSize=\"@dimen/ts_medium\"\r\n                app:layout_constraintBottom_toBottomOf=\"parent\"\r\n                app:layout_constraintStart_toEndOf=\"@+id/ib_close\"\r\n                app:layout_constraintTop_toTopOf=\"parent\" />\r\n\r\n            <ImageButton\r\n                android:id=\"@+id/ib_close\"\r\n                android:layout_width=\"@dimen/fab_small\"\r\n                android:layout_height=\"@dimen/fab_small\"\r\n                android:layout_marginStart=\"16dp\"\r\n                android:background=\"?android:attr/selectableItemBackgroundBorderless\"\r\n                android:contentDescription=\"@string/filter\"\r\n                android:onClick=\"@{()->((Activity)context).finish()}\"\r\n                android:src=\"@drawable/ic_close_24dp\"\r\n                android:tint=\"?colorButtonNormal\"\r\n                android:tooltip=\"@{@string/close}\"\r\n                android:transitionName=\"@string/tn_filter\"\r\n                app:layout_constraintBottom_toBottomOf=\"parent\"\r\n                app:layout_constraintStart_toStartOf=\"parent\"\r\n                app:layout_constraintTop_toTopOf=\"parent\" />\r\n        </androidx.constraintlayout.widget.ConstraintLayout>\r\n\r\n        <LinearLayout\r\n            android:id=\"@+id/ll_curtain\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"match_parent\"\r\n            android:background=\"?colorPrimary\"\r\n            android:elevation=\"@dimen/z_bottom_bar\"\r\n            android:orientation=\"vertical\"\r\n            app:layout_constraintBottom_toBottomOf=\"parent\"\r\n            app:layout_constraintEnd_toEndOf=\"parent\"\r\n            app:layout_constraintStart_toStartOf=\"parent\"\r\n            app:layout_constraintTop_toTopOf=\"parent\">\r\n\r\n            <androidx.constraintlayout.widget.ConstraintLayout\r\n                android:id=\"@+id/bottom_bar\"\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:background=\"?colorPrimary\"\r\n                android:elevation=\"@dimen/z_toolbar\">\r\n\r\n                <EditText\r\n                    android:id=\"@+id/et_search\"\r\n                    android:layout_width=\"match_parent\"\r\n                    android:layout_height=\"wrap_content\"\r\n                    android:background=\"@null\"\r\n                    android:hint=\"@string/hint_search_message\"\r\n                    android:inputType=\"text\"\r\n                    android:minHeight=\"?actionBarSize\"\r\n                    android:textSize=\"@dimen/ts_medium\"\r\n                    android:visibility=\"gone\"\r\n                    app:layout_constraintBottom_toBottomOf=\"@+id/ll_ib_container\"\r\n                    app:layout_constraintStart_toStartOf=\"parent\"\r\n                    app:layout_constraintTop_toTopOf=\"parent\" />\r\n\r\n                <LinearLayout\r\n                    android:id=\"@+id/ll_ib_container\"\r\n                    android:layout_width=\"match_parent\"\r\n                    android:layout_height=\"?actionBarSize\"\r\n                    app:layout_constraintBottom_toTopOf=\"@+id/indicator\"\r\n                    app:layout_constraintStart_toStartOf=\"parent\">\r\n\r\n                    <ImageButton\r\n                        android:id=\"@+id/ib_stats\"\r\n                        android:layout_width=\"0dp\"\r\n                        android:layout_height=\"match_parent\"\r\n                        android:layout_weight=\"1\"\r\n                        android:background=\"?selectableItemBackgroundBorderless\"\r\n                        android:contentDescription=\"@string/statistics\"\r\n                        android:src=\"@drawable/ic_bar_chart_28dp\"\r\n                        android:tooltip=\"@{@string/statistics}\" />\r\n\r\n                    <ImageButton\r\n                        android:id=\"@+id/ib_search\"\r\n                        android:layout_width=\"0dp\"\r\n                        android:layout_height=\"match_parent\"\r\n                        android:layout_weight=\"1\"\r\n                        android:background=\"?selectableItemBackgroundBorderless\"\r\n                        android:contentDescription=\"@string/search\"\r\n                        android:src=\"@drawable/ic_search_24dp\"\r\n                        android:tooltip=\"@{@string/search}\" />\r\n\r\n                    <ImageButton\r\n                        android:id=\"@+id/ib_edit\"\r\n                        android:layout_width=\"0dp\"\r\n                        android:layout_height=\"match_parent\"\r\n                        android:layout_weight=\"1\"\r\n                        android:background=\"?selectableItemBackgroundBorderless\"\r\n                        android:contentDescription=\"@string/edit\"\r\n                        android:editMode=\"@={model.isInEditMode}\"\r\n                        android:src=\"@drawable/ic_pencil_24dp\"\r\n                        android:tooltip=\"@{model.isInEditMode?@string/edit:@string/check_only}\" />\r\n                </LinearLayout>\r\n\r\n                <View\r\n                    android:id=\"@+id/indicator\"\r\n                    android:layout_width=\"0dp\"\r\n                    android:layout_height=\"2dp\"\r\n                    android:background=\"?colorAccent\"\r\n                    app:layout_constraintStart_toStartOf=\"parent\"\r\n                    app:layout_constraintTop_toBottomOf=\"@+id/ll_ib_container\" />\r\n            </androidx.constraintlayout.widget.ConstraintLayout>\r\n\r\n            <androidx.viewpager2.widget.ViewPager2\r\n                android:id=\"@+id/vp_message\"\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"match_parent\" />\r\n        </LinearLayout>\r\n    </xjunz.tool.wechat.ui.customview.MessagePanel>\r\n</layout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_message.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/layout/activity_message.xml	(date 1605618120368)
+@@ -8,7 +8,10 @@
+ 
+     <data>
+ 
+-        <import type="android.app.Activity" />
++        <import type="xjunz.tool.wechat.util.UniUtils" />
++
++        <import type="xjunz.tool.wechat.ui.message.MessageActivity" />
++
+ 
+         <variable
+             name="model"
+@@ -19,169 +22,221 @@
+             type="xjunz.tool.wechat.impl.DatabaseModifier" />
+     </data>
+ 
+-    <xjunz.tool.wechat.ui.customview.MessagePanel
+-        android:id="@+id/message_panel"
+-        android:layout_width="match_parent"
+-        android:layout_height="match_parent">
++    <FrameLayout
++        android:layout_width="match_parent"
++        android:layout_height="match_parent"
++        android:transitionGroup="false">
++        <!--对android:id/background使用fade transition，在执行return transition时，会直接消失，造成突变，而不是渐出，原因不明。
++        因此我们需要构造这个伪造的background来实行过渡，而不使用android:windowBackground属性-->
++        <View
++            android:id="@+id/background"
++            android:layout_width="match_parent"
++            android:layout_height="match_parent"
++            android:background="@color/colorMask" />
++
++        <xjunz.tool.wechat.ui.customview.ElasticDragDismissFrameLayout
++            android:id="@+id/elastic"
++            android:layout_width="match_parent"
++            android:layout_height="match_parent"
++            android:onDismiss="@{()->UniUtils.getHostActivity(context).finishAfterTransition()}"
++            android:transitionGroup="false"
++            app:dragDismissDistance="112dp"
++            app:dragDismissScale=".95"
++            app:dragDismissTarget="@id/rv_message">
++
++            <xjunz.tool.wechat.ui.customview.MessagePanel
++                android:id="@+id/message_panel"
++                android:layout_width="match_parent"
++                android:layout_height="match_parent"
++                android:transitionGroup="false">
+ 
+-        <ProgressBar
+-            android:id="@+id/pb_load"
+-            style="?android:attr/progressBarStyleHorizontal"
+-            android:layout_width="0dp"
+-            android:layout_height="wrap_content"
+-            android:elevation="@dimen/z_bubble"
+-            android:indeterminate="true"
+-            android:translationY="-6dp"
+-            android:visibility="gone"
+-            app:layout_constraintEnd_toEndOf="parent"
+-            app:layout_constraintStart_toStartOf="parent"
+-            app:layout_constraintTop_toBottomOf="@+id/top_bar" />
++                <ProgressBar
++                    android:id="@+id/pb_load"
++                    style="?android:attr/progressBarStyleHorizontal"
++                    android:layout_width="0dp"
++                    android:layout_height="wrap_content"
++                    android:elevation="@dimen/z_bubble"
++                    android:indeterminate="true"
++                    android:translationY="-6dp"
++                    android:visibility="gone"
++                    app:layout_constraintEnd_toEndOf="parent"
++                    app:layout_constraintStart_toStartOf="parent"
++                    app:layout_constraintTop_toBottomOf="@+id/top_bar" />
+ 
+-        <androidx.recyclerview.widget.RecyclerView
+-            android:id="@+id/rv_message"
+-            android:layout_width="0dp"
+-            android:layout_height="0dp"
+-            android:layout_marginBottom="?actionBarSize"
+-            android:background="@color/colorBackgroundLightGrey"
+-            android:clipToPadding="false"
+-            android:paddingTop="@dimen/spacing_normal"
+-            android:paddingBottom="@dimen/spacing_normal"
+-            android:scrollbars="vertical"
+-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+-            app:layout_constraintBottom_toBottomOf="parent"
+-            app:layout_constraintEnd_toEndOf="parent"
+-            app:layout_constraintStart_toStartOf="parent"
+-            app:layout_constraintTop_toBottomOf="@+id/top_bar"
+-            app:reverseLayout="true"
+-            app:stackFromEnd="true"
+-            tools:listitem="@layout/item_bubble_plain_left" />
++                <androidx.recyclerview.widget.RecyclerView
++                    android:id="@+id/rv_message"
++                    android:layout_width="0dp"
++                    android:layout_height="0dp"
++                    android:layout_marginBottom="?actionBarSize"
++                    android:background="?android:colorBackground"
++                    android:clipToPadding="false"
++                    android:nestedScrollingEnabled="true"
++                    android:scrollbars="vertical"
++                    android:transitionName="@string/tn_message_list"
++                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
++                    app:layout_constraintBottom_toBottomOf="parent"
++                    app:layout_constraintEnd_toEndOf="parent"
++                    app:layout_constraintStart_toStartOf="parent"
++                    app:layout_constraintTop_toBottomOf="@+id/top_bar"
++                    app:reverseLayout="true"
++                    app:stackFromEnd="true"
++                    tools:listitem="@layout/item_bubble_plain_left" />
+ 
+-        <androidx.constraintlayout.widget.ConstraintLayout
+-            android:id="@+id/top_bar"
+-            android:layout_width="match_parent"
+-            android:layout_height="wrap_content"
+-            android:background="?colorPrimary"
+-            android:elevation="@dimen/z_toolbar"
+-            android:minHeight="?actionBarSize"
+-            app:layout_constraintEnd_toEndOf="parent"
+-            app:layout_constraintStart_toStartOf="parent"
+-            app:layout_constraintTop_toTopOf="parent">
++                <androidx.constraintlayout.widget.ConstraintLayout
++                    android:id="@+id/top_bar"
++                    android:layout_width="match_parent"
++                    android:layout_height="wrap_content"
++                    android:background="?colorPrimary"
++                    android:clickable="true"
++                    android:elevation="@dimen/z_toolbar"
++                    android:focusable="true"
++                    android:minHeight="?actionBarSize"
++                    app:layout_constraintEnd_toEndOf="parent"
++                    app:layout_constraintStart_toStartOf="parent"
++                    app:layout_constraintTop_toTopOf="parent">
+ 
+-            <TextView
+-                android:id="@+id/tv_top_bar_title"
+-                android:layout_width="wrap_content"
+-                android:layout_height="wrap_content"
+-                android:layout_marginStart="8dp"
+-                android:letterSpacing=".05"
+-                android:text="@{talker.name}"
+-                android:textColor="?colorAccent"
+-                android:textSize="@dimen/ts_medium"
+-                app:layout_constraintBottom_toBottomOf="parent"
+-                app:layout_constraintStart_toEndOf="@+id/ib_close"
+-                app:layout_constraintTop_toTopOf="parent" />
++                    <TextView
++                        android:id="@+id/tv_top_bar_title"
++                        android:layout_width="0dp"
++                        android:layout_height="wrap_content"
++                        android:layout_marginStart="@dimen/spacing_normal"
++                        android:layout_marginEnd="@dimen/spacing_normal"
++                        android:ellipsize="end"
++                        android:letterSpacing=".05"
++                        android:singleLine="true"
++                        android:text="@{model.currentTalker.name}"
++                        android:textColor="?colorAccent"
++                        android:textSize="@dimen/ts_medium"
++                        app:layout_constraintBottom_toBottomOf="parent"
++                        app:layout_constraintEnd_toStartOf="@+id/ib_apply"
++                        app:layout_constraintStart_toStartOf="parent"
++                        app:layout_constraintTop_toTopOf="parent" />
+ 
+-            <ImageButton
+-                android:id="@+id/ib_close"
+-                android:layout_width="@dimen/fab_small"
+-                android:layout_height="@dimen/fab_small"
+-                android:layout_marginStart="16dp"
+-                android:background="?android:attr/selectableItemBackgroundBorderless"
+-                android:contentDescription="@string/filter"
+-                android:onClick="@{()->((Activity)context).finish()}"
+-                android:src="@drawable/ic_close_24dp"
+-                android:tint="?colorButtonNormal"
+-                android:tooltip="@{@string/close}"
+-                android:transitionName="@string/tn_filter"
+-                app:layout_constraintBottom_toBottomOf="parent"
+-                app:layout_constraintStart_toStartOf="parent"
+-                app:layout_constraintTop_toTopOf="parent" />
+-        </androidx.constraintlayout.widget.ConstraintLayout>
++                    <ImageButton
++                        android:id="@+id/ib_close"
++                        android:layout_width="@dimen/fab_small"
++                        android:layout_height="@dimen/fab_small"
++                        android:layout_marginEnd="8dp"
++                        android:background="?android:attr/selectableItemBackgroundBorderless"
++                        android:contentDescription="@string/filter"
++                        android:onClick="@{()->UniUtils.getHostActivity(context).finishAfterTransition()}"
++                        android:src="@drawable/ic_close_24dp"
++                        android:tint="?colorButtonNormal"
++                        android:tooltip="@{@string/close}"
++                        android:transitionName="@string/tn_filter"
++                        app:layout_constraintBottom_toBottomOf="parent"
++                        app:layout_constraintEnd_toEndOf="parent"
++                        app:layout_constraintTop_toTopOf="parent" />
++
++                    <ImageButton
++                        android:id="@+id/ib_apply"
++                        android:layout_width="@dimen/fab_small"
++                        android:layout_height="@dimen/fab_small"
++                        android:layout_marginEnd="@dimen/spacing_normal"
++                        android:background="?android:attr/selectableItemBackgroundBorderless"
++                        android:contentDescription="@string/apply_changes"
++                        android:enabled="@{modifier==null?false:modifier.hasPendingChanges()}"
++                        android:tooltip="@{@string/apply_changes}"
++                        android:tint="?colorButtonNormal"
++                        app:layout_constraintBottom_toBottomOf="parent"
++                        app:layout_constraintEnd_toStartOf="@+id/ib_close"
++                        app:layout_constraintTop_toTopOf="parent"
++                        app:srcCompat="@drawable/ic_baseline_save_24" />
++                </androidx.constraintlayout.widget.ConstraintLayout>
+ 
+-        <LinearLayout
+-            android:id="@+id/ll_curtain"
+-            android:layout_width="match_parent"
+-            android:layout_height="match_parent"
+-            android:background="?colorPrimary"
+-            android:elevation="@dimen/z_bottom_bar"
+-            android:orientation="vertical"
+-            app:layout_constraintBottom_toBottomOf="parent"
+-            app:layout_constraintEnd_toEndOf="parent"
+-            app:layout_constraintStart_toStartOf="parent"
+-            app:layout_constraintTop_toTopOf="parent">
++                <LinearLayout
++                    android:id="@+id/ll_curtain"
++                    android:layout_width="match_parent"
++                    android:layout_height="match_parent"
++                    android:background="?colorPrimary"
++                    android:elevation="@dimen/z_bottom_bar"
++                    android:orientation="vertical"
++                    app:layout_constraintBottom_toBottomOf="parent"
++                    app:layout_constraintEnd_toEndOf="parent"
++                    app:layout_constraintStart_toStartOf="parent"
++                    app:layout_constraintTop_toTopOf="parent">
+ 
+-            <androidx.constraintlayout.widget.ConstraintLayout
+-                android:id="@+id/bottom_bar"
+-                android:layout_width="match_parent"
+-                android:layout_height="wrap_content"
+-                android:background="?colorPrimary"
+-                android:elevation="@dimen/z_toolbar">
++                    <androidx.constraintlayout.widget.ConstraintLayout
++                        android:id="@+id/bottom_bar"
++                        android:layout_width="match_parent"
++                        android:layout_height="wrap_content"
++                        android:background="?colorPrimary"
++                        android:elevation="@dimen/z_toolbar">
+ 
+-                <EditText
+-                    android:id="@+id/et_search"
+-                    android:layout_width="match_parent"
+-                    android:layout_height="wrap_content"
+-                    android:background="@null"
+-                    android:hint="@string/hint_search_message"
+-                    android:inputType="text"
+-                    android:minHeight="?actionBarSize"
+-                    android:textSize="@dimen/ts_medium"
+-                    android:visibility="gone"
+-                    app:layout_constraintBottom_toBottomOf="@+id/ll_ib_container"
+-                    app:layout_constraintStart_toStartOf="parent"
+-                    app:layout_constraintTop_toTopOf="parent" />
++                        <EditText
++                            android:id="@+id/et_search"
++                            android:layout_width="match_parent"
++                            android:layout_height="wrap_content"
++                            android:afterTextChanged="@{e->model.notifySearch(e.toString())}"
++                            android:background="@null"
++                            android:enabled="@{model.currentPageIndex==2&amp;&amp;model.hasLoadAll}"
++                            android:hint="@string/hint_search_message"
++                            android:imeOptions="actionSearch"
++                            android:importantForAutofill="no"
++                            android:inputType="text"
++                            android:minHeight="?actionBarSize"
++                            android:textSize="@dimen/ts_medium"
++                            android:visibility="gone"
++                            app:layout_constraintBottom_toBottomOf="@+id/ll_ib_container"
++                            app:layout_constraintStart_toStartOf="parent"
++                            app:layout_constraintTop_toTopOf="parent" />
+ 
+-                <LinearLayout
+-                    android:id="@+id/ll_ib_container"
+-                    android:layout_width="match_parent"
+-                    android:layout_height="?actionBarSize"
+-                    app:layout_constraintBottom_toTopOf="@+id/indicator"
+-                    app:layout_constraintStart_toStartOf="parent">
++                        <LinearLayout
++                            android:id="@+id/ll_ib_container"
++                            android:layout_width="match_parent"
++                            android:layout_height="?actionBarSize"
++                            app:layout_constraintBottom_toTopOf="@+id/indicator"
++                            app:layout_constraintStart_toStartOf="parent">
+ 
+-                    <ImageButton
+-                        android:id="@+id/ib_stats"
+-                        android:layout_width="0dp"
+-                        android:layout_height="match_parent"
+-                        android:layout_weight="1"
+-                        android:background="?selectableItemBackgroundBorderless"
+-                        android:contentDescription="@string/statistics"
+-                        android:src="@drawable/ic_bar_chart_28dp"
+-                        android:tooltip="@{@string/statistics}" />
++                            <ImageButton
++                                android:id="@+id/ib_stats"
++                                android:layout_width="0dp"
++                                android:layout_height="match_parent"
++                                android:layout_weight="1"
++                                android:background="?selectableItemBackgroundBorderless"
++                                android:contentDescription="@string/statistics"
++                                android:src="@drawable/ic_bar_chart_28dp"
++                                android:tooltip="@{@string/statistics}" />
+ 
+-                    <ImageButton
+-                        android:id="@+id/ib_search"
+-                        android:layout_width="0dp"
+-                        android:layout_height="match_parent"
+-                        android:layout_weight="1"
+-                        android:background="?selectableItemBackgroundBorderless"
+-                        android:contentDescription="@string/search"
+-                        android:src="@drawable/ic_search_24dp"
+-                        android:tooltip="@{@string/search}" />
++                            <ImageButton
++                                android:id="@+id/ib_edit"
++                                android:layout_width="0dp"
++                                android:layout_height="match_parent"
++                                android:layout_weight="1"
++                                android:background="?selectableItemBackgroundBorderless"
++                                android:contentDescription="@string/edited_messages"
++                                android:src="@drawable/ic_pencil_24dp"
++                                android:tooltip="@{@string/edited_messages}" />
+ 
+-                    <ImageButton
+-                        android:id="@+id/ib_edit"
+-                        android:layout_width="0dp"
+-                        android:layout_height="match_parent"
+-                        android:layout_weight="1"
+-                        android:background="?selectableItemBackgroundBorderless"
+-                        android:contentDescription="@string/edit"
+-                        android:editMode="@={model.isInEditMode}"
+-                        android:src="@drawable/ic_pencil_24dp"
+-                        android:tooltip="@{model.isInEditMode?@string/edit:@string/check_only}" />
+-                </LinearLayout>
++                            <ImageButton
++                                android:id="@+id/ib_search"
++                                android:layout_width="0dp"
++                                android:layout_height="match_parent"
++                                android:layout_weight="1"
++                                android:background="?selectableItemBackgroundBorderless"
++                                android:contentDescription="@string/search"
++                                android:src="@drawable/ic_search_24dp"
++                                android:tooltip="@{@string/search}" />
++
++                        </LinearLayout>
+ 
+-                <View
+-                    android:id="@+id/indicator"
+-                    android:layout_width="0dp"
+-                    android:layout_height="2dp"
+-                    android:background="?colorAccent"
+-                    app:layout_constraintStart_toStartOf="parent"
+-                    app:layout_constraintTop_toBottomOf="@+id/ll_ib_container" />
+-            </androidx.constraintlayout.widget.ConstraintLayout>
++                        <View
++                            android:id="@+id/indicator"
++                            android:layout_width="0dp"
++                            android:layout_height="2dp"
++                            android:background="?colorAccent"
++                            app:layout_constraintStart_toStartOf="parent"
++                            app:layout_constraintTop_toBottomOf="@+id/ll_ib_container" />
++                    </androidx.constraintlayout.widget.ConstraintLayout>
+ 
+-            <androidx.viewpager2.widget.ViewPager2
+-                android:id="@+id/vp_message"
+-                android:layout_width="match_parent"
+-                android:layout_height="match_parent" />
+-        </LinearLayout>
+-    </xjunz.tool.wechat.ui.customview.MessagePanel>
++                    <androidx.viewpager2.widget.ViewPager2
++                        android:id="@+id/vp_message"
++                        android:layout_width="match_parent"
++                        android:layout_height="match_parent"
++                        android:background="@color/colorBackgroundMask"
++                        android:currentItem="@={model.currentPageIndex}" />
++                </LinearLayout>
++            </xjunz.tool.wechat.ui.customview.MessagePanel>
++        </xjunz.tool.wechat.ui.customview.ElasticDragDismissFrameLayout>
++    </FrameLayout>
+ </layout>
+\ No newline at end of file
+Index: app/src/main/res/layout/fragment_chat.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<RelativeLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\">\r\n\r\n    <ViewStub\r\n        android:id=\"@+id/stub_no_result\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_centerInParent=\"true\"\r\n        android:inflatedId=\"@+id/iv_no_result\"\r\n        android:layout=\"@layout/stub_no_result\" />\r\n\r\n    <androidx.recyclerview.widget.RecyclerView\r\n        android:id=\"@+id/rv_list\"\r\n        android:clipToPadding=\"false\"\r\n        android:paddingBottom=\"?android:attr/actionBarSize\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"match_parent\"\r\n        app:layoutManager=\"androidx.recyclerview.widget.LinearLayoutManager\"\r\n        tools:listitem=\"@layout/item_chat\" />\r\n\r\n\r\n</RelativeLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/fragment_chat.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/layout/fragment_chat.xml	(date 1605618120376)
+@@ -18,10 +18,11 @@
+ 
+     <androidx.recyclerview.widget.RecyclerView
+         android:id="@+id/rv_list"
+-        android:clipToPadding="false"
+-        android:paddingBottom="?android:attr/actionBarSize"
++        android:overScrollMode="never"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
++        android:clipToPadding="false"
++        android:paddingBottom="?android:attr/actionBarSize"
+         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+         tools:listitem="@layout/item_chat" />
+ 
+Index: app/src/main/res/drawable/bg_btn_normal.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?><!--\r\n  ~ Copyright (c) 2020 xjunz. 保留所有权利\r\n  -->\r\n\r\n<inset xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    android:inset=\"@dimen/dp_6\">\r\n    <ripple android:color=\"@color/colorMask\">\r\n        <item>\r\n            <shape android:shape=\"rectangle\">\r\n                <corners android:radius=\"@dimen/corner_button\" />\r\n                <solid android:color=\"?colorButtonNormal\" />\r\n            </shape>\r\n        </item>\r\n    </ripple>\r\n</inset>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/drawable/bg_btn_normal.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ app/src/main/res/drawable/bg_btn_normal.xml	(date 1605618120385)
+@@ -1,7 +1,6 @@
+ <?xml version="1.0" encoding="utf-8"?><!--
+   ~ Copyright (c) 2020 xjunz. 保留所有权利
+   -->
+-
+ <inset xmlns:android="http://schemas.android.com/apk/res/android"
+     android:inset="@dimen/dp_6">
+     <ripple android:color="@color/colorMask">
+@@ -9,6 +8,9 @@
+             <shape android:shape="rectangle">
+                 <corners android:radius="@dimen/corner_button" />
+                 <solid android:color="?colorButtonNormal" />
++                <padding
++                    android:left="@dimen/spacing_unit"
++                    android:right="@dimen/spacing_unit" />
+             </shape>
+         </item>
+     </ripple>
+Index: .idea/dictionaries/zxj.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><component name=\"ProjectDictionaryState\">\r\n  <dictionary name=\"zxj\">\r\n    <words>\r\n      <w>chatroom</w>\r\n      <w>flowable</w>\r\n      <w>imei</w>\r\n      <w>unfollowed</w>\r\n      <w>wechat</w>\r\n      <w>xjunz</w>\r\n    </words>\r\n  </dictionary>\r\n</component>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/dictionaries/zxj.xml	(revision 66df37be05fa541c21d8b490aabffd6aee59327a)
++++ .idea/dictionaries/zxj.xml	(date 1605618119973)
+@@ -1,10 +1,16 @@
+ <component name="ProjectDictionaryState">
+   <dictionary name="zxj">
+     <words>
++      <w>abcdef</w>
+       <w>chatroom</w>
++      <w>emoji</w>
+       <w>flowable</w>
+       <w>imei</w>
++      <w>repost</w>
++      <w>tencent</w>
++      <w>uins</w>
+       <w>unfollowed</w>
++      <w>viewmodel</w>
+       <w>wechat</w>
+       <w>xjunz</w>
+     </words>

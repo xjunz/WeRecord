@@ -144,7 +144,7 @@ public class Message {
     }
 
     public boolean isEdited() {
-        return this.editionFlag == Edition.FLAG_NONE;
+        return this.editionFlag != Edition.FLAG_NONE;
     }
 
     public int getEditionFlag() {
@@ -413,4 +413,5 @@ public class Message {
         parcel.recycle();
         return clone;
     }
+
 }

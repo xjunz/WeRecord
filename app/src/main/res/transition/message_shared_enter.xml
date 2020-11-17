@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  -->
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:interpolator/fast_out_slow_in">
+    <transition xmlns:app="http://schemas.android.com/apk/res-auto"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        class="xjunz.tool.wechat.ui.transition.GenericButtonMorph"
+        android:drawableLeft="@drawable/ic_baseline_eye_24"
+        android:duration="@integer/animDurationNormal"
+        android:text="@string/check_msg"
+        android:textColor="?colorAccent"
+        app:opticalButtonColor="?android:colorBackground" />
+    <targets>
+        <target android:targetId="@+id/rv_message" />
+    </targets>
+</transitionSet>
