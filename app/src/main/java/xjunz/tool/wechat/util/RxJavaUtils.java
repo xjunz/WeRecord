@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 package xjunz.tool.wechat.util;
 
@@ -26,6 +26,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.schedulers.Schedulers;
+import xjunz.tool.wechat.BuildConfig;
 import xjunz.tool.wechat.impl.model.account.Account;
 
 /**
@@ -182,6 +183,7 @@ public class RxJavaUtils {
         }
     }
 
+
     /**
      * {@link CompletableObserver}的适配器
      */
@@ -194,12 +196,13 @@ public class RxJavaUtils {
 
         @Override
         public void onComplete() {
-
         }
 
         @Override
         public void onError(@NotNull Throwable e) {
-
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -1,8 +1,9 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 package xjunz.tool.wechat.ui.message.fragment;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.transition.AutoTransition;
 import android.transition.Scene;
@@ -16,9 +17,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.Observable;
+import androidx.databinding.ObservableInt;
 import androidx.fragment.app.Fragment;
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,18 +28,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.R;
-import xjunz.tool.wechat.data.viewmodel.MessageEditorViewModel;
 import xjunz.tool.wechat.data.viewmodel.MessageViewModel;
 import xjunz.tool.wechat.databinding.FragmentEditionBinding;
 import xjunz.tool.wechat.databinding.ItemEditionBinding;
 import xjunz.tool.wechat.impl.DatabaseModifier;
 import xjunz.tool.wechat.impl.Environment;
-import xjunz.tool.wechat.impl.model.message.BackupMessage;
-import xjunz.tool.wechat.impl.model.message.Edition;
 import xjunz.tool.wechat.impl.model.message.Message;
+import xjunz.tool.wechat.impl.model.message.util.Edition;
+import xjunz.tool.wechat.ui.message.MessageActivity;
 import xjunz.tool.wechat.util.RxJavaUtils;
+import xjunz.tool.wechat.util.UiUtils;
+import xjunz.tool.wechat.util.Utils;
 
 /**
  * 显示当前{@link xjunz.tool.wechat.impl.model.account.Talker}的消息中被编辑过的消息的{@link Fragment}。
@@ -51,24 +54,87 @@ public class EditionFragment extends Fragment {
     private final List<EditionItem> mUnconfirmedEditionItemList = new ArrayList<>();
     private List<EditionItem> mCurrentEditionItemList = new ArrayList<>();
     private DatabaseModifier mModifier;
+    /**
+     * 选中确认的Editions（0）还是未确认的Editions（1）
+     */
+    public final ObservableInt editionSetSelection = new ObservableInt(0);
+    /**
+     * 选中的Edition类型
+     */
+    public final ObservableInt editionFlagSelection = new ObservableInt(0);
+    public static final int EDITION_SET_INDEX_CONFIRMED = 0;
+    public static final int EDITION_SET_INDEX_UNCONFIRMED = 1;
+    private MessageActivity mHost;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mModel = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(MessageViewModel.class);
         mModifier = Environment.getInstance().modifyDatabase();
-        MessageEditorViewModel.get(requireActivity().getApplication()).registerEventHandler(mHandler);
+        mModel = Utils.getViewModel(requireActivity(), MessageViewModel.class);
+        mModel.handleEvent(mHandler);
+        mHost = (MessageActivity) requireActivity();
     }
 
-    public void restoreMessage(int msgId) {
-        DatabaseModifier modifier = Environment.getInstance().modifyDatabase();
+
+    public void restoreMessage(int position, Message msg) {
+        //如果是未确认的还原，交由Host处理
+        if (editionSetSelection.get() == EDITION_SET_INDEX_UNCONFIRMED) {
+            int index = mModel.currentLoadedMessages.indexOf(msg);
+            if (index >= 0) {
+                mHost.restore(index, msg);
+                mUnconfirmedEditionItemList.remove(position);
+                mAdapter.notifyItemRemoved(position);
+            } else {
+                throw new IllegalArgumentException("Message " + msg.getMsgId() + " not found");
+            }
+        }
+        //如果是确认的还原
+        else {
+            DatabaseModifier modifier = Environment.getInstance().modifyDatabase();
+            RxJavaUtils.complete(() -> {
+                modifier.restoreMessage(msg);
+                modifier.apply();
+                mHost.reloadMessages();
+                //从列表中移除
+                mConfirmedEditionItemList.remove(position);
+                //移除备份消息
+                mModel.confirmedBackups.remove(msg);
+            }).subscribe(new RxJavaUtils.CompletableObservableAdapter() {
+                Dialog progress;
+
+                @Override
+                public void onSubscribe(@NotNull Disposable d) {
+                    progress = UiUtils.createProgress(requireContext(), R.string.loading);
+                    progress.show();
+                }
+
+                @Override
+                public void onComplete() {
+                    //更新消息页面
+                    mHost.notifyMessageListChanged();
+                    //更新当前列表
+                    mAdapter.notifyItemRemoved(position);
+                    progress.dismiss();
+                    UiUtils.createAlert(requireContext(), getString(R.string.alert_restart_after_changes_applied))
+                            .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                                startActivity(requireActivity().getPackageManager().getLaunchIntentForPackage("com.tencent.mm"));
+                            }).setNegativeButton(android.R.string.cancel, null).show();
+                }
+
+                @Override
+                public void onError(@NotNull Throwable e) {
+                    e.printStackTrace();
+                    progress.dismiss();
+                }
+            });
+        }
     }
 
-    private final MessageEditorViewModel.EditorEventHandler mHandler = new MessageEditorViewModel.EditorEventHandler() {
+    private final MessageViewModel.EventHandler mHandler = new MessageViewModel.EventHandler() {
         @Override
-        public void onMessageChanged(boolean timestampChanged, Message changed) {
-            if (mModel.editionSetSelection.get() == 1) {
-                int selection = mModel.editionFlagSelection.get();
+        public void onMessageChanged() {
+            if (editionSetSelection.get() == EDITION_SET_INDEX_UNCONFIRMED) {
+                int selection = editionFlagSelection.get();
                 if (selection == 0 || selection == Edition.FLAG_REPLACEMENT) {
                     refreshList();
                 }
@@ -76,9 +142,9 @@ public class EditionFragment extends Fragment {
         }
 
         @Override
-        public void onMessageInserted(boolean addBefore, Message inserted) {
-            if (mModel.editionSetSelection.get() == 1) {
-                int selection = mModel.editionFlagSelection.get();
+        public void onMessageInserted() {
+            if (editionSetSelection.get() == EDITION_SET_INDEX_UNCONFIRMED) {
+                int selection = editionFlagSelection.get();
                 if (selection == 0 || selection == Edition.FLAG_INSERTION) {
                     refreshList();
                 }
@@ -87,12 +153,27 @@ public class EditionFragment extends Fragment {
 
         @Override
         public void onMessageDeleted() {
-            if (mModel.editionSetSelection.get() == 1) {
-                int selection = mModel.editionFlagSelection.get();
+            if (editionSetSelection.get() == EDITION_SET_INDEX_UNCONFIRMED) {
+                int selection = editionFlagSelection.get();
                 if (selection == 0 || selection == Edition.FLAG_REMOVAL) {
                     refreshList();
                 }
             }
+        }
+
+        @Override
+        public void onMessageRestored(int editionFlag, int setFlag) {
+            if (editionSetSelection.get() == EDITION_SET_INDEX_UNCONFIRMED) {
+                int selection = editionFlagSelection.get();
+                if (selection == 0 || selection == editionFlag) {
+                    refreshList();
+                }
+            }
+        }
+
+        @Override
+        public void onEditionListChanged(int set) {
+            refreshList();
         }
     };
 
@@ -103,10 +184,21 @@ public class EditionFragment extends Fragment {
         }
     }
 
+    private void loadConfirmedEditions() {
+        mConfirmedEditionItemList.clear();
+        for (Message message : mModel.confirmedBackups) {
+            mConfirmedEditionItemList.add(new EditionItem(message));
+        }
+    }
+
+    /**
+     * 更新列表
+     */
     private void refreshList() {
         loadUnconfirmedEditions();
-        mCurrentEditionItemList = mModel.editionSetSelection.get() == 0 ? mConfirmedEditionItemList : mUnconfirmedEditionItemList;
-        int flag = mModel.editionFlagSelection.get();
+        loadConfirmedEditions();
+        mCurrentEditionItemList = editionSetSelection.get() == 0 ? mConfirmedEditionItemList : mUnconfirmedEditionItemList;
+        int flag = editionFlagSelection.get();
         if (flag != 0) {
             RxJavaUtils.stream(mCurrentEditionItemList).parallel().filter(editionItem -> editionItem.getFlag() == flag).runOn(Schedulers.computation())
                     .sequential().toSortedList().observeOn(AndroidSchedulers.mainThread()).subscribe(new RxJavaUtils.SingleObserverAdapter<List<EditionItem>>() {
@@ -122,20 +214,18 @@ public class EditionFragment extends Fragment {
     }
 
     private void initList() {
-        for (BackupMessage message : mModel.allBackupMessages) {
-            mConfirmedEditionItemList.add(new EditionItem(message));
-        }
         loadUnconfirmedEditions();
+        loadConfirmedEditions();
         mCurrentEditionItemList = mConfirmedEditionItemList;
         mAdapter = new EditionAdapter();
         mBinding.rvEdition.setAdapter(mAdapter);
-        mModel.editionSetSelection.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+        editionSetSelection.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
                 refreshList();
             }
         });
-        mModel.editionFlagSelection.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+        editionFlagSelection.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
                 refreshList();
@@ -156,11 +246,7 @@ public class EditionFragment extends Fragment {
             return flag;
         }
 
-        public boolean isExpanded() {
-            return expanded;
-        }
-
-        public int getMsgId() {
+        public long getMsgId() {
             return getShowcase().getMsgId();
         }
 
@@ -177,7 +263,7 @@ public class EditionFragment extends Fragment {
             flag = edition.getFlag();
         }
 
-        public EditionItem(@NotNull BackupMessage backup) {
+        public EditionItem(@NotNull Message backup) {
             showcase = backup;
             flag = backup.getEditionFlag();
         }
@@ -205,7 +291,8 @@ public class EditionFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_edition, container, false);
-        mBinding.setModel(mModel);
+        mBinding.setEditionFlagSelection(editionFlagSelection);
+        mBinding.setEditionSetSelection(editionSetSelection);
         return mBinding.getRoot();
     }
 
@@ -215,7 +302,7 @@ public class EditionFragment extends Fragment {
         initList();
     }
 
-    private class EditionAdapter extends RecyclerView.Adapter<EditionAdapter.EditionViewHolder> {
+    public class EditionAdapter extends RecyclerView.Adapter<EditionAdapter.EditionViewHolder> {
         private final AutoTransition transition;
 
         private EditionAdapter() {
@@ -243,6 +330,7 @@ public class EditionFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull EditionViewHolder holder, int position) {
+            holder.binding.setVh(holder);
             holder.binding.setItem(mCurrentEditionItemList.get(position));
             holder.binding.executePendingBindings();
         }
@@ -252,14 +340,14 @@ public class EditionFragment extends Fragment {
             return mCurrentEditionItemList.size();
         }
 
-        private class EditionViewHolder extends RecyclerView.ViewHolder {
+        public class EditionViewHolder extends RecyclerView.ViewHolder {
             ItemEditionBinding binding;
 
             public EditionViewHolder(@NonNull ItemEditionBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
-                this.binding.setModel(mModel);
-                this.binding.btnRestore.setOnClickListener(v -> restoreMessage(binding.getItem().showcase.getMsgId()));
+                this.binding.setFragment(EditionFragment.this);
+                this.binding.setHost(mHost);
                 this.itemView.setOnClickListener(v -> {
                     binding.getItem().collapseOrExpand();
                     binding.expandable.setVisibility(binding.getItem().expanded ? View.VISIBLE : View.GONE);

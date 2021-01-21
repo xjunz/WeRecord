@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.ui.intro;
@@ -27,12 +27,12 @@ import java.io.InputStream;
 
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
-import xjunz.tool.wechat.ui.BaseActivity;
+import xjunz.tool.wechat.ui.base.BaseActivity;
 import xjunz.tool.wechat.ui.intro.fragment.IntroAvailabilityFragment;
 import xjunz.tool.wechat.ui.intro.fragment.IntroFragment;
 import xjunz.tool.wechat.ui.intro.fragment.IntroSuFragment;
 import xjunz.tool.wechat.ui.intro.fragment.IntroWelcomeFragment;
-import xjunz.tool.wechat.ui.outer.SplashActivity;
+import xjunz.tool.wechat.ui.outer.InitializationActivity;
 import xjunz.tool.wechat.util.UiUtils;
 
 public class IntroActivity extends BaseActivity implements IntroFragment.OnStepDoneListener {
@@ -77,7 +77,7 @@ public class IntroActivity extends BaseActivity implements IntroFragment.OnStepD
     }
 
     private void initViews() {
-        mTvTitle = findViewById(R.id.tv_title);
+        mTvTitle = findViewById(R.id.tv_msg);
         mIvIcon = findViewById(R.id.iv_icon);
         mTvIndicator = findViewById(R.id.tv_indicator);
         mViewPager = findViewById(R.id.vp_intro);
@@ -144,7 +144,7 @@ public class IntroActivity extends BaseActivity implements IntroFragment.OnStepD
                             .setMessage(Html.fromHtml(new String(all)))
                             .setPositiveButton(R.string.read_and_approved, (dialog, which) -> {
                                 App.getSharedPrefsManager().setIsAppIntroDone(true);
-                                Intent i = new Intent(this, SplashActivity.class);
+                                Intent i = new Intent(this, InitializationActivity.class);
                                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(i);
                             })

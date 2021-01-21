@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 package xjunz.tool.wechat.impl.model.message;
 
 import android.content.ContentValues;
+import android.os.Parcel;
 import android.text.Spanned;
 
 import androidx.annotation.NonNull;
@@ -27,7 +28,7 @@ import javax.xml.parsers.SAXParserFactory;
 import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.repo.ContactRepository;
 import xjunz.tool.wechat.impl.repo.RepositoryFactory;
-import xjunz.tool.wechat.util.UniUtils;
+import xjunz.tool.wechat.util.Utils;
 
 import static xjunz.tool.wechat.impl.model.message.MessageFactory.TYPE_SYSTEM_JOIN_GROUP;
 import static xjunz.tool.wechat.impl.model.message.MessageFactory.TYPE_SYSTEM_PAT;
@@ -36,12 +37,10 @@ import static xjunz.tool.wechat.impl.model.message.MessageFactory.TYPE_SYSTEM_PA
  * 系统消息类
  */
 public class SystemMessage extends Message {
-    private String parsedContent;
     private Spanned html;
-    private CharSequence spannedContent;
 
     public SystemMessage(ContentValues values) {
-        super(values);
+        super(values, MessageFactory.Type.SYSTEM);
         this.senderId = null;
     }
 
@@ -96,6 +95,7 @@ public class SystemMessage extends Message {
         }
         return spannedContent;
     }
+
 
 
     private void parseJoinGroupMessage() {
@@ -189,7 +189,7 @@ public class SystemMessage extends Message {
             }
             if (inTemplate) {
                 template = text;
-                patterns = UniUtils.extract(text, "\\$(.+?)\\$");
+                patterns = Utils.extract(text, "\\$(.+?)\\$");
                 matchedMap = new HashMap<>();
             } else if (inLink && inTarget) {
                 String matched = matchedMap.get(currentPattern);
@@ -205,8 +205,8 @@ public class SystemMessage extends Message {
 
     private class PatMessageHandler extends DefaultHandler {
         private boolean inTemplate;
-        private StringBuilder message;
-        private ContactRepository repo;
+        private final StringBuilder message;
+        private final ContactRepository repo;
 
         public PatMessageHandler() {
             super();
@@ -241,7 +241,7 @@ public class SystemMessage extends Message {
             super.characters(ch, start, length);
             if (inTemplate) {
                 String text = new String(ch, start, length);
-                List<String> wxids = UniUtils.extract(text, "\\$\\{(.+?)\\}");
+                List<String> wxids = Utils.extract(text, "\\$\\{(.+?)\\}");
                 for (String wxid : wxids) {
                     Contact contact = repo.get(wxid);
                     if (contact != null) {
@@ -256,4 +256,32 @@ public class SystemMessage extends Message {
             }
         }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NotNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeString(this.parsedContent);
+    }
+
+    protected SystemMessage(Parcel in) {
+        super(in);
+        this.parsedContent = in.readString();
+    }
+
+    public static final Creator<SystemMessage> CREATOR = new Creator<SystemMessage>() {
+        @Override
+        public SystemMessage createFromParcel(Parcel source) {
+            return new SystemMessage(source);
+        }
+
+        @Override
+        public SystemMessage[] newArray(int size) {
+            return new SystemMessage[size];
+        }
+    };
 }

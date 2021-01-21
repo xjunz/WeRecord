@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.impl.repo;
@@ -15,29 +15,26 @@ import xjunz.tool.wechat.impl.Environment;
 import xjunz.tool.wechat.impl.model.account.User;
 
 class LifecyclePerceptiveRepository implements LifecycleObserver {
-    private final SQLiteDatabase mDatabase;
     private final Environment mEnv;
-    private final User mCurrentUser;
 
     protected LifecyclePerceptiveRepository() {
         mEnv = Environment.getInstance();
-        mEnv.getLifecycle().addObserver(this);
-        mDatabase = mEnv.getDatabaseOfCurrentUser();
-        mCurrentUser = mEnv.getCurrentUser();
+        if (mEnv != null) {
+            mEnv.getLifecycle().addObserver(this);
+        }
     }
 
     protected SQLiteDatabase getDatabase() {
-        return mDatabase;
+        return mEnv.getDatabaseOfCurrentUser();
     }
 
     protected User getCurrentUser() {
-        return mCurrentUser;
+        return mEnv.getCurrentUser();
     }
 
     protected Environment getEnvironment() {
         return mEnv;
     }
-
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     public void purge() {

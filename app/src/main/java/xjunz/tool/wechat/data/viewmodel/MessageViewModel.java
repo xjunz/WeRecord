@@ -1,14 +1,18 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.data.viewmodel;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.ObservableBoolean;
-import androidx.databinding.ObservableField;
+import androidx.databinding.ObservableInt;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import xjunz.tool.wechat.impl.model.account.Talker;
-import xjunz.tool.wechat.impl.model.message.BackupMessage;
 import xjunz.tool.wechat.impl.model.message.Message;
 
 /**
@@ -17,64 +21,75 @@ import xjunz.tool.wechat.impl.model.message.Message;
 public class MessageViewModel extends ObservableViewModel {
     public Talker currentTalker;
     public ObservableInt currentPageIndex = new ObservableInt(0);
-    public ObservableBoolean hasLoadAll = new ObservableBoolean(false);
+    public ObservableBoolean hasLoadedAll = new ObservableBoolean(false);
+    public ObservableBoolean isLoadingAll = new ObservableBoolean(false);
     public List<Message> currentLoadedMessages = new ArrayList<>();
-    public List<BackupMessage> allBackupMessages = new ArrayList<>();
-    public int actualMessageCount;
-    public int selectedMessagePosition;
-    private final ArrayList<EventHandler> eventHandlers = new ArrayList<>();
-
-    //EditionFragment variables
-
     /**
-     * 选中确认的Editions（0）还是未确认的Editions（1）
+     * 已确认的修改的备份
      */
-    public final ObservableInt editionSetSelection = new ObservableInt(0);
+    public List<Message> confirmedBackups = new ArrayList<>();
     /**
-     * 选中的Edition类型
-     *
-     * @see xjunz.tool.wechat.impl.model.message.Edition
+     * 未确认的修改的备份
      */
-    public final ObservableInt editionFlagSelection = new ObservableInt(0);
+    private final List<Message> unconfirmedBackups = new ArrayList<>();
+    public long actualMessageCount;
+    private EventHandler mEventHandler;
 
-    public void addEventHandler(EventHandler eventHandler) {
-        eventHandlers.add(eventHandler);
+    public void handleEvent(EventHandler eventHandler) {
+        this.mEventHandler = eventHandler;
     }
 
-    public void notifySearch(String keyword) {
-        for (EventHandler eventHandler : eventHandlers) {
-            eventHandler.onSearch(keyword);
+    public void notifyMessageDeleted() {
+        if (mEventHandler != null) {
+            mEventHandler.onMessageDeleted();
         }
     }
 
-    public void notifyNavigate(Message msg) {
-        for (EventHandler eventHandler : eventHandlers) {
-            eventHandler.onNavigate(msg);
+    public void notifyMessageInserted() {
+        if (mEventHandler != null) {
+            mEventHandler.onMessageInserted();
         }
     }
 
-    public void notifyAllLoaded(int preCount) {
-        hasLoadAll.set(true);
-        for (EventHandler eventHandler : eventHandlers) {
-            eventHandler.onAllLoaded(preCount);
+    public void notifyMessageRestored(int editionFlag, int setFlag) {
+        if (mEventHandler != null) {
+            mEventHandler.onMessageRestored(editionFlag, setFlag);
+        }
+    }
+
+    public void notifyMessageChanged() {
+        if (mEventHandler != null) {
+            mEventHandler.onMessageChanged();
         }
     }
 
     /**
-     * 向所有{@link EventHandler}发布消息变更事件
-     *
-     * @param msgId 变更的消息ID
+     * 已编辑消息列表改变，在不知道改变的消息时或者有大量已编辑消息改变时调用此方法
      */
-    public void notifyMessageChanged(int msgId) {
-
+    public void notifyEditionListChanged(int setFlag) {
+        if (mEventHandler != null) {
+            mEventHandler.onEditionListChanged(setFlag);
+        }
     }
 
-    public void setSelectedMessagePosition(int position) {
-        this.selectedMessagePosition = position;
+    public void addUnconfirmedBackupIfNotExists(@NonNull Message raw) {
+        if (!unconfirmedBackups.contains(raw)) {
+            unconfirmedBackups.add(raw);
+        }
     }
 
-    public Message getSelectedMessage() {
-        return currentLoadedMessages.get(selectedMessagePosition);
+    public void removeUnconfirmedBackup(@NonNull Message raw) {
+        unconfirmedBackups.remove(raw);
+    }
+
+    @Nullable
+    public Message getUnconfirmedBackup(long msgId) {
+        for (Message backup : unconfirmedBackups) {
+            if (backup.getMsgId() == msgId) {
+                return backup;
+            }
+        }
+        return null;
     }
 
     /**
@@ -82,14 +97,35 @@ public class MessageViewModel extends ObservableViewModel {
      * {@link androidx.fragment.app.Fragment}之间进行交互的事件。
      */
     public static class EventHandler {
-        public void onSearch(String keyword) {
+
+        public void onMessageDeleted() {
         }
 
-        public void onNavigate(Message msg) {
+        public void onMessageRestored(int editionFlag, int setFlag) {
         }
 
-        public void onAllLoaded(int preCount) {
+        public void onMessageChanged() {
+        }
 
+        public void onMessageInserted() {
+        }
+
+        public void onEditionListChanged(int set) {
         }
     }
+
+    private SearchDelegate mSearchDelegate;
+
+    public SearchDelegate getSearchDelegate() {
+        return mSearchDelegate;
+    }
+
+    public void delegateSearch(SearchDelegate searchDelegate) {
+        this.mSearchDelegate = searchDelegate;
+    }
+
+    public interface SearchDelegate {
+        void search(String keyword);
+    }
+
 }

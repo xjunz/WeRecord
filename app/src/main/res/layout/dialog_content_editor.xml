@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,12 +8,14 @@
     <data>
 
         <variable
-            name="model"
-            type="xjunz.tool.wechat.data.viewmodel.EditorViewModel" />
+            name="label"
+            type="String" />
 
         <variable
-            name="dialog"
-            type="xjunz.tool.wechat.ui.message.fragment.dialog.ContentEditorDialog" />
+            name="host"
+            type="xjunz.tool.wechat.ui.base.ContentEditorDialog" />
+
+        <import type="xjunz.tool.wechat.util.UiUtils" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,55 +23,121 @@
         android:layout_height="match_parent"
         android:background="@android:color/white">
 
-        <EditText
-            android:id="@+id/et_editor"
-            android:layout_width="0dp"
+        <View
+            android:id="@+id/divider_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginBottom="@dimen/spacing_unit"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintBottom_toTopOf="@+id/btn_operate"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <RelativeLayout
+            android:id="@+id/top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:actionBarSize"
+            android:background="?colorPrimary"
+            android:elevation="@dimen/z_toolbar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="@dimen/spacing_normal"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:text="@{label==null?@string/edit:@string/format_editor_title(label)}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                tools:text="@tools:sample/lorem" />
+
+            <View
+                android:id="@+id/divider_top"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_alignParentBottom="true"
+                android:background="?android:attr/listDivider" />
+        </RelativeLayout>
+
+
+        <ScrollView
+            android:id="@+id/sv_editor"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_margin="@dimen/spacing_normal"
-            android:background="@drawable/bg_edit_box"
-            android:gravity="start"
-            android:inputType="textMultiLine"
-            android:padding="@dimen/spacing_unit"
-            android:text="@{model.modifiedMessage.content}"
-            app:layout_constraintBottom_toTopOf="@+id/btn_cancel"
+            android:background="?android:colorBackground"
+            app:layout_constraintBottom_toTopOf="@+id/divider_bottom"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="@tools:sample/lorem/random" />
+            app:layout_constraintTop_toBottomOf="@+id/top_bar">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <xjunz.tool.wechat.ui.customview.LineCounter
+                    android:id="@+id/line_counter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="?colorAccent"
+                    android:paddingHorizontal="@dimen/dp_4"
+                    android:theme="@style/ThemeOverlay.AppCompat.Dark"
+                    app:lineCounterTextColor="?android:textColorPrimary"
+                    app:lineCounterTextSize="15sp" />
+
+                <EditText
+                    android:id="@+id/et_editor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:gravity="start"
+                    android:hint="@string/pls_input"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine"
+                    android:padding="@dimen/spacing_unit"
+                    android:text="@{host.defaultValue}"
+                    android:textSize="16sp"
+                    tools:text="@tools:sample/lorem/random" />
+            </LinearLayout>
+        </ScrollView>
 
         <Button
             android:id="@+id/btn_reset"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored.Small"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored.Normal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{()->etEditor.setText(model.originalMessage.content)}"
+            android:layout_marginStart="8dp"
+            android:onClick="@{()->UiUtils.setTextKeepSelection(etEditor,host.defaultValue)}"
             android:text="@string/reset"
             app:layout_constraintBottom_toBottomOf="@+id/btn_cancel"
-            app:layout_constraintStart_toStartOf="@+id/et_editor"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/btn_cancel" />
 
         <Button
             android:id="@+id/btn_cancel"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored.Small"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored.Normal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{()->dialog.dismiss()}"
+            android:onClick="@{()->host.dismiss()}"
             android:text="@android:string/cancel"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/btn_confirm"
-            app:layout_constraintTop_toTopOf="@+id/btn_confirm" />
+            app:layout_constraintBottom_toBottomOf="@+id/btn_operate"
+            app:layout_constraintEnd_toStartOf="@+id/btn_operate"
+            app:layout_constraintTop_toTopOf="@+id/btn_operate" />
 
 
         <Button
-            android:id="@+id/btn_confirm"
-            style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+            android:id="@+id/btn_operate"
+            style="@style/Widget.AppCompat.Button.Normal.Flat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{()->model.setModifiedContent(etEditor.getText().toString())}"
-            android:onClick2="@{()->dialog.dismiss()}"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:onClick="@{()->host.confirm()}"
             android:text="@android:string/ok"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/et_editor" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

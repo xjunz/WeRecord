@@ -1,0 +1,11 @@
+<!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<msg fromusername="%1$s" encryptusername="%1$s" fromnickname="%1$s" content="%1$s" fullpy="%1$s"
+    shortpy="%1$s" imagestatus="3" scene="0" country="" province="" city="" sign="" percard="0"
+    sex="0" alias="%1$s" weibo="" albumflag="0" albumstyle="0" albumbgimgid="" snsflag="0"
+    snsbgimgid="" snsbgobjectid="0" mhash="" mfullhash="" bigheadimgurl="" smallheadimgurl=""
+    ticket="" opcode="2" googlecontact="" qrticket="" chatroomusername="" sourceusername=""
+    sourcenickname="" sharecardusername="" sharecardnickname="" cardversion="">
+    <brandlist count="0" ver="0"></brandlist>
+</msg>

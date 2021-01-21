@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.impl.repo;
@@ -43,31 +43,17 @@ public class AvatarRepository extends LifecyclePerceptiveRepository {
     private Bitmap decodeAvatar(@NonNull String id) {
         String idMd5 = DigestUtils.md5Hex(id);
         String backupAvatarPath = getEnvironment().getAvatarBackupPath() + File.separator + idMd5;
-        File backup = new File(backupAvatarPath);
-        if (!backup.exists()) {
-            String originalAvatarPath = getCurrentUser().dirPath + File.separator + "avatar" + File.separator
-                    + idMd5.substring(0, 2) + File.separator
-                    + idMd5.substring(2, 4) + File.separator
-                    + "user_" + idMd5 + ".png";
-            try {
-                ShellUtils.cp2dataIfExists(originalAvatarPath, backupAvatarPath, true, "decodeAvatar");
-            } catch (ShellUtils.ShellException | IOException e) {
-                e.printStackTrace();
-            }
+        String originalAvatarPath = getCurrentUser().dirPath + File.separator + "avatar" + File.separator
+                + idMd5.substring(0, 2) + File.separator
+                + idMd5.substring(2, 4) + File.separator
+                + "user_" + idMd5 + ".png";
+        try {
+            //即使头像已存在，仍然允许重写，保持我们的头像为最新
+            ShellUtils.cp2dataIfExists(originalAvatarPath, backupAvatarPath, true, "decodeAvatar");
+        } catch (ShellUtils.ShellException | IOException e) {
+            e.printStackTrace();
         }
         return BitmapFactory.decodeFile(backupAvatarPath);
-    }
-
-
-    /**
-     * 从{@link AvatarRepository#mAvatarCache}中获取缓存的头像{@link Bitmap}
-     *
-     * @param id 指定微信ID
-     * @return 缓存中的头像，如果不存在返回null
-     */
-    @Nullable
-    private Bitmap getAvatarFromCache(@NonNull String id) {
-        return mAvatarCache.get(id);
     }
 
 
@@ -94,7 +80,7 @@ public class AvatarRepository extends LifecyclePerceptiveRepository {
      */
     @Nullable
     public Bitmap getAvatar(@NonNull String id) {
-        Bitmap cache = getAvatarFromCache(id);
+        Bitmap cache = mAvatarCache.get(id);
         if (cache == null) {
             Bitmap bitmap = decodeAvatar(id);
             if (bitmap != null) {

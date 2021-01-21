@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.data.viewmodel;
@@ -8,8 +8,11 @@ import android.text.Editable;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.Bindable;
+import androidx.databinding.library.baseAdapters.BR;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,16 +32,31 @@ public class PageViewModel extends ObservableViewModel {
     /**
      * 全局筛选事件处理器集合。无论当前{@link PageConfig}是什么，当事件发出时，接口都会被调用。
      */
-    private List<EventHandler> mHandlerList = new ArrayList<>();
+    private final List<EventHandler> mHandlerList = new ArrayList<>();
 
-    public interface EventHandler {
-        void onConfirmFilter();
 
-        void onResetFilter();
+    private boolean mNeedDemonstration;
 
-        void onCancelFilter();
+    public static class EventHandler {
+        public void onConfirmFilter() {
+        }
 
-        void onPrepareFilter();
+        public void onResetFilter() {
+        }
+
+        public void onCancelFilter() {
+        }
+
+        public void onPrepareFilter() {
+        }
+    }
+
+    public void requestDemonstrate(boolean needDemonstration) {
+        mNeedDemonstration = needDemonstration;
+    }
+
+    public boolean needDemonstration() {
+        return mNeedDemonstration;
     }
 
     public void addEventHandler(@NonNull EventHandler handler) {
@@ -70,7 +88,7 @@ public class PageViewModel extends ObservableViewModel {
     /**
      * 下发搜索事件
      */
-    public void notifySearch(Editable editable) {
+    public void notifySearch(@NotNull Editable editable) {
         mCurrentConfig.getEventHandler().onSearch(editable.toString());
     }
 
@@ -98,7 +116,7 @@ public class PageViewModel extends ObservableViewModel {
      */
     public void updateCurrentConfig(@NonNull PageConfig config) {
         mCurrentConfig = config;
-        notifyChange();
+        notifyPropertyChanged(BR.currentConfig);
     }
 
 

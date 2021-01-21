@@ -1,95 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
+
+        <variable
+            name="msg"
+            type="xjunz.tool.wechat.impl.model.message.Message" />
+
 
         <variable
             name="vh"
             type="xjunz.tool.wechat.ui.message.MessageActivity.MessageViewHolder" />
 
-
-        <variable
-            name="model"
-            type="xjunz.tool.wechat.data.viewmodel.MessageViewModel" />
-
-        <variable
-            name="account"
-            type="xjunz.tool.wechat.impl.model.account.Account" />
-
-        <variable
-            name="message"
-            type="xjunz.tool.wechat.impl.model.message.Message" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:backgroundColor="@{msg.parseError?@color/colorParseErrorTint:@android:color/transparent}"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_avatar"
-            style="@style/SelectableCircleImageView"
             android:layout_width="@dimen/fab_small"
             android:layout_height="@dimen/fab_small"
-            android:layout_marginStart="@dimen/spacing_normal"
-            android:layout_marginTop="@{message.inGroupChat?@dimen/spacing_normal:@dimen/spacing_unit}"
-            android:avatar="@{account}"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="@drawable/bg_selectable_circle"
-            android:onClick="@{v->vh.gotoDetail(v)}"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:avatar="@{msg.senderAccount}"
+            android:onClick="@{()->vh.gotoDetail(ivAvatar)}"
+            android:transitionName="@string/tn_avatar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@tools:sample/avatars" />
 
-        <Space
-            android:id="@+id/space"
+        <TextView
+            android:id="@+id/tv_tag"
+            style="@style/TextAppearance.AppCompat.Caption.Tag"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_avatar"
+            android:layout_marginHorizontal="@dimen/spacing_unit"
+            android:editionColor="@{msg.editionFlag}"
+            android:text="@{msg.editionFlagCaption}"
+            android:visible="@{msg.edited}"
+            app:layout_constraintBottom_toBottomOf="@+id/fl_container"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/iv_avatar"
-            app:layout_constraintVertical_bias="0.35" />
-
-        <TextView
-            android:id="@+id/tv_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_unit"
-            android:layout_marginTop="@dimen/dp_4"
-            android:layout_marginBottom="@dimen/spacing_unit"
-            android:background="@drawable/bg_bubble_left"
-            android:clickable="true"
-            android:contextMenu="@{true}"
-            android:elevation="@dimen/z_bubble"
-            android:focusable="true"
-            android:gravity="start"
-            android:maxWidth="@dimen/max_bubble_width"
-            android:onClick="@{()->model.setSelectedMessagePosition(vh.adapterPosition)}"
-            android:paddingStart="@dimen/spacing_normal"
-            android:paddingTop="@dimen/spacing_unit"
-            android:paddingEnd="@dimen/spacing_normal"
-            android:paddingBottom="@dimen/spacing_unit"
-            android:text="@{message.spannedContent}"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/iv_avatar"
-            app:layout_constraintTop_toBottomOf="@+id/space"
+            app:layout_constraintStart_toEndOf="@+id/fl_container"
+            app:layout_constraintTop_toTopOf="@+id/fl_container"
             tools:text="@tools:sample/lorem" />
+
+        <LinearLayout
+            android:id="@+id/fl_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/spacing_unit"
+            android:layout_marginStart="@dimen/spacing_unit"
+            android:layout_marginEnd="@dimen/dp_64"
+            android:gravity="center|start"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/iv_avatar"
+            app:layout_constraintTop_toBottomOf="@+id/tv_name">
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/msg_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/z_bubble"
+                android:background="@drawable/bg_bubble_left"
+                android:backgroundTint="@{msg.parseError?@color/colorError:@android:color/transparent}"
+                android:backgroundTintMode="add"
+                android:clickable="true"
+                android:contextMenu="@{()->vh.setSelectedMsgIndex(vh.adapterPosition)}"
+                android:elevation="@dimen/z_bubble"
+                android:focusable="true"
+                android:paddingHorizontal="@dimen/spacing_normal"
+                android:paddingVertical="@dimen/spacing_unit">
+
+                <TextView
+                    android:id="@+id/tv_msg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{msg.spannedContent}"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:maxLines="10"
+                    tools:text="@tools:sample/lorem" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:layout_weight="1"
+                android:background="?android:attr/listDivider"
+                android:editionColor="@{msg.editionFlag}"
+                android:visible="@{msg.edited}" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tv_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="@{message.inGroupChat?account.name:null}"
-            app:layout_constraintBottom_toTopOf="@+id/space"
+            android:gone="@{!msg.inGroupChat}"
+            android:text="@{msg.senderAccount.name}"
+            android:textColor="?colorAccent"
             app:layout_constraintStart_toEndOf="@+id/iv_avatar"
-            tools:text="@tools:sample/lorem" />
+            app:layout_constraintTop_toTopOf="@+id/iv_avatar"
+            tools:text="@tools:sample/full_names" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>

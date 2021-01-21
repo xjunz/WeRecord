@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.data.databinding;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.text.Spannable;
@@ -27,12 +29,15 @@ import org.jetbrains.annotations.NotNull;
 import de.hdodenhof.circleimageview.CircleImageView;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.model.account.Account;
+import xjunz.tool.wechat.impl.model.message.util.Edition;
+import xjunz.tool.wechat.impl.repo.ContactRepository;
+import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 import xjunz.tool.wechat.ui.customview.ElasticDragDismissFrameLayout;
 import xjunz.tool.wechat.ui.customview.MasterToast;
 import xjunz.tool.wechat.ui.message.fragment.SearchFragment;
 import xjunz.tool.wechat.util.RxJavaUtils;
 import xjunz.tool.wechat.util.UiUtils;
-import xjunz.tool.wechat.util.UniUtils;
+import xjunz.tool.wechat.util.Utils;
 
 public class MessageActivityBindingAdapter {
     @BindingAdapter(value = {"android:editMode"})
@@ -61,11 +66,67 @@ public class MessageActivityBindingAdapter {
     }
 
     @BindingAdapter(value = "android:avatar")
-    public static void setAvatar(CircleImageView imageView, Account account) {
-        if (account == null) {
+    public static void setAvatar(CircleImageView imageView, Account oldAccount, Account newAccount) {
+        if (oldAccount != null && oldAccount.equals(newAccount)) {
+            return;
+        }
+        if (newAccount == null) {
             imageView.setImageResource(R.mipmap.avatar_default);
         } else {
-            RxJavaUtils.maybe(account::getAvatar).subscribe(new RxJavaUtils.MaybeObserverAdapter<Bitmap>() {
+            RxJavaUtils.maybe(newAccount::getAvatar).subscribe(new RxJavaUtils.MaybeObserverAdapter<Bitmap>() {
+                @Override
+                public void onComplete() {
+                    imageView.setImageResource(R.mipmap.avatar_default);
+                }
+
+                @Override
+                public void onSuccess(@NotNull Bitmap bitmap) {
+                    imageView.setImageBitmap(bitmap);
+                }
+            });
+        }
+    }
+
+    @BindingAdapter(value = "android:avatar")
+    public static void setAvatar(CircleImageView imageView, String oldId, String newId) {
+        if (oldId != null && oldId.equals(newId)) {
+            return;
+        }
+        if (newId == null) {
+            imageView.setImageResource(R.mipmap.avatar_default);
+        } else {
+            RxJavaUtils.maybe(() -> {
+                ContactRepository repository = RepositoryFactory.get(ContactRepository.class);
+                Account account = repository.get(newId);
+                if (account == null) {
+                    return null;
+                } else {
+                    return account.getAvatar();
+                }
+            }).subscribe(new RxJavaUtils.MaybeObserverAdapter<Bitmap>() {
+                @Override
+                public void onComplete() {
+                    imageView.setImageResource(R.mipmap.avatar_default);
+                }
+
+                @Override
+                public void onSuccess(@NotNull Bitmap bitmap) {
+                    imageView.setImageBitmap(bitmap);
+                }
+            });
+        }
+    }
+
+    @BindingAdapter(value = "android:avatarIfExists")
+    public static void setAvatarIfExists(CircleImageView imageView, Account oldAccount, Account newAccount) {
+        if (oldAccount != null && oldAccount.equals(newAccount)) {
+            return;
+        }
+        if (newAccount == null) {
+            imageView.setVisibility(View.GONE);
+        } else {
+            imageView.setVisibility(View.VISIBLE);
+            RxJavaUtils.maybe(newAccount::getAvatar).subscribe(new RxJavaUtils.MaybeObserverAdapter<Bitmap>() {
                 @Override
                 public void onComplete() {
                     imageView.setImageResource(R.mipmap.avatar_default);
@@ -87,35 +148,33 @@ public class MessageActivityBindingAdapter {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    @BindingAdapter(value = {"android:contextMenu", "android:onClick"})
-    public static void setContextMenu(@NotNull View view, boolean clickToShow, View.OnClickListener onClickListener) {
-        Activity activity = UniUtils.getHostActivity(view.getContext());
+    @BindingAdapter(value = {"android:contextMenu"})
+    public static void setContextMenu(@NotNull View view, Runnable onClick) {
+        Activity activity = Utils.getHostActivity(view.getContext());
         activity.registerForContextMenu(view);
-        if (clickToShow) {
-            float[] touchPos = new float[2];
-            view.setOnTouchListener((v, event) -> {
-                view.onTouchEvent(event);
-                touchPos[0] = event.getX();
-                touchPos[1] = event.getY();
-                return false;
-            });
-            view.setOnClickListener(v -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    v.showContextMenu(touchPos[0], touchPos[1]);
-                } else {
-                    v.showContextMenu();
-                }
-                if (onClickListener != null) {
-                    onClickListener.onClick(v);
-                }
-            });
-            view.setOnLongClickListener(v -> {
-                if (onClickListener != null) {
-                    onClickListener.onClick(v);
-                }
-                return false;
-            });
-        }
+        float[] touchPos = new float[2];
+        view.setOnTouchListener((v, event) -> {
+            view.onTouchEvent(event);
+            touchPos[0] = event.getX();
+            touchPos[1] = event.getY();
+            return false;
+        });
+        view.setOnClickListener(v -> {
+            if (onClick != null) {
+                onClick.run();
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                v.showContextMenu(touchPos[0], touchPos[1]);
+            } else {
+                v.showContextMenu();
+            }
+        });
+        view.setOnLongClickListener(v -> {
+            if (onClick != null) {
+                onClick.run();
+            }
+            return false;
+        });
     }
 
     @BindingAdapter(value = "android:onDismiss")
@@ -144,6 +203,22 @@ public class MessageActivityBindingAdapter {
         } else {
             //清除样式
             textView.setText(item.message.getParsedContent());
+        }
+    }
+
+    @BindingAdapter(value = "android:editionColor")
+    public static void setEditionColor(@NotNull View view, int edition) {
+        Context context = view.getContext();
+        switch (edition) {
+            case Edition.FLAG_REMOVAL:
+                view.setBackgroundTintList(ColorStateList.valueOf(context.getColor(R.color.colorDel)));
+                break;
+            case Edition.FLAG_INSERTION:
+                view.setBackgroundTintList(ColorStateList.valueOf(context.getColor(R.color.colorIns)));
+                break;
+            case Edition.FLAG_REPLACEMENT:
+                view.setBackgroundTintList(ColorStateList.valueOf(context.getColor(R.color.colorRep)));
+                break;
         }
     }
 

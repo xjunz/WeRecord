@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.ui.transition;
@@ -181,16 +181,16 @@ public class FabRevealTransform extends Transition {
             circularReveal = ViewAnimationUtils.createCircularReveal(view,
                     view.getWidth() / 2,
                     view.getHeight() / 2,
-                    startBounds.width() / 2,
-                    (float) Math.hypot(endBounds.width() / 2, endBounds.height() / 2));
+                    startBounds.width() / 2f,
+                    (float) Math.hypot(endBounds.width() / 2f, endBounds.height() / 2f));
             circularReveal.setInterpolator(
                     AnimUtils.getFastOutLinearInInterpolator());
         } else {
             circularReveal = ViewAnimationUtils.createCircularReveal(view,
                     view.getWidth() / 2,
                     view.getHeight() / 2,
-                    (float) Math.hypot(startBounds.width() / 2, startBounds.height() / 2),
-                    endBounds.width() / 2);
+                    (float) Math.hypot(startBounds.width() / 2f, startBounds.height() / 2f),
+                    endBounds.width() / 2f);
             circularReveal.setInterpolator(
                     AnimUtils.getLinearOutSlowInInterpolator());
 

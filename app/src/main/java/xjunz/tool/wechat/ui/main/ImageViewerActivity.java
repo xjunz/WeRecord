@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.ui.main;
@@ -16,21 +16,20 @@ import java.util.Objects;
 
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.model.account.Account;
-import xjunz.tool.wechat.ui.BaseActivity;
+import xjunz.tool.wechat.ui.base.RecycleSensitiveActivity;
 import xjunz.tool.wechat.util.UiUtils;
 
-public class ImageViewerActivity extends BaseActivity {
+public class ImageViewerActivity extends RecycleSensitiveActivity {
     public static final String EXTRA_ACCOUNT = "ImageViewerActivity.extra.account";
     ImageView mIvAvatar;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreateNormally(@Nullable Bundle savedInstanceState) {
         setContentView(R.layout.activity_image_viewer);
         mIvAvatar = findViewById(R.id.iv_avatar);
         setWithAndHeight();
         Intent intent = getIntent();
-        Account contact = (Account) Objects.requireNonNull(intent.getSerializableExtra(EXTRA_ACCOUNT), "Got null account");
+        Account contact = Objects.requireNonNull(intent.getParcelableExtra(EXTRA_ACCOUNT), "Got null account");
         Bitmap bitmap = contact.getAvatar();
         if (bitmap == null) {
             UiUtils.toast(R.string.no_local_avatar_found);

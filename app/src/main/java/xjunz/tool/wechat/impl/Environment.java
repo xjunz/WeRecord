@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.impl;
@@ -20,8 +20,7 @@ import androidx.lifecycle.LifecycleRegistry;
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteDatabaseHook;
 
-import org.apaches.commons.codec.DecoderException;
-import org.apaches.commons.codec.binary.Hex;
+import org.apaches.commons.codec.binary.Base64;
 import org.apaches.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -58,22 +57,26 @@ import io.reactivex.CompletableObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.App;
+import xjunz.tool.wechat.BuildConfig;
 import xjunz.tool.wechat.impl.model.account.User;
 import xjunz.tool.wechat.util.IOUtils;
 import xjunz.tool.wechat.util.ShellUtils;
-import xjunz.tool.wechat.util.UniUtils;
+import xjunz.tool.wechat.util.Utils;
 
 /**
  * An entity represents the fundamental functional environment of this application, which defines all kinds of constants,
  * initializes databases and creates {@link User} instances.
  * <p>
  * This entity is designed in single-instance mode. Please call {@link Environment#getInstance()} to obtain the instance.
- * </p>
+ * Don't expect the instance returned is non-null, because the system would recycle this instance anytime when this app is
+ * running in the background after home key is pressed.
+ * <p>
+ * In normal case, this instance's lifecycle is across the lifecycle of the application from {@link Environment#init(CompletableObserver)} is finished util
+ * the user manually exits the app.
  */
 public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleOwner {
     private final LifecycleRegistry mLifecycle;
     private static Environment sEnvironment;
-    private transient final String DEF_IMEI = "1234567890ABCDEF";
     private transient String mWechatDataPath;
     private transient String mWechatSharedPrefsPath;
     private transient String mWechatMicroMsgPath;
@@ -89,18 +92,18 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
     private List<String> mUinList;
     private SQLiteDatabase mDatabaseOfCurUser;
     private User mCurrentUser;
-
+    private DatabaseModifier mModifier;
 
     public SQLiteDatabase getDatabaseOfCurrentUser() {
         if (!initialized()) {
-            throw new IllegalStateException("Environment is not initialized successfully!");
+            throw new IllegalStateException("Environment is not initialized successfully! Current state is " + getLifecycle().getCurrentState().toString());
         }
         return mDatabaseOfCurUser;
     }
 
     public User getCurrentUser() {
         if (!initialized()) {
-            throw new IllegalStateException("Environment is not initialized successfully!");
+            throw new IllegalStateException("Environment is not initialized successfully! Current state is " + getLifecycle().getCurrentState().toString());
         }
         return mCurrentUser;
     }
@@ -152,7 +155,8 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
             mImei = readImei();
             initUins();
             initUsers();
-            backupDatabaseOf(mCurrentUser);
+            //backupOriginDatabaseOf(mCurrentUser);
+            copyWorkerDatabaseOf(mCurrentUser);
             tryOpenDatabaseOf(mCurrentUser, mImei);
             fulfillUsers();
             mLifecycle.setCurrentState(Lifecycle.State.STARTED);
@@ -205,26 +209,38 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
         mLifecycle.setCurrentState(Lifecycle.State.CREATED);
     }
 
-    public static Environment getInstance() {
-        return sEnvironment = (sEnvironment == null ? new Environment() : sEnvironment);
+    public static Environment createInstance() {
+        sEnvironment = new Environment();
+        return sEnvironment;
     }
 
+    public static Environment getInstance() {
+        return sEnvironment;
+    }
 
-    private void backupDatabaseOf(@NotNull User user) throws IOException, ShellUtils.ShellException {
-        user.backupDatabaseFilePath = mDatabaseBackupDirPath + File.separator + DigestUtils.md5Hex(user.uin);
-        ShellUtils.cp2data(user.originalDatabaseFilePath, user.backupDatabaseFilePath, true, "backupDatabaseOf");
+    private void copyWorkerDatabaseOf(@NotNull User user) throws IOException, ShellUtils.ShellException {
+        user.workerDatabaseFilePath = mDatabaseBackupDirPath + File.separator + DigestUtils.md5Hex(user.uin);
+        ShellUtils.cp2data(user.originalDatabaseFilePath, user.workerDatabaseFilePath, true, "copyWorkerDatabaseOf");
+    }
+
+    /**
+     * 备份原数据库
+     */
+    public void backupOriginDatabaseOf(@NotNull User user) throws IOException, ShellUtils.ShellException {
+        user.backupDatabasePath = mDatabaseBackupDirPath + File.separator + DigestUtils.md5Hex("backup");
+        ShellUtils.cp2data(user.originalDatabaseFilePath, user.backupDatabasePath, true, "backupDatabaseOf");
     }
 
 
     private void initUins() throws ShellUtils.ShellException {
         String out = ShellUtils.cat(mWechatSharedPrefsPath + separator + "app_brand_global_sp.xml", "initUins,1");
         // /data/user/0/com.tencent.mm/shared_prefs/app_brand_global_sp.xml
-        mUinList = UniUtils.extract(out, ">(\\d+)<");
+        mUinList = Utils.extract(out, ">(\\d+)<");
         if (mUinList.size() == 0) {
             throw new RuntimeException("No uin set found");
         }
         out = ShellUtils.cat(mWechatSharedPrefsPath + separator + "com.tencent.mm_preferences.xml", "initUins,2");
-        mCurrentUin = UniUtils.extractFirst(out, "last_login_uin\">(\\d+)<");
+        mCurrentUin = Utils.extractFirst(out, "last_login_uin\">(\\d+)<");
         //out = ShellUtils.cat(mWechatSharedPrefsPath + separator + "system_config_prefs.xml", "initUins,2");
         if (TextUtils.isEmpty(mCurrentUin)) {
             throw new RuntimeException("No last login uin found");
@@ -259,7 +275,8 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
         }
 
         if (mImei == null) {
-            mImei = DEF_IMEI;
+            //def imei
+            mImei = "1234567890ABCDEF";
         }
     }
 
@@ -281,13 +298,18 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
 
     private void tryOpenDatabaseOf(@NonNull User user, @NonNull String imei) {
         String possibleKey = DigestUtils.md5Hex(imei + user.uin).substring(0, 7).toLowerCase();
-        mDatabaseOfCurUser = SQLiteDatabase.openDatabase(user.backupDatabaseFilePath, possibleKey, null, SQLiteDatabase.OPEN_READWRITE, this);
-        user.databasePragmaKey = possibleKey;
-        //UniUtils.copyPlainText("key",possibleKey);
+        mDatabaseOfCurUser = SQLiteDatabase.openDatabase(user.workerDatabaseFilePath, possibleKey, null, SQLiteDatabase.OPEN_READWRITE, this);
+        user.databasePassword = possibleKey;
+        //Utils.copyPlainText("key",possibleKey);
     }
 
     public DatabaseModifier modifyDatabase() {
-        return DatabaseModifier.getInstance(this);
+        synchronized (DatabaseModifier.class) {
+            if (mModifier == null) {
+                mModifier = new DatabaseModifier(this);
+            }
+            return mModifier;
+        }
     }
 
     public String serialize() {
@@ -298,7 +320,7 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
             outputStream.setLevel(9);
             outputStream.putNextEntry(new ZipEntry(""));
             IOUtils.transferStream(in, outputStream);
-            return Hex.encodeHexString(out.toByteArray());
+            return Base64.encodeBase64String(out.toByteArray());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -308,12 +330,12 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
     @Nullable
     public static String deserialize(String serial) {
         try {
-            ZipInputStream in = new ZipInputStream(new ByteArrayInputStream(Hex.decodeHex(serial)));
+            ZipInputStream in = new ZipInputStream(new ByteArrayInputStream(Base64.decodeBase64(serial)));
             in.getNextEntry();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             IOUtils.transferStream(in, out);
             return out.toString();
-        } catch (IOException | DecoderException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -324,7 +346,7 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
             mDatabaseOfCurUser.close();
         }
         if (mCurrentUser != null) {
-            mCurrentUser.deleteBackupDatabase();
+            mCurrentUser.deleteWorkerDatabase();
         }
         mLifecycle.setCurrentState(LifecycleRegistry.State.DESTROYED);
         sEnvironment = null;
@@ -343,8 +365,8 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
     @NonNull
     @Contract(pure = true)
     private static String getVersionInfo() {
-        return "<b>version_name</b>: " + App.VERSION_NAME + "<br/>" +
-                "<b>version_code</b>: " + App.VERSION_CODE + "<br/>" + "<b>pid:</>" + Process.myPid()
+        return "<b>version_name</b>: " + BuildConfig.VERSION_NAME + "<br/>" +
+                "<b>version_code</b>: " + BuildConfig.VERSION_CODE + "<br/>" + "<b>pid:</>" + Process.myPid()
                 + "<br/>" + "<b>uid:</b>" + Process.myUid();
     }
 
@@ -376,7 +398,7 @@ public class Environment implements SQLiteDatabaseHook, Serializable, LifecycleO
     }
 
     @Override
-    public void postKey(SQLiteDatabase database) {
+    public void postKey(@NotNull SQLiteDatabase database) {
         database.rawExecSQL("PRAGMA cipher_migrate;");
     }
 }

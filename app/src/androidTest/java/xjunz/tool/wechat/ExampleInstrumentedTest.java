@@ -1,19 +1,20 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 package xjunz.tool.wechat;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.jaredrummler.android.shell.CommandResult;
-import com.jaredrummler.android.shell.Shell;
+import net.sqlcipher.Cursor;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import xjunz.tool.wechat.impl.Environment;
+import xjunz.tool.wechat.util.LogUtils;
 
 import static org.junit.Assert.assertEquals;
 
@@ -35,10 +36,10 @@ public class ExampleInstrumentedTest {
 
     @Test
     public void fileTest() {
-        CommandResult result = Shell.SU.run("cp " + "/sdcard/cx.txt " + "/data/data/xjunz.tool.wechat/cy.txt");
-        if (!result.isSuccessful()) {
-            Log.i("xjunz", result.getStderr());
-        }
+        Environment environment = Environment.getInstance();
+        Cursor cursor = environment.getDatabaseOfCurrentUser().rawQuery("select sql from sqlite_master where name='message'", null);
+        LogUtils.debug(cursor.getString(0));
+        cursor.close();
     }
 
 }

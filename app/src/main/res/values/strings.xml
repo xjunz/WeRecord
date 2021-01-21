@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <resources>
@@ -52,6 +52,7 @@
     <string name="debug">debug</string>
     <!--action-->
     <string name="search">搜索</string>
+    <string name="caveat">警告</string>
     <string name="alert">提示</string>
     <string name="share">分享</string>
     <string name="go_on">继续</string>
@@ -110,8 +111,9 @@
     <string name="type_service">服务号</string>
     <string name="format_search_result">共%s条搜索结果</string>
     <string name="format_count_stats"><![CDATA[共<b>%d</b>条记录 已筛选出<b>%d</b>条]]></string>
-    <string name="bracketed_all"><![CDATA[<全部>]]></string>
-    <string name="bracketed_none"><![CDATA[<无>]]></string>
+    <string name="bracketed_all"><i>&lt;全部&gt;</i></string>
+    <string name="bracketed_none"><i>&lt;无&gt;</i></string>
+    <string name="bracketed_empty"><i>&lt;空&gt;</i></string>
     <string name="last_week">上周</string>
     <string name="last_month">上个月</string>
     <string name="last_year">去年</string>
@@ -124,32 +126,41 @@
     <string name="remark">备注</string>
     <string name="last_msg_time">最后聊天时间</string>
     <string name="msg_count">消息数量</string>
-    <string name="wx_id">微信ID</string>
+    <string name="wxid">微信ID</string>
     <string name="wx_name">微信号</string>
     <string name="check_msg">查看消息</string>
     <string name="export_msg">导出消息</string>
     <string name="msg_no_more_show_this">以后不再显示此对话框</string>
     <!--message-->
-    <string name="file">文件</string>
-    <string name="call">通话</string>
-    <string name="hongbao">红包</string>
-    <string name="wcx">小程序的分享</string>
-    <string name="link">链接</string>
-    <string name="picture">图片</string>
-    <string name="transfer">转账</string>
-    <string name="music">音乐</string>
-    <string name="location">位置</string>
-    <string name="video">视频</string>
-    <string name="from_to">从%1s\n至%2s</string>
-    <string name="plain_text">文字</string>
-    <string name="voice">语音</string>
-    <string name="system_msg">系统消息</string>
-    <string name="others">其他类型的消息</string>
-    <string name="emoji">表情图</string>
-    <string name="shared_url">链接</string>
-    <string name="repost">转发的消息</string>
-    <string name="push">推送消息</string>
-    <string name="recommend_friend">推荐好友</string>
+    <string name="msg_type_file">文件</string>
+    <string name="msg_type_call">通话</string>
+    <string name="msg_type_voice_call">语音通话</string>
+    <string name="msg_type_video_call">视频通话</string>
+    <string name="msg_type_hb">红包</string>
+    <string name="msg_type_wcx">小程序的分享</string>
+    <string name="msg_type_link">链接</string>
+    <string name="msg_type_picture">图片</string>
+    <string name="msg_type_transfer">转账</string>
+    <string name="msg_type_music">音乐</string>
+    <string name="msg_type_location">位置</string>
+    <string name="msg_type_video">视频</string>
+    <string name="msg_type_share">分享</string>
+    <string name="msg_type_plain_text">文字</string>
+    <string name="msg_type_voice">语音</string>
+    <string name="msg_type_system">系统消息</string>
+    <string name="msg_type_unknown">未知消息类型</string>
+    <string name="msg_type_emoji">表情图</string>
+    <string name="msg_type_shared_url">链接</string>
+    <string name="msg_type_repost">转发的消息</string>
+    <string name="msg_type_push">推送消息</string>
+    <string name="msg_type_card">名片</string>
+    <string name="msg_type_reply">回复</string>
+    <string name="msg_type_gif">GIF图片</string>
+    <string name="msg_type_notification">通知</string>
+    <string name="msg_type_position_share">位置共享</string>
+    <string name="msg_type_solitaire">接龙</string>
+
+    <string name="format_from_to">从%1s\n至%2s</string>
     <string name="hint_search_message">搜索聊天记录</string>
     <string name="check_only">仅查看</string>
     <string name="edit_mode_entered">已进入编辑模式</string>
@@ -163,11 +174,7 @@
     <string name="has_copied_to_clipboard">已复制到剪贴板</string>
     <string name="tn_message_list">tn_message_list</string>
     <string name="restore">还原</string>
-    <string name="reply">回复</string>
-    <string name="gif">GIF图片</string>
-    <string name="notification">通知</string>
-    <string name="position_share">位置共享</string>
-    <string name="unsupport_to_preview">&lt;暂不支持预览&gt;</string>
+    <string name="unpreviewable">暂不支持预览</string>
     <string name="parse_failed">&lt;内容解析失败&gt;</string>
     <string name="edited_messages">已编辑的消息</string>
     <!--editor-->
@@ -176,6 +183,7 @@
     <string name="msg_content">消息内容</string>
     <string name="send_time">发送时间</string>
     <string name="change">更改</string>
+    <string name="template">模板</string>
     <string name="use_template">使用模板</string>
     <string name="preview">预览</string>
     <string name="bracketed_modified">（已修改）</string>
@@ -185,6 +193,7 @@
     <string name="group_owner">群主</string>
     <string name="choose_sender">选择发送者</string>
     <string name="format_sender_chosen">已选择 %s</string>
+    <string name="pls_choose">请选择</string>
     <string name="use_default">使用默认</string>
     <string name="exceeded_stop_limit">超过允许时间范围上限</string>
     <string name="exceeded_start_limit">超过允许时间范围下限</string>
@@ -192,16 +201,103 @@
     <string name="format_send_time_limit"><![CDATA[起始: <i>%s</i><br>结束: <i>%s</i>]]></string>
     <string name="status_send_failed">发送失败</string>
     <string name="status_send_suc">发送成功</string>
-
     <string name="check_origin">查看原消息</string>
-    <string name="edition_type_rep">更改</string>
-    <string name="edition_type_removal">移除</string>
+    <string name="edition_type_rep">已编辑</string>
+    <string name="edition_type_removal">已删除</string>
     <string name="edition_type_insertion">新增</string>
     <string name="functions">功能</string>
     <string name="apply_changes">应用更改</string>
     <string name="press_again_to_quit">再次点击以退出</string>
     <string name="edit_send_timestamp">编辑发送时间</string>
     <string name="allowed_timestamp_range">允许设置的时间范围</string>
-    <string name="help_send_timestamp">时间戳精确到毫秒，一秒包含1000毫秒。设置不正常的时间戳（太远的过去或未来）可能导致错误，请谨慎设置。</string>
+    <string name="help_send_timestamp">时间戳精确到毫秒，一秒包含1000毫秒。为了防止错误，默认不允许设置未来的时间。</string>
     <string name="help_edition">“<b>已应用的更改</b>”是指已经同步到微信的消息更改；“<b>未应用的更改</b>”是指您仅在本应用内对消息做的更改，尚未同步到微信。</string>
+    <string name="operation">操作</string>
+    <string name="no_change_was_made">内容无更改</string>
+    <string name="message_not_found">找不到该消息~</string>
+    <string name="alert_quit_discard_changes">仍有未应用的更改，确定要退出吗？退出后这些更改会被舍弃。</string>
+    <string name="quit">退出</string>
+    <string name="relaunching_from_recycled">应用意外终止，正在重新启动…</string>
+    <string name="title">标题</string>
+    <string name="description">描述</string>
+    <string name="pls_input">在此输入内容</string>
+    <string name="format_editor_title">编辑%s</string>
+    <string name="italic_null"><i>null</i></string>
+    <string name="nul">null</string>
+    <string name="source">来源</string>
+    <string name="load_all_contacts">加载全部联系人</string>
+    <string name="check_out_zombies">查找单向好友</string>
+    <string name="find_contact_by_wxid">根据微信ID添加联系人</string>
+    <string name="set_as_template">设为消息模板</string>
+    <string name="universal">通用</string>
+    <string name="message_type_app_message">App消息</string>
+    <string name="simple_edit">快速编辑</string>
+    <string name="advanced_edit">高级编辑</string>
+    <string name="app_msg_not_support_edit">APP消息不支持编辑内容</string>
+    <string name="modify_send_status_not_supported">此消息不支持修改发送状态</string>
+    <string name="warning_advanced_editor">高级编辑功能可以让您直接修改消息在数据库中的内容。但是请<b>注意</b>：
+        \n(1)简易编辑和高级编辑是互相独立的，这意味者，您在简易编辑页面内对消息的编辑不会影响到高级编辑页面内的消息，反之亦然。
+        \n(2)某些修改可能导致消息解析失败从而导致未知的后果，请谨慎修改。
+        \n(3)若干已知会导致问题的字段默认不允许修改。
+    </string>
+    <string name="error_number_format">超过临界值或格式错误</string>
+    <string name="error_format">格式错误</string>
+    <string name="edit_lvbuffer">编辑LvBuffer</string>
+    <string name="error_over_length">超过长度限制</string>
+    <string name="format_error_parse_message">消息解析失败(%d)，请先还原消息</string>
+    <string name="warning_parse_failed_message">当前修改中包含无法解析的消息，是否继续？</string>
+    <string name="alert_apply_changes">您确定要应用所有更改吗？这是一项危险操作，可能导致您的微信数据库损坏</string>
+    <string name="alert_restart_after_changes_applied">所有更改已应用，是否启动微信查看更改？</string>
+    <string name="applying_changes">正在应用更改…</string>
+    <string name="note_imperfect_preview">*注:此预览内容不代表微信内实际显示内容</string>
+    <string name="caption_template_rules">通过在模板中插入替换组可实现<b>自定义替换内容</b>。替换组的格式为<b>${</b><i><b>名称</b></i><b>}</b>。如某模板中包含替换组“${消息内容}”,
+    那么当您使用此模板添加消息时，应用会自动检测到名为“消息内容”的替换组，此时您可以自定义该“消息内容”。当您点击确定时，整个替换组会被替换成您自定义的内容。</string>
+    <string name="current_reps">当前替换组</string>
+    <string name="rep_group">替换组</string>
+    <string name="format_hint_editor">在此输入%s</string>
+    <string name="template_name">模板名称</string>
+    <string name="format_require_nonnull">%s不能为空</string>
+    <string name="format_require_unique">“%s”已存在</string>
+    <string name="build_in">预设</string>
+    <string name="custom">自定义</string>
+    <string name="hidden_msg">此消息已隐藏</string>
+    <string name="format_template_added">已添加模板“%s”</string>
+    <string name="format_template_edited">已修改模板“%s”</string>
+    <string name="use_no_template">不使用模板</string>
+    <string name="note_from_template">*来自模板</string>
+    <string name="error_type_inconsistent">所有使用相同名称的替换组必须使用相同的类型。</string>
+    <string name="check_stats">查看统计信息</string>
+    <string name="format_msg_count">%d条</string>
+    <string name="none">无</string>
+    <string name="detail">详情</string>
+    <string name="overview">概览</string>
+    <string name="format_stats_overview">合计%d条消息 (不包含系统消息)。</string>
+    <string name="format_group_stats_overview">合计%d条消息 (不包含系统消息)。群聊当前共%d名成员，共%d人曾有发言记录。</string>
+    <string name="time_span">时间跨度</string>
+    <string name="format_others">其他%d人</string>
+    <string name="error_time_traveller">不允许设置未来的时间</string>
+    <string name="profile">概况</string>
+    <string name="msg_count_distribution">消息数量分布</string>
+    <string name="msg_type_distribution">消息类型分布</string>
+    <string name="add_to_contacts">添加</string>
+    <string name="caption_wxid">微信ID一般是一串以<b><i>wxid_</i></b>开头的字符，它是一个微信账号的唯一标识，即每个微信账号都有其独一无二的微信ID。
+        在某些情况下，您可能需要通过微信ID查找、添加用户。此功能可以查找指定微信ID的用户。</string>
+    <string name="note_check_contacts">注：请在<b>通讯录->新的朋友</b>中查看、添加您查找的用户。</string>
+    <string name="format_pls_input">请输入%s</string>
+    <string name="more">更多</string>
+    <string name="mark_as_unread">标记未读</string>
+    <string name="delete_contact_locally">本地删除联系人</string>
+    <string name="add_to_local_friends">添加为本地好友</string>
+    <string name="export">导出</string>
+    <string name="caption_zombie_friend">单向好友俗称"僵尸"好友，是指对方已将您从联系人列表中删除，而仍然在您的联系人列表中存在的好友。
+        此功能可以无打扰式地查找可能存在的单向好友。\n注：<b>结果仅供参考</b>。点击打开查看，可请在<b>通讯录->标签->可能的单向好友</b>中查看、删除单向好友。</string>
+    <string name="delete_all">全部删除</string>
+    <string name="format_colon">%s: </string>
+    <string name="possible_zombies">可能的单向好友</string>
+    <string name="start_search_for">开始查找</string>
+    <string name="nothing_was_found">什么都没找到~</string>
+    <string name="label_name_local_contacts">本地好友</string>
+    <string name="send_friend_request">发送朋友验证</string>
+    <string name="open_to_check">打开查看</string>
+    <string name="all_contacts_loaded">已经加载所有联系人</string>
 </resources>

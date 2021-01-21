@@ -1,45 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/colorBackgroundLightGrey">
+    <data>
 
-    <ImageButton
-        android:id="@+id/ib_shutter"
-        android:scaleType="centerInside"
-        android:layout_width="@dimen/dp_20"
-        android:layout_height="@dimen/dp_20"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/spacing_normal"
-        android:layout_marginTop="@dimen/spacing_unit"
-        android:layout_marginBottom="@dimen/spacing_unit"
-        android:background="?selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_baseline_expand_more_24"
-        android:tint="?colorAccent" />
+        <variable
+            name="caption"
+            type="String" />
 
+        <variable
+            name="hideDivider"
+            type="boolean" />
 
-    <TextView
-        android:id="@+id/tv_separator"
-        android:layout_marginStart="@dimen/spacing_unit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toEndOf="@+id/ib_shutter"
-        android:letterSpacing="0.04"
-        android:textAllCaps="true"
-        android:textColor="?colorAccent"
-        tools:text="@string/app_name" />
+        <variable
+            name="note"
+            type="String" />
+    </data>
 
-    <View
-        android:id="@+id/divider_bottom"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:alpha="0.5"
-        android:layout_below="@+id/ib_shutter"
-        android:background="?android:listDivider" />
-</RelativeLayout>
+        android:layout_height="wrap_content"
+        android:background="?android:colorBackground">
+
+        <ImageButton
+            android:id="@+id/ib_shutter"
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_unit"
+            android:layout_marginBottom="@dimen/spacing_unit"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cd_shutter"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_baseline_expand_more_24"
+            android:tint="?colorAccent" />
+
+
+        <TextView
+            android:id="@+id/tv_separator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/spacing_unit"
+            android:layout_toEndOf="@+id/ib_shutter"
+            android:letterSpacing="0.04"
+            android:text="@{caption}"
+            android:textAllCaps="true"
+            android:textColor="?colorAccent"
+            tools:text="@string/app_name" />
+
+        <View
+            android:id="@+id/divider_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_below="@+id/ib_shutter"
+            android:alpha="0.5"
+            android:background="?android:listDivider"
+            android:gone="@{hideDivider}" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginHorizontal="@dimen/dp_4"
+            android:layout_toEndOf="@+id/tv_separator"
+            android:text="@{note}"
+            tools:text="@tools:sample/lorem" />
+    </RelativeLayout>
+</layout>

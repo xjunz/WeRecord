@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -17,26 +17,70 @@
         android:layout="@layout/stub_no_result"
         android:src="@mipmap/art_no_result" />
 
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_toStartOf="@+id/rv_scroller"
+        android:clickable="false"
         android:clipToPadding="false"
         android:overScrollMode="never"
         android:paddingBottom="?android:attr/actionBarSize"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/item_contact" />
 
+    <xjunz.tool.wechat.ui.customview.HorizontalScrollViewInViewPager2
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@+id/rv_scroller"
+        android:overScrollMode="ifContentScrolls"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/spacing_unit">
+
+            <TextView
+                android:id="@+id/tv_load_all_contacts"
+                style="@style/TextAppearance.AppCompat.Small.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/load_all_contacts" />
+
+            <TextView
+                android:id="@+id/tv_check_out_zombies"
+                style="@style/TextAppearance.AppCompat.Small.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:text="@string/check_out_zombies" />
+
+            <TextView
+                android:id="@+id/tv_add_contact_by_id"
+                style="@style/TextAppearance.AppCompat.Small.Chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:text="@string/find_contact_by_wxid" />
+
+        </LinearLayout>
+    </xjunz.tool.wechat.ui.customview.HorizontalScrollViewInViewPager2>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_scroller"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/rv_list"
+        android:layout_alignBottom="@+id/rv_list"
         android:layout_alignParentEnd="true"
-        android:background="@drawable/bg_cornered_card"
+        android:background="?android:colorBackgroundFloating"
         android:clipToPadding="false"
         android:elevation="@dimen/z_card"
-        android:paddingBottom="?android:attr/actionBarSize"
+        android:paddingBottom="?android:actionBarSize"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:itemCount="38"
         tools:listitem="@layout/item_scroller" />

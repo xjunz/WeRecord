@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.util;
@@ -113,12 +113,15 @@ public class ShellUtils {
         return sudo(msgWhenFail, "cat", path).getStdout();
     }
 
+    public static void forceStop(String packageName, String msgWhenFail) throws ShellException {
+        sudo(msgWhenFail, "am", "force-stop", packageName);
+    }
+
     /**
-     * 重启微信
+     * 使用am指令集启动Activity
      */
-    public static void restartWechat() throws ShellException {
-        sudo("restartWechat,1", "am", "kill", "com.tencent.mm");
-        sudo("restartWechat,2", "am", "start", "com.tencent.mm/.ui.LauncherUI");
+    public static void startActivity(String activityName, String msgWhenFail) throws ShellException {
+        sudo(msgWhenFail, "am", "start", activityName);
     }
 
     /**
@@ -142,7 +145,7 @@ public class ShellUtils {
         CommandResult result = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
                 Shell.run("su -mm", command.toString()) : Shell.SU.run(command.toString());
         if (!result.isSuccessful()) {
-            throw new ShellException((msgWhenFail == null ? "" : "error " + msgWhenFail + ":\n") + result.getStderr());
+            throw new ShellException((msgWhenFail == null ? "" : "Error " + msgWhenFail + ":\n") + result.getStderr());
         }
         return result;
     }

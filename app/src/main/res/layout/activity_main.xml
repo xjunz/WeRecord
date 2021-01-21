@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:onPanelClose="@{()->!model.currentConfig.filterConfirmed?model.notifyCancelFilter():null}"
-        android:onPanelOpen="@{()->model.currentConfig.filterConfirmed?model.notifyPrepareFilter():null}">
+        android:onPanelOpen="@{()->model.notifyPrepareFilter()}">
 
 
         <RelativeLayout
@@ -38,7 +38,7 @@
                 android:id="@+id/vp_main"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/colorBackgroundMask"
+                android:background="?android:colorBackground"
                 android:currentItem="@={activity.mCurrentPageIndex}"
                 android:userInputEnabled="@{!model.currentConfig.isInSearchMode}" />
 
@@ -120,7 +120,7 @@
                     android:imeOptions="actionSearch"
                     android:importantForAutofill="no"
                     android:inputType="text"
-                    android:labelFor="@+id/tv_title"
+                    android:labelFor="@+id/tv_msg"
                     android:text="@={model.currentConfig.searchKeyword}"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -134,9 +134,9 @@
                     android:layout_height="@dimen/fab_small"
                     android:layout_marginEnd="@dimen/spacing_unit"
                     android:background="?android:selectableItemBackgroundBorderless"
+                    android:onClick="gotoDebugActivity"
                     android:tint="?colorButtonNormal"
                     android:visible="@{BuildConfig.DEBUG}"
-                    android:onClick="gotoDebugActivity"
                     app:layout_constraintBottom_toBottomOf="@+id/ib_search"
                     app:layout_constraintEnd_toStartOf="@+id/ib_search"
                     app:layout_constraintTop_toTopOf="@+id/ib_search"

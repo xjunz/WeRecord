@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -7,6 +7,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="contact"
             type="xjunz.tool.wechat.impl.model.account.Contact" />
@@ -15,9 +16,13 @@
             name="talker"
             type="xjunz.tool.wechat.impl.model.account.Talker" />
 
+        <variable
+            name="id"
+            type="String" />
+
         <import type="android.text.TextUtils" />
 
-        <import type="xjunz.tool.wechat.util.UniUtils" />
+        <import type="xjunz.tool.wechat.util.Utils" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -40,8 +45,8 @@
             android:layout_width="@dimen/fab_normal"
             android:layout_height="@dimen/fab_normal"
             android:layout_marginTop="@dimen/dp_2"
-            android:avatar="@{contact.avatar}"
             android:onClick="viewImage"
+            android:src="@{contact.avatar}"
             android:transitionName="@string/tn_avatar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/tv_name"
@@ -72,7 +77,7 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginTop="8dp"
-            android:text="@{UniUtils.fallback(contact.type.caption,@string/type_unknown)}"
+            android:text="@{Utils.fallback(contact.type.caption,@string/type_unknown)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/tv_name"
@@ -86,10 +91,10 @@
             android:layout_marginStart="16dp"
             android:copyable="@{true}"
             android:ellipsize="end"
-            android:text="@{contact.name}"
+            android:text="@{contact.name??id}"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:transitionName="@string/tn_name"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ib_more"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/iv_avatar"
             app:layout_constraintTop_toTopOf="parent"
@@ -100,7 +105,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/wx_id"
+            android:text="@string/wxid"
             app:layout_constraintEnd_toStartOf="@+id/space_center"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/divider" />
@@ -121,24 +126,25 @@
             android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:copyable="@{true}"
-            android:text="@{contact.id}"
+            android:text="@{id}"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             app:layout_constraintEnd_toEndOf="@+id/tv_caption_wx_id"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_caption_wx_id"
-            tools:text="WXID_SDUSDHU" />
+            tools:text="WXID_ALPHA" />
 
         <TextView
             android:id="@+id/tv_wx_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:copyable="@{true}"
-            android:text="@{UniUtils.fallback(contact.alias,@string/bracketed_none)}"
+            android:emptyFallback="@{true}"
+            android:text="@{contact.alias}"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/tv_caption_wx_id"
             app:layout_constraintTop_toTopOf="@id/tv_wx_id"
-            tools:text="M_E_Z_X_J" />
+            tools:text="ALPHA" />
 
         <TextView
             android:id="@+id/tv_caption_nickname"
@@ -166,24 +172,26 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:copyable="@{true}"
-            android:text="@{UniUtils.fallback(contact.nickname,@string/bracketed_none)}"
+            android:emptyFallback="@{true}"
+            android:text="@{contact.nickname}"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             app:layout_constraintEnd_toEndOf="@+id/tv_wx_id"
             app:layout_constraintStart_toStartOf="@+id/tv_caption_nickname"
             app:layout_constraintTop_toBottomOf="@+id/tv_caption_nickname"
-            tools:text="IM-XJUNZ" />
+            tools:text="IM-ALPHA" />
 
         <TextView
             android:id="@+id/tv_remark"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:copyable="@{true}"
-            android:text="@{UniUtils.fallback(contact.remark,@string/bracketed_none)}"
+            android:emptyFallback="@{true}"
+            android:text="@{contact.remark}"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/tv_caption_wx_id"
             app:layout_constraintTop_toTopOf="@+id/tv_nickname"
-            tools:text="XJUNZ" />
+            tools:text="BETA" />
 
         <TextView
             android:id="@+id/tv_caption_last_msg_time"
@@ -202,7 +210,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:copyable="@{true}"
-            android:text="@{UniUtils.formatDate(talker.lastMsgTimestamp)}"
+            android:text="@{Utils.formatDate(talker.lastMsgTimestamp)}"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             android:visible="@{talker!=null}"
             app:layout_constraintEnd_toEndOf="@+id/tv_wx_id"
@@ -272,6 +280,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_check_msg"
             app:layout_constraintTop_toTopOf="@+id/btn_check_msg" />
+
+        <ImageButton
+            android:id="@+id/ib_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackgroundBorderless"
+            android:onClick="showMore"
+            android:tooltip="@{@string/more}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_baseline_more_vert_24"
+            tools:ignore="ContentDescription" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

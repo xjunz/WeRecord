@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <resources>
-    <declare-styleable name="FabTransform">
+    <declare-styleable name="Transform">
         <attr name="startColor" format="color|reference" />
         <attr name="endColor" format="color|reference" />
         <attr name="endCornerRadius" format="dimension|reference" />
         <attr name="startCornerRadius" format="dimension|reference" />
-
+        <attr name="opticalButtonColor" format="color|reference" />
     </declare-styleable>
     <declare-styleable name="FabRevealTransform">
         <attr name="fabColor" format="color|reference" />
@@ -17,5 +17,19 @@
     <declare-styleable name="BottomBar">
         <attr name="imageEntries" format="reference" />
         <attr name="captionEntries" format="reference" />
+    </declare-styleable>
+    <declare-styleable name="ElasticDragDismissFrameLayout">
+        <attr name="dragDismissTarget" format="reference" />
+        <attr name="dragDismissDistance" format="dimension" />
+        <attr name="dragDismissFraction" format="float" />
+        <attr name="dragDismissScale" format="float" />
+        <attr name="dragElasticity" format="float" />
+    </declare-styleable>
+    <declare-styleable name="LineCounter">
+        <attr name="lineCounterTextColor" format="reference|color" />
+        <attr name="lineCounterTextSize" format="reference|dimension" />
+    </declare-styleable>
+    <declare-styleable name="ChartBarView">
+        <attr name="barColor" format="color|reference" />
     </declare-styleable>
 </resources>

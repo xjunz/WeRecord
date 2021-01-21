@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.ui.main;
@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableInt;
 import androidx.fragment.app.Fragment;
@@ -21,7 +22,7 @@ import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.data.viewmodel.PageConfig;
 import xjunz.tool.wechat.data.viewmodel.PageViewModel;
 import xjunz.tool.wechat.databinding.ActivityMainBinding;
-import xjunz.tool.wechat.ui.BaseActivity;
+import xjunz.tool.wechat.ui.base.RecycleSensitiveActivity;
 import xjunz.tool.wechat.ui.customview.MasterToast;
 import xjunz.tool.wechat.ui.main.fragment.ChatFragment;
 import xjunz.tool.wechat.ui.main.fragment.ContactFragment;
@@ -29,7 +30,7 @@ import xjunz.tool.wechat.ui.main.fragment.PageFragment;
 import xjunz.tool.wechat.ui.outer.DebugActivity;
 import xjunz.tool.wechat.util.UiUtils;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends RecycleSensitiveActivity {
     /**
      * 当前{@link androidx.viewpager2.widget.ViewPager2}的选中项，支持数据绑定<br/>
      * <b>注意：</b>默认值不能为空或为0，否则不会触发数据绑定初始化
@@ -48,25 +49,13 @@ public class MainActivity extends BaseActivity {
         }
 
         @Override
-        public void onResetFilter() {
-            MasterToast.shortToast(R.string.reset_completed);
-        }
-
-        @Override
         public void onCancelFilter() {
             mBinding.mainPanel.closePanel();
         }
-
-        @Override
-        public void onPrepareFilter() {
-
-        }
     };
 
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreateNormally(@Nullable Bundle savedInstanceState) {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         mBinding.setActivity(this);
         initPages();
@@ -76,7 +65,6 @@ public class MainActivity extends BaseActivity {
         UiUtils.initColors(this);
     }
 
-
     private void initPages() {
         ChatFragment chat = new ChatFragment();
         ContactFragment contact = new ContactFragment();
@@ -84,17 +72,19 @@ public class MainActivity extends BaseActivity {
         mBinding.vpMain.setAdapter(new MainFragmentAdapter(this));
     }
 
+    public void openPanel() {
+        mBinding.mainPanel.openPanel();
+    }
 
     public void autoSearchMode(View view) {
         //当数据变化后，数据绑定默认会在下一帧执行，导致requestFocus()时EditText实际上处于disabled的状态，
         //实际上并未获取到焦点，因此当EditText被设置为enabled时，就不会显示光标。可以调用此方法可以立即刷新数据绑定。
         mBinding.executePendingBindings();
         if (mFilterModel.getCurrentConfig().isInSearchMode.get()) {
-            mBinding.etSearch.requestFocus();
-            showIme(view);
+            showImeFor(mBinding.etSearch);
         } else {
             mBinding.etSearch.getText().clear();
-            hideIme(view);
+            hideIme(mBinding.etSearch);
         }
     }
 
@@ -104,7 +94,6 @@ public class MainActivity extends BaseActivity {
             MasterToast.shortToast("下滑顶部工具栏也可直接调出筛选页面哦！");
         }
     }
-
 
     public void onItemSelected(int position, CharSequence caption, boolean unchanged) {
         if (!unchanged) {

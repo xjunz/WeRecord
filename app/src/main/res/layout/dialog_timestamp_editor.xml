@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -8,16 +8,10 @@
 
         <import type="xjunz.tool.wechat.util.UiUtils" />
 
-        <import type="xjunz.tool.wechat.util.UniUtils" />
-
-        <import type="android.text.Html" />
+        <import type="xjunz.tool.wechat.util.Utils" />
 
         <variable
-            name="model"
-            type="xjunz.tool.wechat.data.viewmodel.EditorViewModel" />
-
-        <variable
-            name="dialog"
+            name="host"
             type="xjunz.tool.wechat.ui.message.fragment.dialog.TimestampEditorDialog" />
     </data>
 
@@ -27,7 +21,7 @@
 
 
         <TextView
-            android:id="@+id/tv_title"
+            android:id="@+id/tv_msg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/spacing_normal"
@@ -44,11 +38,11 @@
             android:layout_marginStart="@dimen/spacing_unit"
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/help"
-            android:tint="?android:textColorSecondary"
             android:help="@{@string/help_send_timestamp}"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_title"
-            app:layout_constraintStart_toEndOf="@+id/tv_title"
-            app:layout_constraintTop_toTopOf="@+id/tv_title"
+            android:tint="?android:textColorSecondary"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_msg"
+            app:layout_constraintStart_toEndOf="@+id/tv_msg"
+            app:layout_constraintTop_toTopOf="@+id/tv_msg"
             app:srcCompat="@drawable/ic_help_outline_black_20dp" />
 
         <EditText
@@ -56,17 +50,17 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_normal"
-            android:layout_marginEnd="16dp"
-            android:afterTextChanged="@{e->model.notifyTextChanged(e)}"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:afterTextChanged="@{e->host.notifyTextChanged(e)}"
             android:background="@drawable/bg_edit_box"
             android:digits="1234567890- :"
             android:importantForAutofill="no"
             android:inputType="datetime"
             android:padding="@dimen/spacing_unit"
-            android:text="@{UniUtils.formatDate(model.modifiedTimestamp)}"
+            android:text="@{Utils.formatDate(host.defaultValue)}"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/tv_title"
-            app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+            app:layout_constraintStart_toStartOf="@+id/tv_msg"
+            app:layout_constraintTop_toBottomOf="@+id/tv_msg" />
 
         <TextView
             android:id="@+id/tv_hint"
@@ -74,72 +68,35 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_unit"
             android:background="@drawable/bg_cornered_card"
-            android:backgroundTint="@{model.parsedTimestamp&lt;0?@color/colorError:@color/colorOk}"
+            android:backgroundTint="@{host.parsed&lt;0?@color/colorError:@color/colorOk}"
             android:padding="@dimen/dp_4"
-            android:text="@{model.hintText}"
+            android:text="@{host.hint}"
             android:textColor="?android:textColorPrimary"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="@+id/et_editor"
             app:layout_constraintStart_toStartOf="@+id/et_editor"
             app:layout_constraintTop_toBottomOf="@+id/et_editor" />
 
-        <ImageView
-            android:id="@+id/iv_info"
-            android:layout_width="@dimen/dp_20"
-            android:layout_height="@dimen/dp_20"
-            android:layout_marginStart="@dimen/spacing_normal"
-            android:layout_marginTop="@dimen/spacing_normal"
-            android:contentDescription="@string/alert"
-            android:src="@drawable/ic_baseline_info_24dp"
-            android:visible="@{!model.inEditMode}"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_hint"
-            app:tint="?colorAccent" />
-
-        <TextView
-            android:id="@+id/tv_caption_info"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/dp_4"
-            android:text="@string/allowed_timestamp_range"
-            android:textStyle="bold"
-            android:visible="@{!model.inEditMode}"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_info"
-            app:layout_constraintEnd_toEndOf="@+id/et_editor"
-            app:layout_constraintStart_toEndOf="@+id/iv_info"
-            app:layout_constraintTop_toTopOf="@+id/iv_info" />
-
-        <TextView
-            android:id="@+id/tv_info"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/dp_4"
-            android:text="@{Html.fromHtml(@string/format_send_time_limit(UniUtils.formatDate(model.sendTimestampStartLimit),UniUtils.formatDate(model.sendTimestampEndLimit)))}"
-            android:visible="@{!model.inEditMode}"
-            app:layout_constraintStart_toStartOf="@+id/tv_caption_info"
-            app:layout_constraintTop_toBottomOf="@id/tv_caption_info" />
-
         <Button
             android:id="@+id/btn_auto"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored.Small"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored.Normal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/spacing_unit"
-            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="@dimen/spacing_unit"
-            android:onClick="@{()->etEditor.setText(UniUtils.formatDate(model.defSendTimestamp))}"
-            android:onClick2="@{()->etEditor.setSelection(etEditor.text.length())}"
-            android:text="@{model.inEditMode?@string/reset:@string/use_default}"
+            android:onClick="@{()->UiUtils.setTextKeepSelection(etEditor,Utils.formatDate(host.defaultValue))}"
+            android:text="@{@string/reset}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_info" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_hint" />
 
         <Button
             android:id="@+id/btn_cancel"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored.Small"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored.Normal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{()->dialog.dismiss()}"
+            android:onClick="@{()->host.dismiss()}"
             android:text="@android:string/cancel"
             app:layout_constraintBottom_toBottomOf="@+id/btn_auto"
             app:layout_constraintEnd_toStartOf="@+id/btn_ok"
@@ -147,12 +104,11 @@
 
         <Button
             android:id="@+id/btn_ok"
-            style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+            style="@style/Widget.AppCompat.Button.Normal.Flat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/spacing_unit"
-            android:onClick="@{()->model.parsedTimestamp&lt;0?UiUtils.swing(tvHint):model.setModifiedTimestamp(model.parsedTimestamp)}"
-            android:onClick2="@{()->model.parsedTimestamp&lt;0?null:dialog.dismiss()}"
+            android:onClick="@{()->host.result==-1?UiUtils.swing(tvHint):host.confirm()}"
             android:text="@android:string/ok"
             app:layout_constraintBottom_toBottomOf="@+id/btn_auto"
             app:layout_constraintEnd_toEndOf="parent"

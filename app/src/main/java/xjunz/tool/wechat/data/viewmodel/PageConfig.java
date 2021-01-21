@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.data.viewmodel;
@@ -148,4 +148,10 @@ public class PageConfig {
         return mEventHandler;
     }
 
+    public int getFilterId() {
+        return Objects.hash(typeSelection.get(),
+                descriptionSelectionMap.toString(),
+                isAscending(),
+                getCurrentSortBy().caption);
+    }
 }

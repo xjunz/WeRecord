@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -29,7 +29,7 @@
 
         <Button
             android:id="@+id/button3"
-            style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+            style="@style/Widget.AppCompat.Button.Normal.Flat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="deleteBackupTable"
@@ -39,7 +39,7 @@
 
         <Button
             android:id="@+id/button4"
-            style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+            style="@style/Widget.AppCompat.Button.Normal.Flat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="showEnvInfo"
@@ -50,14 +50,54 @@
 
         <Button
             android:id="@+id/button5"
-            style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+            style="@style/Widget.AppCompat.Button.Normal.Flat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="exportDatabase"
-            android:text="导出数据库"
+            android:text="导出消息数据库"
             app:layout_constraintBottom_toBottomOf="@+id/button4"
             app:layout_constraintStart_toEndOf="@+id/button4"
             app:layout_constraintTop_toTopOf="@+id/button4" />
+
+        <Button
+            android:id="@+id/button6"
+            style="@style/Widget.AppCompat.Button.Normal.Flat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="simulateSysRecycle"
+            android:text="模拟系统回收"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/button3" />
+
+        <Button
+            android:id="@+id/button7"
+            style="@style/Widget.AppCompat.Button.Normal.Flat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="exportTemplateDb"
+            android:text="导出模板数据库"
+            app:layout_constraintStart_toEndOf="@+id/button6"
+            app:layout_constraintTop_toBottomOf="@+id/button3" />
+
+        <Button
+            android:id="@+id/button8"
+            style="@style/Widget.AppCompat.Button.Normal.Flat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:onClick="deleteTemplateDb"
+            android:text="删除模板数据库"
+            app:layout_constraintStart_toEndOf="@+id/button7"
+            app:layout_constraintTop_toBottomOf="@+id/button3" />
+
+        <Button
+            android:id="@+id/button9"
+            style="@style/Widget.AppCompat.Button.Normal.Flat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:onClick="restoreMsgDatabaseBackup"
+            android:text="还原消息数据库备份"
+            app:layout_constraintStart_toEndOf="@+id/button10"
+            app:layout_constraintTop_toBottomOf="@+id/button6" />
 
         <TextView
             android:id="@+id/tv_title_1"
@@ -67,7 +107,7 @@
             android:text="@string/input_environment_serial"
             android:textColor="?colorAccent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button3" />
+            app:layout_constraintTop_toBottomOf="@+id/button9" />
 
 
         <xjunz.tool.wechat.ui.customview.NestedEditText
@@ -86,7 +126,7 @@
             tools:ignore="Autofill,LabelFor" />
 
         <Button
-            style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+            style="@style/Widget.AppCompat.Button.Normal.Flat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="parseEnvInfo"
@@ -120,7 +160,14 @@
             app:layout_constraintTop_toBottomOf="@id/tv_title_2"
             tools:ignore="Autofill,LabelFor" />
 
-
+        <Button
+            android:id="@+id/button10"
+            android:onClick="backupMsgDatabase"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="备份消息数据库"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/button6" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

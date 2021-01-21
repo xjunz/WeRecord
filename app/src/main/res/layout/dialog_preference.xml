@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -36,7 +36,7 @@
 
     <Button
         android:id="@+id/button"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored.Small.Framed"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored.Framed"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@android:string/cancel"
@@ -46,7 +46,7 @@
 
     <Button
         android:id="@+id/button2"
-        style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+        style="@style/Widget.AppCompat.Button.Normal.Flat"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@android:string/ok"

@@ -1,16 +1,18 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.impl.model.account;
 
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Serializable;
+import java.util.Objects;
 
 import xjunz.tool.wechat.impl.repo.AvatarRepository;
 import xjunz.tool.wechat.impl.repo.RepositoryFactory;
@@ -19,7 +21,7 @@ import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 /**
  * 微信账号（个人用户、群聊、公众号）的抽象类
  */
-public class Account implements Serializable {
+public class Account implements Parcelable {
     /**
      * 微信的昵称
      */
@@ -131,6 +133,38 @@ public class Account implements Serializable {
     @Override
     public int hashCode() {
         return id.hashCode();
+    }
+
+    public Account() {
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NotNull Parcel dest, int flags) {
+        dest.writeString(this.nickname);
+        dest.writeString(this.alias);
+        dest.writeString(this.id);
+        dest.writeByte(this.mHasTryDecodeAvatar ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.mHasLocalAvatar ? (byte) 1 : (byte) 0);
+    }
+
+    protected Account(@NotNull Parcel in) {
+        this.nickname = in.readString();
+        this.alias = in.readString();
+        this.id = in.readString();
+        this.mHasTryDecodeAvatar = in.readByte() != 0;
+        this.mHasLocalAvatar = in.readByte() != 0;
+    }
+
+    public String getIdentifier() {
+        if (Objects.equals(getName(), id)) {
+            return id;
+        }
+        return getName() + "(" + id + ")";
     }
 
 }

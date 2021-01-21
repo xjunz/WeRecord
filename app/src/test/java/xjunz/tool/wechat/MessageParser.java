@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 package xjunz.tool.wechat;
 
@@ -18,7 +18,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import xjunz.tool.wechat.util.UniUtils;
+import xjunz.tool.wechat.util.Utils;
 
 
 public class MessageParser {
@@ -122,7 +122,7 @@ public class MessageParser {
             String text = new String(ch, start, length).trim();
             if (inTemplate) {
                 template = text;
-                patterns = UniUtils.extract(text, "\\$(.+k ?)\\$");
+                patterns = Utils.extract(text, "\\$(.+k ?)\\$");
                 matchedMap = new HashMap<>();
             } else if (inNickname) {
                 String matched = matchedMap.get(currentPattern);

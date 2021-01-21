@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="host"
+            type="xjunz.tool.wechat.ui.main.fragment.dialog.CheckZombiesDialog" />
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="@dimen/spacing_large"
+            android:background="@drawable/bg_material_dialog"
+            android:elevation="@dimen/z_dialog"
+            android:paddingTop="@dimen/r_fab_normal">
+
+
+            <ProgressBar
+                android:id="@+id/pb_load"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="@dimen/width_progress"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_marginVertical="@dimen/spacing_large"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:indeterminate="true"
+                android:visibility="invisible" />
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="8dp"
+                android:text="@string/check_out_zombies"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+            <TextView
+                android:id="@+id/tv_caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_title"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="@dimen/spacing_unit"
+                android:layout_marginEnd="16dp"
+                android:text="@string/caption_zombie_friend"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_zombies"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_caption"
+                android:layout_marginTop="8dp"
+                android:invisible="@{!host.foundZombies}"
+                android:overScrollMode="never"
+                android:paddingBottom="?actionBarSize"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="2"
+                tools:listitem="@layout/item_zombie" />
+
+            <LinearLayout
+                android:id="@+id/bottom_bar"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:layout_alignBottom="@id/rv_zombies"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <Button
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored.Framed"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:onClick="@{()->host.dismiss()}"
+                    android:text="@android:string/cancel" />
+
+                <Button
+                    android:id="@+id/btn_operate"
+                    style="@style/Widget.AppCompat.Button.Normal.Flat"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:drawableStart="@{host.foundZombies?@drawable/ic_baseline_open_in_new_24:@drawable/ic_search_24dp}"
+                    android:drawableTint="@android:color/white"
+                    android:onClick="@{()->host.operate()}"
+                    android:text="@{host.foundZombies?@string/open_to_check:@string/start_search_for}" />
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/civ_avatar"
+            android:layout_width="@dimen/fab_normal"
+            android:layout_height="@dimen/fab_normal"
+            android:layout_alignTop="@+id/container"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/minus_r_fab_normal"
+            android:background="@drawable/bg_fab"
+            android:elevation="@dimen/z_dialog"
+            android:padding="@dimen/dp_12"
+            android:src="@drawable/ic_baseline_person_remove_24"
+            tools:ignore="ContentDescription" />
+    </RelativeLayout>
+</layout>

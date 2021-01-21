@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.impl.repo;
@@ -15,7 +15,7 @@ import java.util.List;
 import xjunz.tool.wechat.impl.model.account.Account;
 
 abstract class AccountRepository<T extends Account> extends LifecyclePerceptiveRepository {
-    private List<T> mAll = new ArrayList<>();
+    protected List<T> mAll = new ArrayList<>();
     private final LruCache<String, T> mCache;
 
     AccountRepository() {
@@ -65,26 +65,29 @@ abstract class AccountRepository<T extends Account> extends LifecyclePerceptiveR
      * @param id 与获取的{@link Account}的ID
      * @return 获取到的 {@link Account}，如果数据库中查询不到此ID，返回{@code null}
      */
-    @SuppressWarnings("SuspiciousMethodCalls")
     @Nullable
-    public T get(String id) {
+    public T get(@NonNull String id) {
         //先从缓存中获取
         T t = mCache.get(id);
         //如果缓存中不存在
         if (t == null) {
-            int index;
             //从全部中获取
-            if (mAll != null && (index = mAll.indexOf(id)) >= 0) {
-                t = mAll.get(index);
+            if (mAll != null) {
+                for (int i = 0; i < mAll.size(); i++) {
+                    t = mAll.get(i);
+                    if (t.id.equals(id)) {
+                        //取得的话，存入缓存
+                        mCache.put(id, t);
+                        return t;
+                    }
+                }
+            }
+            //如果都不存在，从数据库中获取
+            t = query(id);
+            if (t != null) {
                 mCache.put(id, t);
             } else {
-                //如果都不存在，从数据库中获取
-                t = query(id);
-                if (t != null) {
-                    mCache.put(id, t);
-                } else {
-                    return null;
-                }
+                return null;
             }
         }
         return t;

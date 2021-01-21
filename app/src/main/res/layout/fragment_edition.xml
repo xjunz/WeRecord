@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,8 +8,12 @@
     <data>
 
         <variable
-            name="model"
-            type="xjunz.tool.wechat.data.viewmodel.MessageViewModel" />
+            name="editionSetSelection"
+            type="androidx.databinding.ObservableInt" />
+
+        <variable
+            name="editionFlagSelection"
+            type="androidx.databinding.ObservableInt" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -23,7 +27,7 @@
             android:layout_marginHorizontal="@dimen/spacing_unit"
             android:layout_marginVertical="@dimen/spacing_normal"
             android:entries="@array/type_edition"
-            android:selection="@={model.editionSetSelection}"
+            android:selection="@={editionSetSelection}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -34,7 +38,7 @@
             android:layout_marginHorizontal="@dimen/spacing_unit"
             android:layout_marginVertical="@dimen/spacing_normal"
             android:entries="@array/type_edition_flag"
-            android:selection="@={model.editionFlagSelection}"
+            android:selection="@={editionFlagSelection}"
             app:layout_constraintStart_toEndOf="@+id/sp_edition_type"
             app:layout_constraintTop_toTopOf="parent" />
 

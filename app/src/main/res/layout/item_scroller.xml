@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -7,7 +7,7 @@
     android:id="@+id/tv_text"
     android:layout_width="40dp"
     android:layout_height="40dp"
-    android:background="@drawable/bg_selectable_item_white"
+    android:background="@drawable/bg_selectable_item_floating"
     android:clickable="true"
     android:focusable="true"
     android:gravity="center"

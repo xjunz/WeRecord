@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <resources>
     <string name="cd_no_result">No Result</string>
     <string name="cd_bottom_bar_item">Bottom Bar Item</string>
+    <string name="cd_shutter">展开/收起</string>
+    <string name="cd_avatar">Avatar</string>
+    <string name="cd_icon">icon</string>
 </resources>

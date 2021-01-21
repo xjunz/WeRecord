@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -8,8 +8,14 @@
     <data>
 
         <variable
-            name="model"
-            type="xjunz.tool.wechat.data.viewmodel.EditorViewModel" />
+            name="host"
+            type="xjunz.tool.wechat.ui.message.fragment.dialog.SenderChooserDialog" />
+
+        <variable
+            name="groupOwnerId"
+            type="String" />
+
+        <import type="java.util.Objects" />
 
         <variable
             name="account"
@@ -22,7 +28,7 @@
         android:background="?selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
-        android:onClick="@{()->model.setCandidateSender(account)}"
+        android:onClick="@{()->host.setCandidate(account)}"
         android:padding="@dimen/spacing_unit">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -43,22 +49,23 @@
             android:backgroundTint="@color/colorMask"
             android:scaleType="centerInside"
             android:src="@drawable/ic_check_24dp"
-            android:tint="@android:color/white"
-            android:visible="@{model.candidateSender.id.equals(account.id)}"
+            android:visible="@{Objects.equals(host.candidate.id,account.id)}"
             app:layout_constraintBottom_toBottomOf="@id/civ_avatar"
             app:layout_constraintEnd_toEndOf="@id/civ_avatar"
             app:layout_constraintStart_toStartOf="@id/civ_avatar"
             app:layout_constraintTop_toTopOf="@id/civ_avatar"
+            app:tint="@android:color/white"
             tools:ignore="ContentDescription" />
 
         <TextView
             style="@style/TextAppearance.AppCompat.Caption.Tag"
-            android:textSize="12sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/dp_4"
             android:text="@string/group_owner"
-            android:visible="@{account.id.equals(model.groupTalker.groupOwnerId)}"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:visible="@{account!=null&amp;&amp;account.id.equals(groupOwnerId)}"
             app:layout_constraintBottom_toTopOf="@+id/tv_name"
             app:layout_constraintEnd_toEndOf="@+id/civ_avatar"
             app:layout_constraintStart_toStartOf="@+id/civ_avatar" />

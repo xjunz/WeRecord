@@ -1,13 +1,15 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.ui.main.fragment;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -29,6 +31,12 @@ import xjunz.tool.wechat.data.viewmodel.SortBy;
 import xjunz.tool.wechat.impl.model.account.Contact;
 import xjunz.tool.wechat.impl.repo.ContactRepository;
 import xjunz.tool.wechat.impl.repo.RepositoryFactory;
+import xjunz.tool.wechat.ui.customview.MasterToast;
+import xjunz.tool.wechat.ui.main.MainActivity;
+import xjunz.tool.wechat.ui.main.fragment.dialog.AddContactByIdDialog;
+import xjunz.tool.wechat.ui.main.fragment.dialog.CheckZombiesDialog;
+import xjunz.tool.wechat.util.RxJavaUtils;
+import xjunz.tool.wechat.util.UiUtils;
 
 import static xjunz.tool.wechat.util.UiUtils.getFirstVisibleItemIndexOfList;
 import static xjunz.tool.wechat.util.UiUtils.getLastVisibleItemIndexOfList;
@@ -42,57 +50,154 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
      * 右侧的“指示器（indicator）”列表，为列表提供索引以快速访问
      */
     private RecyclerView mScroller;
+    private View mHeader;
     private ScrollerAdapter mScrollerAdapter;
     private ContactAdapter mAdapter;
+    private ContactRepository mRepository;
+    private final RecyclerView.OnScrollListener mHeaderElevation = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(@NotNull RecyclerView recyclerView, int newState) {
+            LinearLayoutManager layoutManager = Objects.requireNonNull((LinearLayoutManager) recyclerView.getLayoutManager());
+            // we want the list to scroll over the top of the header but for the header items
+            // to be clickable when visible. To achieve this we play games with elevation. The
+            // header is laid out in front of the list but when we scroll, we lower it's elevation
+            // to allow the content to pass in front (and reset when scrolled to top of the list)
+            if (newState == RecyclerView.SCROLL_STATE_IDLE
+                    && layoutManager.findFirstVisibleItemPosition() == 0
+                    && Objects.requireNonNull(layoutManager.findViewByPosition(0)).getTop() == recyclerView.getPaddingTop()
+                    && mHeader.getTranslationZ() != 0) {
+                // at top, reset elevation
+                mHeader.setTranslationZ(0f);
+            } else if (newState == RecyclerView.SCROLL_STATE_SETTLING || newState == RecyclerView.SCROLL_STATE_DRAGGING
+                    && mHeader.getTranslationZ() != -1f) {
+                // list scrolled, lower header to allow content to pass in front
+                mHeader.setTranslationZ(-1f);
+            }
+        }
+    };
+
+    private final RecyclerView.OnScrollListener mScrollerProcessor = new RecyclerView.OnScrollListener() {
+        // 当用户开始滑动时，如果当前指示器位置不可见（用户滑动了指示器列表），则滑动到当前指示器的位置
+        @Override
+        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+            if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                int firstIndicatorIndex = getFirstVisibleItemIndexOfList(mScroller, true);
+                int lastIndicatorIndex = getLastVisibleItemIndexOfList(mScroller, true);
+                if (firstIndicatorIndex >= 0 && lastIndicatorIndex >= 0) {
+                    int currentIndicatorIndex = mScrollerAdapter.selectedItemIndex;
+                    if (currentIndicatorIndex < firstIndicatorIndex || currentIndicatorIndex > lastIndicatorIndex) {
+                        mScroller.smoothScrollToPosition(currentIndicatorIndex);
+                    }
+                }
+            }
+        }
+
+        // 根据当前主列表第一个可见的Item设置当前指示器
+        @Override
+        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+            int first = getFirstVisibleItemIndexOfList(mList, false);
+            if (first >= 0) {
+                int scrollIndex = mScrollerAdapter.getIndexOfIndicator(mItemList.get(first).description);
+                mScrollerAdapter.setSelectedItemIndex(scrollIndex);
+            }
+        }
+    };
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mRepository = RepositoryFactory.get(ContactRepository.class);
+    }
 
     @NotNull
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         mScroller = view.findViewById(R.id.rv_scroller);
-        mList.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            /**
-             * 当用户开始滑动时，如果当前指示器位置不可见（用户滑动了指示器列表），则滑动到当前指示器的位置
-             */
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    int firstIndicatorIndex = getFirstVisibleItemIndexOfList(mScroller, true);
-                    int lastIndicatorIndex = getLastVisibleItemIndexOfList(mScroller, true);
-                    if (firstIndicatorIndex >= 0 && lastIndicatorIndex >= 0) {
-                        int currentIndicatorIndex = mScrollerAdapter.selectedItemIndex;
-                        if (currentIndicatorIndex < firstIndicatorIndex || currentIndicatorIndex > lastIndicatorIndex) {
-                            mScroller.smoothScrollToPosition(currentIndicatorIndex);
-                        }
-                    }
-                }
-            }
-
-            /**
-             * 根据当前主列表第一个可见的Item设置当前指示器
-             */
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                int first = getFirstVisibleItemIndexOfList(mList, false);
-                if (first >= 0) {
-                    int scrollIndex = mScrollerAdapter.getIndexOfIndicator(mItemList.get(first).description);
-                    mScrollerAdapter.setSelectedItemIndex(scrollIndex);
-                }
-            }
-        });
+        mHeader = view.findViewById(R.id.header);
         return view;
     }
 
     @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mHeader.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                mList.setPadding(mList.getPaddingLeft(), mHeader.getHeight(), mList.getPaddingRight(), mList.getPaddingBottom());
+                mList.addOnScrollListener(mHeaderElevation);
+                mHeader.getViewTreeObserver().removeOnPreDrawListener(this);
+                return true;
+            }
+        });
+        mList.addOnScrollListener(mScrollerProcessor);
+        view.findViewById(R.id.tv_add_contact_by_id).setOnClickListener(v -> showAddContactByIdDialog());
+        view.findViewById(R.id.tv_check_out_zombies).setOnClickListener(v -> showCheckZombiesDialog());
+        view.findViewById(R.id.tv_load_all_contacts).setOnClickListener(v -> loadAllContacts());
+    }
+
+
+    private void loadAllContacts() {
+        if (mRepository.isNonFriendsLoaded()) {
+            MasterToast.shortToast(R.string.all_contacts_loaded);
+            //演示
+            ((MainActivity) requireActivity()).openPanel();
+            mModel.requestDemonstrate(true);
+            return;
+        }
+        Dialog progress = UiUtils.createProgress(requireContext(), R.string.loading);
+        progress.show();
+        RxJavaUtils.complete(() -> {
+            long start = System.currentTimeMillis();
+            mRepository.queryNonFriends();
+            //至少加载一秒
+            long offset = 1000L - (System.currentTimeMillis() - start);
+            if (offset > 0) {
+                Thread.sleep(offset);
+            }
+        }).subscribe(new RxJavaUtils.CompletableObservableAdapter() {
+            @Override
+            public void onComplete() {
+                super.onComplete();
+                progress.dismiss();
+                //更新Type列表
+                mConfig.typeList.clear();
+                mConfig.typeList.addAll(Contact.Type.getCaptionList(getTypeList()));
+                mModel.updateCurrentConfig(mConfig);
+                //更新分隔项，因为我们的all更新了
+                collectSeparatorDescListMap();
+                //演示
+                ((MainActivity) requireActivity()).openPanel();
+                mModel.requestDemonstrate(true);
+            }
+
+            @Override
+            public void onError(@NotNull Throwable e) {
+                super.onError(e);
+                progress.dismiss();
+                MasterToast.shortToast(R.string.error_occurred);
+            }
+        });
+    }
+
+    private void showCheckZombiesDialog() {
+        new CheckZombiesDialog().show(requireFragmentManager(), "check_out_zombies");
+    }
+
+    private void showAddContactByIdDialog() {
+        new AddContactByIdDialog().show(requireFragmentManager(), "add_contact_by_id");
+    }
+
+    @Override
     public List<Contact> getAllOfType(@NonNull Contact.Type type) {
-        return RepositoryFactory.get(ContactRepository.class).getAllOfType(type);
+        return mRepository.getAllOfType(type);
     }
 
     @Override
     public List<Contact> getAll() {
-        return RepositoryFactory.get(ContactRepository.class).getAll();
+        return mRepository.getAll();
     }
 
     @Override
@@ -107,11 +212,12 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
 
     @Override
     public Contact.Type[] getTypeList() {
-        return new Contact.Type[]{Contact.Type.FRIEND, Contact.Type.JOINED_GROUP, Contact.Type.FOLLOWING_GZH,};
+        return mRepository.isNonFriendsLoaded() ? Contact.Type.values() : new Contact.Type[]{Contact.Type.FRIEND, Contact.Type.JOINED_GROUP, Contact.Type.FOLLOWING_GZH};
     }
 
     @Override
-    public void initPageConfig(PageConfig config) {
+    public PageConfig getInitialConfig() {
+        PageConfig config = new PageConfig();
         config.caption = getString(R.string.contact);
         config.isChat.set(false);
         config.sortBy.set(SortBy.NAME);
@@ -119,6 +225,7 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
         config.typeList.addAll(captionList);
         config.sortByList.add(SortBy.NAME.caption);
         config.setEventHandler(this);
+        return config;
     }
 
 
@@ -129,7 +236,7 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
 
 
     @Override
-    public void resetFilterConfig(PageConfig config) {
+    public void resetFilterConfig(@NotNull PageConfig config) {
         config.orderBy.set(PageConfig.ORDER_ASCENDING);
         config.typeSelection.set(0);
         config.descriptionSelectionMap.clear();
@@ -301,7 +408,7 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
                     String descOfClickedItem = indicatorSerial.get(posOfClickedItem);
                     int targetIndex = binarySearch(descOfClickedItem);
                     if (targetIndex < 0) {
-                        throw new RuntimeException("Index of the item scrolling to not found but expected to exist! ");
+                        throw new RuntimeException("Index of the item scrolled to not found but expected to exist! ");
                     }
                     int firstVisibleItemOfMainList = getFirstVisibleItemIndexOfList(mList, true);
                     int lastVisibleItemOfMainList = getLastVisibleItemIndexOfList(mList, false);
@@ -321,7 +428,6 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
                             mList.smoothScrollToPosition(targetIndex);
                         }
                     }
-
                     LinearLayoutManager llm = (LinearLayoutManager) Objects.requireNonNull(mScroller.getLayoutManager());
                     int f = llm.findFirstVisibleItemPosition();
                     int l = llm.findLastVisibleItemPosition();

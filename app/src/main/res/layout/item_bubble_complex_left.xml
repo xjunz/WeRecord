@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,141 +7,153 @@
 
     <data>
 
-        <import type="android.text.TextUtils" />
+
+        <variable
+            name="msg"
+            type="xjunz.tool.wechat.impl.model.message.ComplexMessage" />
 
         <variable
             name="vh"
             type="xjunz.tool.wechat.ui.message.MessageActivity.MessageViewHolder" />
 
-
-        <variable
-            name="model"
-            type="xjunz.tool.wechat.data.viewmodel.MessageViewModel" />
-
-        <variable
-            name="account"
-            type="xjunz.tool.wechat.impl.model.account.Account" />
-
-        <variable
-            name="message"
-            type="xjunz.tool.wechat.impl.model.message.ComplexMessage" />
+        <import type="android.text.TextUtils" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:backgroundColor="@{msg.parseError?@color/colorParseErrorTint:@android:color/transparent}"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_avatar"
-            style="@style/SelectableCircleImageView"
             android:layout_width="@dimen/fab_small"
             android:layout_height="@dimen/fab_small"
-            android:layout_marginStart="@dimen/spacing_normal"
-            android:layout_marginTop="@{message.inGroupChat?@dimen/spacing_normal:@dimen/spacing_unit}"
-            android:avatar="@{account}"
-            android:onClick="@{v->vh.gotoDetail(v)}"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:avatar="@{msg.senderAccount}"
+            android:onClick="@{()->vh.gotoDetail(ivAvatar)}"
+            android:transitionName="@string/tn_avatar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@tools:sample/avatars" />
 
-        <Space
-            android:id="@+id/space"
+        <TextView
+            android:id="@+id/tv_tag"
+            style="@style/TextAppearance.AppCompat.Caption.Tag"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_avatar"
+            android:layout_marginHorizontal="@dimen/spacing_unit"
+            android:editionColor="@{msg.editionFlag}"
+            android:text="@{msg.editionFlagCaption}"
+            android:visible="@{msg.edited}"
+            app:layout_constraintBottom_toBottomOf="@+id/fl_container"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/iv_avatar"
-            app:layout_constraintVertical_bias="0.35" />
+            app:layout_constraintStart_toEndOf="@+id/fl_container"
+            app:layout_constraintTop_toTopOf="@+id/fl_container"
+            tools:text="@tools:sample/lorem" />
 
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/ll_container"
-            android:layout_width="@dimen/max_bubble_width"
+        <LinearLayout
+            android:id="@+id/fl_container"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/spacing_unit"
             android:layout_marginStart="@dimen/spacing_unit"
-            android:layout_marginTop="@dimen/dp_4"
-            android:layout_marginBottom="@dimen/spacing_unit"
-            android:background="@drawable/bg_bubble_complex"
-            android:clickable="true"
-            android:contextMenu="@{true}"
-            android:elevation="@dimen/z_bubble"
-            android:focusable="true"
-            android:onClick="@{()->model.setSelectedMessagePosition(vh.adapterPosition)}"
-            android:padding="@dimen/dp_12"
+            android:layout_marginEnd="@dimen/dp_64"
+            android:gravity="start|center"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/iv_avatar"
-            app:layout_constraintTop_toBottomOf="@+id/space">
+            app:layout_constraintTop_toBottomOf="@+id/tv_name">
 
-            <TextView
-                android:id="@+id/textView7"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/msg_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/z_bubble"
+                android:background="@drawable/bg_bubble_left"
+                android:clickable="true"
+                android:contextMenu="@{()->vh.setSelectedMsgIndex(vh.adapterPosition)}"
+                android:elevation="@dimen/z_bubble"
+                android:focusable="true"
+                android:paddingHorizontal="@dimen/spacing_normal"
+                android:paddingVertical="@dimen/dp_12">
+
+                <TextView
+                    android:id="@+id/tv_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{msg.type.caption}"
+                    android:textColor="?colorAccent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="@tools:sample/lorem"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_4"
+                    android:gone="@{TextUtils.isEmpty(msg.title)}"
+                    android:text="@{msg.title}"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_type"
+                    tools:maxLines="10"
+                    tools:text="@tools:sample/lorem/random" />
+
+                <TextView
+                    android:id="@+id/tv_des"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_4"
+                    android:gone="@{TextUtils.isEmpty(msg.description)}"
+                    android:text="@{msg.description}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/tv_title"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_title"
+                    app:layout_constraintVertical_bias="0.0"
+                    tools:maxLines="2"
+                    tools:text="@tools:sample/lorem/random" />
+
+                <TextView
+                    android:id="@+id/tv_caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="16dp"
+                    android:text="@{msg.caption}"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_type"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintStart_toEndOf="@+id/tv_type"
+                    app:layout_constraintTop_toTopOf="@+id/tv_type"
+                    tools:text="@tools:sample/lorem" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="1dp"
                 android:layout_marginStart="@dimen/spacing_unit"
-                android:ellipsize="end"
-                android:gravity="end|center"
-                android:singleLine="true"
-                android:text="@{message.source}"
-                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                app:layout_constraintBottom_toBottomOf="@+id/tv_caption"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toEndOf="@+id/tv_caption"
-                app:layout_constraintTop_toTopOf="@+id/tv_caption"
-                tools:text="@tools:sample/lorem/random" />
-
-            <TextView
-                android:id="@+id/tv_caption"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:letterSpacing=".05"
-                android:text="@{message.subtype.caption}"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                android:textColor="?colorAccent"
-                app:layout_constraintBottom_toTopOf="@+id/tv_title"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="@tools:sample/lorem" />
-
-            <TextView
-                android:id="@+id/tv_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:maxWidth="@dimen/max_bubble_width"
-                android:text="@{message.title??@string/parse_failed}"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="?android:textColorPrimary"
-                android:visible="@{message.title!=null}"
-                app:layout_constraintBottom_toTopOf="@+id/tv_description"
-                app:layout_constraintStart_toStartOf="@+id/tv_caption"
-                app:layout_constraintTop_toBottomOf="@+id/tv_caption"
-                tools:text="@tools:sample/lorem" />
-
-            <TextView
-                android:id="@+id/tv_description"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:maxWidth="@dimen/max_bubble_width"
-                android:text="@{message.description}"
-                android:visible="@{!TextUtils.isEmpty(message.description)}"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/tv_title"
-                app:layout_constraintTop_toBottomOf="@+id/tv_title"
-                tools:text="@tools:sample/lorem" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                android:layout_weight="1"
+                android:background="?android:attr/listDivider"
+                android:editionColor="@{msg.editionFlag}"
+                android:visible="@{msg.edited}" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tv_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_unit"
-            android:text="@{message.inGroupChat?account.name:null}"
-            app:layout_constraintBottom_toTopOf="@+id/space"
+            android:layout_marginStart="8dp"
+            android:gone="@{!msg.inGroupChat}"
+            android:text="@{msg.senderAccount.name}"
+            android:textColor="?colorAccent"
             app:layout_constraintStart_toEndOf="@+id/iv_avatar"
-            tools:text="@tools:sample/lorem" />
+            app:layout_constraintTop_toTopOf="@+id/iv_avatar"
+            tools:text="@tools:sample/full_names" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>

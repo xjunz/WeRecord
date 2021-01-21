@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 package xjunz.tool.wechat.impl.model.message;
 
@@ -8,24 +8,26 @@ import android.content.ContentValues;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
+import xjunz.tool.wechat.impl.repo.MessageRepository;
+import xjunz.tool.wechat.impl.repo.RepositoryFactory;
 
 /**
  * 消息工厂，用于“生产”{@link Message}对象
  */
 public final class MessageFactory {
-
     //普通文本
     protected static final int TYPE_PLAIN_MSG = 1;
     //普通图片
     protected static final int TYPE_IMAGE = 3;
     //语音
     protected static final int TYPE_VOICE = 34;
-    //好友
-    protected static final int TYPE_RECOMMEND = 42;
+    //好友推荐、名片
+    protected static final int TYPE_CARD = 42;
     //视频
     protected static final int TYPE_VIDEO = 43;
     //表情图片
@@ -49,8 +51,8 @@ public final class MessageFactory {
     protected static final int TYPE_16777265 = 0x01000031;
     //公众号推送（图片配文字）
     protected static final int TYPE_PUSH = 0x11000031;
-    //小程序支付相关通知
-    protected static final int TYPE_WCX_PAY = 0x13000031;
+    //通知（如小程序支付）
+    protected static final int TYPE_NOTIFICATION = 0x13000031;
     //转账
     protected static final int TYPE_TRANSFER = 0x19000031;
     //红包
@@ -61,10 +63,13 @@ public final class MessageFactory {
     protected static final int TYPE_587202609 = 0x23000031;
     //todo:未知（图片
     protected static final int TYPE_687865905 = 0x29000031;
+    //接龙消息
+    protected static final int TYPE_SOLITAIRE = 0x30000031;
     //回复
     protected static final int TYPE_REPLY = 0x31000031;
     //拍一拍消息
     protected static final int TYPE_SYSTEM_PAT = 0x35000031;
+
 
     //=====SUBTYPE是复杂类型消息的亚类=====
     //todo:分享（未知类型）[待定]
@@ -91,8 +96,8 @@ public final class MessageFactory {
     protected static final int SUBTYPE_WCX = 33;
     //分享（来自其他程序的分享）
     protected static final int SUBTYPE_SHARE = 36;
-    //todo:红包（来自小程序）[待定]
-    protected static final int SUBTYPE_46 = 46;
+    //通知
+    protected static final int SUBTYPE_NOTIFICATION = 46;
     //回复消息
     protected static final int SUBTYPE_REPLY = 57;
     //转账消息
@@ -101,131 +106,130 @@ public final class MessageFactory {
     protected static final int SUBTYPE_HB = 2001;
 
     public enum Type {
-        CALL(R.string.call),
-        EMOJI(R.string.emoji),
-        RECOMMEND(R.string.recommend_friend),
-        PLAIN(R.string.plain_text),
-        IMAGE(R.string.picture),
-        GIF(R.string.gif),
-        PUSH(R.string.push),
-        VIDEO(R.string.video),
-        VOICE(R.string.voice),
-
-        SYSTEM(R.string.system_msg),
-
-        LOCATION(R.string.location, true),
-
-        WCX_SHARED(R.string.wcx, true),
-        SHARED_URL(R.string.shared_url, true),
-        SHARE(R.string.share, true),
-        REPOST(R.string.repost, true),
-        FILE(R.string.file, true),
-        TRANSFER(R.string.transfer, true),
-        HB(R.string.hongbao, true),
-        NOTIFICATION(R.string.notification, true),
-        REPLY(R.string.reply, true),
-        MUSIC(R.string.music, true),
-        POSITION_SHARE(R.string.position_share, true),
-        OTHERS(R.string.others, true);
+        /**
+         * {@link PlainMessage}
+         */
+        PLAIN(R.string.msg_type_plain_text),
+        /**
+         * {@link SystemMessage}
+         */
+        SYSTEM(R.string.msg_type_system),
+        /**
+         * {@link CallMessage}
+         */
+        VOICE_CALL(R.string.msg_type_voice_call),
+        VIDEO_CALL(R.string.msg_type_video_call),
+        CALL(R.string.msg_type_call),
+        /**
+         * {@link UnpreviewableMessage}
+         */
+        EMOJI(R.string.msg_type_emoji),
+        IMAGE(R.string.msg_type_picture),
+        GIF(R.string.msg_type_gif),
+        VIDEO(R.string.msg_type_video),
+        VOICE(R.string.msg_type_voice),
+        PUSH(R.string.msg_type_push),
+        UNKNOWN(R.string.msg_type_unknown),
+        /**
+         * {@link CardMessage}
+         */
+        CARD(R.string.msg_type_card),
+        /**
+         * {@link AppMessage}
+         */
+        LOCATION(R.string.msg_type_location),
+        WCX_SHARED(R.string.msg_type_wcx),
+        SHARED_URL(R.string.msg_type_shared_url),
+        SHARE(R.string.msg_type_share),
+        REPOST(R.string.msg_type_repost),
+        FILE(R.string.msg_type_file),
+        TRANSFER(R.string.msg_type_transfer),
+        HB(R.string.msg_type_hb),
+        NOTIFICATION(R.string.msg_type_notification),
+        REPLY(R.string.msg_type_reply),
+        MUSIC(R.string.msg_type_music),
+        POSITION_SHARE(R.string.msg_type_position_share),
+        SOLITAIRE(R.string.msg_type_solitaire);
         String caption;
-        private final boolean isComplex;
 
-        Type(@StringRes int captionRes, boolean isComplex) {
-            this.caption = App.getStringOf(captionRes);
-            this.isComplex = isComplex;
-        }
 
         Type(@StringRes int captionRes) {
             this.caption = App.getStringOf(captionRes);
-            this.isComplex = false;
-        }
-
-        public boolean isComplex() {
-            return isComplex;
         }
 
         public String getCaption() {
             return caption;
         }
-
-        public boolean isSystem() {
-            return this == SYSTEM;
-        }
-
-        public boolean isPlain() {
-            return this == PLAIN;
-        }
-
     }
+
+
+    private static final int[] TYPE_ARRAY_IMAGE = {TYPE_IMAGE, 13, 23, 33, 39};
 
     @NotNull
     public static Message createMessage(@NonNull ContentValues values) {
-        Type type = judgeType(values.getAsInteger(Message.KEY_TYPE));
-        Message msg;
-        if (type.isComplex()) {
-            msg = new ComplexMessage(values);
-        } else if (type.isSystem()) {
-            msg = new SystemMessage(values);
-        } else if (type.isPlain()) {
-            msg = new PlainMessage(values);
-        } else {
-            msg = new UnsupportedMessage(values);
-        }
-        msg.setType(type);
-        return msg;
-    }
-
-    @NonNull
-    static Type judgeType(int rawType) {
+        int rawType = values.getAsInteger(Message.KEY_TYPE);
         switch (rawType) {
             case TYPE_PLAIN_MSG:
-                return Type.PLAIN;
+            case 11:
+            case 21:
+            case 31:
+            case 36:
+                return new PlainMessage(values);
             case TYPE_IMAGE:
-                return Type.IMAGE;
+                return new UnpreviewableMessage(values, Type.IMAGE);
             case TYPE_EMOJI:
-                return Type.EMOJI;
-            case TYPE_TRANSFER:
-                return Type.TRANSFER;
-            case TYPE_HB:
-                return Type.HB;
-            case TYPE_GIF:
-                return Type.GIF;
-            case TYPE_VOICE:
-                return Type.VOICE;
-            case TYPE_CALL:
-                return Type.CALL;
-            case TYPE_VIDEO:
-                return Type.VIDEO;
-            case TYPE_RECOMMEND:
-                return Type.RECOMMEND;
-            case TYPE_LOCATION:
-                return Type.LOCATION;
-            case TYPE_PUSH:
-                return Type.PUSH;
-            case TYPE_16777265:
-            case TYPE_SHARE:
-                return Type.SHARE;
-            case TYPE_REPLY:
-                return Type.REPLY;
-            case TYPE_WCX_PAY:
-                return Type.NOTIFICATION;
-            case TYPE_SYSTEM_POSITION_REQUEST:
+                return new UnpreviewableMessage(values, Type.EMOJI);
+            case TYPE_SYSTEM:
+            case TYPE_SYSTEM_JOIN_GROUP:
             case TYPE_SYSTEM_CALL:
             case TYPE_SYSTEM_PAT:
-            case TYPE_SYSTEM_JOIN_GROUP:
-            case TYPE_SYSTEM:
-                return Type.SYSTEM;
+            case TYPE_SYSTEM_POSITION_REQUEST:
+            case 0x37000031:
+                return new SystemMessage(values);
+            case TYPE_TRANSFER:
+                return new AppMessage(values, Type.TRANSFER);
+            case TYPE_HB:
+                return new AppMessage(values, Type.HB);
+            case TYPE_GIF:
+                return new UnpreviewableMessage(values, Type.GIF);
+            case TYPE_VOICE:
+                return new UnpreviewableMessage(values, Type.VOICE);
+            case TYPE_CALL:
+                return new CallMessage(values);
+            case TYPE_VIDEO:
+                return new UnpreviewableMessage(values, Type.VIDEO);
+            case TYPE_CARD:
+                return new CardMessage(values);
+            case TYPE_LOCATION:
+                return new AppMessage(values, Type.LOCATION);
+            case TYPE_PUSH:
+                return new UnpreviewableMessage(values, Type.PUSH);
+            case TYPE_16777265:
+            case TYPE_SHARE:
+                return new AppMessage(values, Type.SHARE);
+            case TYPE_REPLY:
+                return new AppMessage(values, Type.REPLY);
+            case TYPE_NOTIFICATION:
+                return new AppMessage(values, Type.NOTIFICATION);
+            case TYPE_SOLITAIRE:
+                return new AppMessage(values, Type.SOLITAIRE);
         }
-        return Type.OTHERS;
+        return fallback(values);
     }
 
     /**
-     * todo
      * 为未识别的消息类型寻找可能的类型
      *
      * @return 可能的消息类型
      */
-    private Type fallback() {
-        return null;
+    @NotNull
+    @Contract(pure = true)
+    private static Message fallback(@NotNull ContentValues values) {
+        MessageRepository repository = RepositoryFactory.get(MessageRepository.class);
+        ContentValues appValues = repository.queryAppContentValuesByMsgId(values.getAsInteger(Message.KEY_MSG_ID));
+        if (appValues != null) {
+            return new AppMessage(values, Type.UNKNOWN);
+        }
+        return new UnpreviewableMessage(values, Type.UNKNOWN);
     }
 }

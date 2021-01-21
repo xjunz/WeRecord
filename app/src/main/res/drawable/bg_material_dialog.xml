@@ -1,29 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:inset="@dimen/spacing_large">
+<inset xmlns:android="http://schemas.android.com/apk/res/android">
     <layer-list>
         <item>
             <shape android:shape="rectangle">
                 <corners android:radius="@dimen/corner_dialog" />
-                <solid android:color="@android:color/white" />
+                <gradient
+                    android:endColor="#FDFDFD"
+                    android:startColor="@android:color/white" />
             </shape>
         </item>
+
         <item>
-            <inset android:insetTop="@dimen/dp_2">
+            <inset
+                android:insetLeft="@dimen/dp_1"
+                android:insetTop="@dimen/dp_2"
+                android:insetBottom="@dimen/dp_2">
                 <shape android:shape="rectangle">
                     <corners android:radius="@dimen/corner_dialog" />
-                    <solid android:color="#F7F7F7" />
-                </shape>
-            </inset>
-        </item>
-        <item>
-            <inset android:insetBottom="@dimen/dp_2">
-                <shape android:shape="rectangle">
-                    <corners android:radius="@dimen/corner_dialog" />
-                    <solid android:color="#FAFAFA" />
+                    <solid android:color="#FDFDFD" />
                 </shape>
             </inset>
         </item>

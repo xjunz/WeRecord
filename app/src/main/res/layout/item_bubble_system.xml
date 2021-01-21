@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -11,41 +13,70 @@
 
 
         <variable
-            name="model"
-            type="xjunz.tool.wechat.data.viewmodel.MessageViewModel" />
-
-        <variable
-            name="message"
+            name="msg"
             type="xjunz.tool.wechat.impl.model.message.Message" />
     </data>
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="@dimen/spacing_large"
-        android:paddingTop="@dimen/spacing_unit"
-        android:paddingEnd="@dimen/spacing_large"
-        android:paddingBottom="@dimen/spacing_unit">
+        android:paddingVertical="@dimen/spacing_unit">
+
+
+        <RelativeLayout
+            android:id="@+id/fl_wrapper"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_64"
+            android:layout_marginEnd="@dimen/dp_64"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/msg_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:background="@drawable/bg_bubble_system"
+                android:clickable="true"
+                android:contextMenu="@{()->vh.setSelectedMsgIndex(vh.adapterPosition)}"
+                android:focusable="true"
+                android:gravity="center"
+                android:paddingStart="@dimen/spacing_normal"
+                android:paddingTop="@dimen/spacing_unit"
+                android:paddingEnd="@dimen/spacing_normal"
+                android:paddingBottom="@dimen/spacing_unit"
+                android:text="@{msg.spannedContent}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                android:textColor="@android:color/white"
+                tools:text="@tools:sample/lorem" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="@dimen/spacing_unit"
+                android:layout_toEndOf="@+id/msg_container"
+                android:background="?android:attr/listDivider"
+                android:editionColor="@{msg.editionFlag}"
+                android:visible="@{msg.edited}" />
+        </RelativeLayout>
+
 
         <TextView
-            android:id="@+id/tv_message"
-            android:layout_width="wrap_content"
+            android:id="@+id/tv_edition_caption"
+            style="@style/TextAppearance.AppCompat.Caption.Tag"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@drawable/bg_bubble_system_message"
-            android:clickable="true"
-            android:contextMenu="@{true}"
-            android:focusable="true"
-            android:gravity="center"
-            android:onClick="@{()->model.setSelectedMessagePosition(vh.adapterPosition)}"
-            android:paddingStart="@dimen/spacing_normal"
-            android:paddingTop="@dimen/spacing_unit"
-            android:paddingEnd="@dimen/spacing_normal"
-            android:paddingBottom="@dimen/spacing_unit"
-            android:text="@{message.spannedContent}"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            android:textColor="?android:textColorPrimaryInverse"
-            tools:text="@tools:sample/lorem" />
-    </FrameLayout>
+            android:layout_marginHorizontal="@dimen/spacing_unit"
+            android:editionColor="@{msg.editionFlag}"
+            android:gone="@{!msg.edited}"
+            android:text="@{msg.editionFlagCaption}"
+            app:layout_constraintBottom_toBottomOf="@+id/fl_wrapper"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/fl_wrapper"
+            app:layout_constraintTop_toTopOf="@+id/fl_wrapper" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

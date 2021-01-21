@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.impl.model.account;
 
+import android.os.Parcel;
+
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -46,4 +49,47 @@ public class Group extends Contact {
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NotNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeStringArray(this.mMemberIdList);
+        dest.writeString(this.memberDisplayName);
+        dest.writeString(this.groupOwnerId);
+        dest.writeInt(this.memberCount);
+    }
+
+    protected Group(Parcel in) {
+        super(in);
+        this.mMemberIdList = in.createStringArray();
+        this.memberDisplayName = in.readString();
+        this.groupOwnerId = in.readString();
+        this.memberCount = in.readInt();
+    }
+
+    @Override
+    public String getName() {
+        String name = super.getName();
+        return name.equals(id) ? memberDisplayName : name;
+    }
+
+    public static final Creator<Group> CREATOR = new Creator<Group>() {
+        @NotNull
+        @Contract("_ -> new")
+        @Override
+        public Group createFromParcel(Parcel source) {
+            return new Group(source);
+        }
+
+        @NotNull
+        @Contract(value = "_ -> new", pure = true)
+        @Override
+        public Group[] newArray(int size) {
+            return new Group[size];
+        }
+    };
 }

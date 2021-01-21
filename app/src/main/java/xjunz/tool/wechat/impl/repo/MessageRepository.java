@@ -1,31 +1,62 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.impl.repo;
 
 import android.content.ContentValues;
+import android.util.ArrayMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import net.sqlcipher.Cursor;
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-import xjunz.tool.wechat.impl.DatabaseModifier;
-import xjunz.tool.wechat.impl.model.message.BackupMessage;
 import xjunz.tool.wechat.impl.model.message.Message;
 import xjunz.tool.wechat.impl.model.message.MessageFactory;
 
-public class MessageRepository extends LifecyclePerceptiveRepository {
+import static xjunz.tool.wechat.util.DbUtils.buildValuesFromCursor;
 
+public class MessageRepository extends LifecyclePerceptiveRepository {
+    public static final String TABLE_MESSAGE = "message";
+    public static final String TABLE_APP_MESSAGE = "AppMessage";
+    public static final String TABLE_MESSAGE_BACKUP = "MessageBackup";
+    public static final String TABLE_APP_MESSAGE_BACKUP = "AppMessageBackup";
+
+
+    private final ArrayMap<String, String> typeMap = new ArrayMap<>();
 
     MessageRepository() {
+    }
+
+    @Nullable
+    public String getType(String colName) {
+        return typeMap.get(colName);
+    }
+
+
+    @NonNull
+    public String requireType(String colName) {
+        return Objects.requireNonNull(typeMap.get(colName), "Could not find column: " + colName);
+    }
+
+    public void initTypeMap() {
+        Cursor cursor = getDatabase().rawQuery("pragma table_info(" + TABLE_MESSAGE + ")", null);
+        int nameIndex = cursor.getColumnIndex("name");
+        int typeIndex = cursor.getColumnIndex("type");
+        while (cursor.moveToNext()) {
+            typeMap.put(cursor.getString(nameIndex), cursor.getString(typeIndex));
+        }
+        cursor.close();
+        Cursor cursor2 = getDatabase().rawQuery("pragma table_info(" + TABLE_APP_MESSAGE + ")", null);
+        while (cursor2.moveToNext()) {
+            typeMap.put(cursor2.getString(nameIndex), cursor2.getString(typeIndex));
+        }
+        cursor2.close();
     }
 
     /**
@@ -39,11 +70,14 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
      * @see TalkerRepository#queryAll()
      * </p>
      */
-    public int getActualMessageCountOf(String id) {
-        Cursor cursor = getDatabase().rawQuery("select msgId from message where talker=" + "'" + id + "'", null);
-        int actualCount = cursor.getCount();
+    public long getActualMessageCountOf(String talkerId) {
+        long count = 0;
+        Cursor cursor = getDatabase().rawQuery("select count(msgId) from " + TABLE_MESSAGE + " where talker=" + "'" + talkerId + "'", null);
+        if (cursor.moveToNext()) {
+            count = cursor.getLong(0);
+        }
         cursor.close();
-        return actualCount;
+        return count;
     }
 
     /**
@@ -58,11 +92,11 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
      * @param formerMsgList 储存数据的{@link List}，数据会被追加到此{@link List}中
      * @return 查询到的实际消息数
      */
-    public int queryMessageByTalkerLimit(@NonNull String id, int limitCount, @NonNull List<Message> formerMsgList) {
-        Cursor cursor = getDatabase().rawQuery("select type,isSend,createTime,content,imgPath,msgId,status,talker from message where talker=" + "'"
+    public int queryMessageByTalkerLimit(@NonNull String id, long limitCount, @NonNull List<Message> formerMsgList) {
+        Cursor cursor = getDatabase().rawQuery("select * from " + TABLE_MESSAGE + " where talker=" + "'"
                 + id + "'" + " order by createTime desc" + " limit " + limitCount + " offset " + formerMsgList.size(), null);
         while (cursor.moveToNext()) {
-            formerMsgList.add(buildMessageFromCursor(cursor));
+            formerMsgList.add(MessageFactory.createMessage(buildValuesFromCursor(cursor)));
         }
         int count = cursor.getCount();
         cursor.close();
@@ -82,12 +116,12 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
      * @param limitCount 消息数量
      * @return 查询到的消息列表
      */
-    public List<Message> queryMessageByTalkerLimit(@NonNull String id, int offset, int limitCount) {
+    public List<Message> queryMessageByTalkerLimit(@NonNull String id, long offset, long limitCount) {
         List<Message> queried = new ArrayList<>();
-        Cursor cursor = getDatabase().rawQuery("select type,isSend,createTime,content,imgPath,msgId,status,talker from message where talker=" + "'"
+        Cursor cursor = getDatabase().rawQuery("select * from " + TABLE_MESSAGE + " where talker=" + "'"
                 + id + "'" + " order by createTime desc" + " limit " + limitCount + " offset " + offset, null);
         while (cursor.moveToNext()) {
-            queried.add(buildMessageFromCursor(cursor));
+            queried.add(MessageFactory.createMessage(buildValuesFromCursor(cursor)));
         }
         cursor.close();
         return queried;
@@ -100,10 +134,10 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
      * @return 返回查询到的消息，如果未查询到返回null
      */
     @Nullable
-    public Message queryMessageByMsgId(int msgId) {
-        Cursor cursor = getDatabase().rawQuery("select * from message where msgId=" + msgId, null);
+    public Message queryMessageByMsgId(long msgId) {
+        Cursor cursor = getDatabase().rawQuery("select * from " + TABLE_MESSAGE + " where msgId=" + msgId, null);
         if (cursor.moveToNext()) {
-            Message message = buildMessageFromCursor(cursor);
+            Message message = MessageFactory.createMessage(buildValuesFromCursor(cursor));
             cursor.close();
             return message;
         }
@@ -111,11 +145,42 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
         return null;
     }
 
-
-    public BackupMessage queryBackupMessageById(int msgId) {
-        Cursor cursor = getDatabase().rawQuery("select * from " + DatabaseModifier.TABLE_ORIGINAL_MESSAGE_BACKUP + " where msgId=" + msgId, null);
+    @Nullable
+    public ContentValues queryAppContentValuesByMsgId(long msgId) {
+        ContentValues values = null;
+        Cursor cursor = getDatabase().rawQuery("select * from " + TABLE_APP_MESSAGE + " where msgId=" + msgId, null);
         if (cursor.moveToNext()) {
-            BackupMessage message = new BackupMessage(buildMessageFromCursor(cursor).getValues());
+            values = buildValuesFromCursor(cursor);
+        }
+        cursor.close();
+        return values;
+    }
+
+    @Nullable
+    public ContentValues queryBackupAppContentValuesByMsgId(long msgId) {
+        ContentValues values = null;
+        Cursor cursor = getDatabase().rawQuery("select * from " + TABLE_APP_MESSAGE_BACKUP + " where msgId=" + msgId, null);
+        if (cursor.moveToNext()) {
+            values = buildValuesFromCursor(cursor);
+        }
+        cursor.close();
+        return values;
+    }
+
+    @Nullable
+    public ContentValues queryBackupContentValuesByMsgId(long msgId) {
+        Cursor cursor = getDatabase().rawQuery("select * from " + TABLE_MESSAGE_BACKUP + " where msgId=" + msgId, null);
+        if (cursor.moveToNext()) {
+            return buildValuesFromCursor(cursor);
+        }
+        cursor.close();
+        return null;
+    }
+
+    public Message queryBackupMessageById(long msgId) {
+        Cursor cursor = getDatabase().rawQuery("select * from " + TABLE_MESSAGE_BACKUP + " where msgId=" + msgId, null);
+        if (cursor.moveToNext()) {
+            Message message = MessageFactory.createMessage(buildValuesFromCursor(cursor));
             cursor.close();
             return message;
         }
@@ -123,40 +188,14 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
         return null;
     }
 
-    public void queryBackupMessagesByTalker(String id, @NonNull List<BackupMessage> backupMessages) {
-        Cursor cursor = getDatabase().rawQuery("select * from " + DatabaseModifier.TABLE_ORIGINAL_MESSAGE_BACKUP + " where talker=" + "'"
+    public void queryBackupMessagesByTalker(String id, @NonNull List<Message> backupMessages) {
+        Cursor cursor = getDatabase().rawQuery("select * from " + TABLE_MESSAGE_BACKUP + " where talker=" + "'"
                 + id + "'", null);
         while (cursor.moveToNext()) {
-            backupMessages.add(new BackupMessage(buildMessageFromCursor(cursor).getValues()));
+            backupMessages.add(MessageFactory.createMessage(buildValuesFromCursor(cursor)));
         }
         cursor.close();
     }
 
-    @NotNull
-    @Contract("_ -> new")
-    private Message buildMessageFromCursor(@NotNull Cursor cursor) {
-        ContentValues values = new ContentValues();
-        for (int i = 0; i < cursor.getColumnCount(); i++) {
-            switch (cursor.getType(i)) {
-                case Cursor.FIELD_TYPE_STRING:
-                    values.put(cursor.getColumnName(i), cursor.getString(i));
-                    break;
-                case Cursor.FIELD_TYPE_BLOB:
-                    values.put(cursor.getColumnName(i), cursor.getBlob(i));
-                    break;
-                case Cursor.FIELD_TYPE_FLOAT:
-                    //使用getDouble()可同时兼容Float类型和Double类型，防止Double类型被转为Float导致溢出
-                    values.put(cursor.getColumnName(i), cursor.getDouble(i));
-                    break;
-                case Cursor.FIELD_TYPE_INTEGER:
-                    //使用getLong()可同时兼容Long类型和Integer类型，防止Long类型被转为Integer导致溢出
-                    values.put(cursor.getColumnName(i), cursor.getLong(i));
-                    break;
-                case Cursor.FIELD_TYPE_NULL:
-                    values.putNull(cursor.getColumnName(i));
-                    break;
-            }
-        }
-        return MessageFactory.createMessage(values);
-    }
+
 }

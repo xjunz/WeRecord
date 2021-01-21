@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.ui.intro.fragment;
@@ -25,7 +25,7 @@ public class IntroPermissionFragment extends IntroFragment implements View.OnCli
     private Button mBtnPhone, mBtnStorage, mBtnSandbox;
     private Permissions mPermissions;
     private boolean mShouldRefresh;
-    private View.OnClickListener mGotoSettings = new View.OnClickListener() {
+    private final View.OnClickListener mGotoSettings = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             mShouldRefresh = true;

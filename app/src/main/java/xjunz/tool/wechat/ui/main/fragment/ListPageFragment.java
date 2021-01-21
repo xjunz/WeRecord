@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.ui.main.fragment;
@@ -23,7 +23,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
@@ -50,6 +49,7 @@ import xjunz.tool.wechat.ui.customview.MasterToast;
 import xjunz.tool.wechat.ui.main.DetailActivity;
 import xjunz.tool.wechat.util.RxJavaUtils;
 import xjunz.tool.wechat.util.UiUtils;
+import xjunz.tool.wechat.util.Utils;
 
 public abstract class ListPageFragment<T extends Contact> extends PageFragment implements PageConfig.EventHandler {
     /**
@@ -81,7 +81,7 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
     /**
      * 当前页面的配置信息
      */
-    private PageConfig mConfig = new PageConfig();
+    protected PageConfig mConfig;
     /**
      * 当前数据所有分隔项的描述集合
      */
@@ -91,11 +91,13 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
      *
      * @see ListPageFragment#hasFilterConfigChanged()
      */
-    private String mFilterConfigIdentifierCache;
+    private int mFilterConfigIdentifierCache;
     /**
      * 管理{@link Disposable}的集合
      */
     private final CompositeDisposable mDisposables = new CompositeDisposable();
+
+    protected PageViewModel mModel;
 
     /**
      * 获取当前的主布局资源ID
@@ -115,9 +117,9 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
     /**
      * 初始化配置
      *
-     * @param config 当前配置
+     * @return 当前配置
      */
-    public abstract void initPageConfig(PageConfig config);
+    public abstract PageConfig getInitialConfig();
 
     /**
      * 获取{@link ListPageFragment#mList}的适配器
@@ -132,11 +134,9 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
     public abstract void resetFilterConfig(PageConfig config);
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        initPageConfig(mConfig);
-        PageViewModel model = new ViewModelProvider(requireActivity(), new ViewModelProvider.NewInstanceFactory()).get(PageViewModel.class);
-        model.updateCurrentConfig(mConfig);
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mModel = Utils.getViewModel(requireActivity(), PageViewModel.class);
     }
 
     @NonNull
@@ -145,16 +145,23 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
         View root = inflater.inflate(getLayoutResource(), container, false);
         mList = root.findViewById(R.id.rv_list);
         mStubNoResult = root.findViewById(R.id.stub_no_result);
-        initList();
+
         return root;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mConfig = getInitialConfig();
+        mModel.updateCurrentConfig(mConfig);
+        mFilterConfigIdentifierCache = mConfig.getFilterId();
+        initList();
+    }
 
     @Override
     public PageConfig getCurrentConfig() {
         return mConfig;
     }
-
 
     /**
      * 判断配置信息是否改变
@@ -165,11 +172,8 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
      * @return 配置是否改变
      */
     private boolean hasFilterConfigChanged() {
-        String currentId = mConfig.typeSelection.get() +
-                mConfig.descriptionSelectionMap.toString() +
-                mConfig.isAscending() +
-                mConfig.getCurrentSortBy().caption;
-        if (currentId.equals(mFilterConfigIdentifierCache)) {
+        int currentId = mConfig.getFilterId();
+        if (currentId == mFilterConfigIdentifierCache) {
             return false;
         } else {
             mFilterConfigIdentifierCache = currentId;
@@ -194,7 +198,7 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
     /**
      * 初始化列表
      */
-    private void initList() {
+    protected void initList() {
         Disposable disposable = Flowable.fromIterable(getRawDataList()).subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread())
                 .flatMap((Function<T, Publisher<Item>>) t -> subscriber -> {
                     String description = t.describe(mConfig.getCurrentSortBy());
@@ -330,7 +334,15 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
     @Override
     public void onResetFilter() {
         resetFilterConfig(mConfig);
-        onConfirmFilter();
+        if (!hasFilterConfigChanged()) {
+            MasterToast.shortToast(R.string.msg_filter_config_unchanged);
+        } else {
+            mDisposables.add(filter(getRawDataList()).subscribe(newItemList -> {
+                mFilteredItemList = newItemList;
+                updateList(newItemList);
+                MasterToast.shortToast(R.string.reset_completed);
+            }));
+        }
     }
 
 
@@ -339,7 +351,7 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
      */
     protected void collectSeparatorDescListMap() {
         List<T> all = getAll();
-        Disposable disposable = Flowable.fromArray(getSortByList()).parallel().runOn(Schedulers.newThread())
+        Disposable disposable = Flowable.fromArray(getSortByList()).parallel().runOn(Schedulers.computation())
                 .map(sortBy -> {
                     List<String> descList = new ArrayList<>();
                     ArrayList<T> syncAll = new ArrayList<>(all);
@@ -520,8 +532,8 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
     }
 
     public abstract class ListPageAdapter<S extends ListPageViewHolder> extends RecyclerView.Adapter<S> {
-        private int foregroundSpanColor;
-        private int backgroundSpanColor;
+        private final int foregroundSpanColor;
+        private final int backgroundSpanColor;
 
         public ListPageAdapter() {
             foregroundSpanColor = UiUtils.getAttrColor(requireContext(), R.attr.colorAccent);
@@ -609,16 +621,8 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
             bottomDivider = itemView.findViewById(R.id.divider_bottom);
             itemView.setOnClickListener(v -> {
                 if (getItemViewType() == Item.TYPE_DATA) {
-                    // DetailFragment fragment = new DetailFragment();
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable(DetailActivity.EXTRA_CONTACT, mItemList.get(getAdapterPosition()).content);
-                    /*bundle.putInt("tn", getAdapterPosition());
-                    fragment.setArguments(bundle);
-                    fragment.setSharedElementEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(android.R.transition.move));
-                    fragment.setEnterTransition(TransitionInflater.from(requireContext()).inflateTransition(R.transition.detail_enter));
-                    getFragmentManager().beginTransaction().addSharedElement(ivAvatar, ivAvatar.getTransitionName())
-                            .setReorderingAllowed(true).replace(R.id.fragment_container, fragment)
-                            .addToBackStack("detail").commit();*/
+                    bundle.putParcelable(DetailActivity.EXTRA_CONTACT, mItemList.get(getAdapterPosition()).content);
                     ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(requireActivity(), this.ivAvatar, this.ivAvatar.getTransitionName());
                     Intent i = new Intent(requireActivity(), DetailActivity.class);
                     i.putExtra(DetailActivity.EXTRA_CONTACT, mItemList.get(getAdapterPosition()).content);
@@ -626,6 +630,7 @@ public abstract class ListPageFragment<T extends Contact> extends PageFragment i
                 }
             });
         }
+
     }
 
     @Override

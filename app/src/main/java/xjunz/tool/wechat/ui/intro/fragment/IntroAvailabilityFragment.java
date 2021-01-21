@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.ui.intro.fragment;
@@ -25,21 +25,12 @@ import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.impl.Environment;
 import xjunz.tool.wechat.ui.outer.DebugActivity;
 import xjunz.tool.wechat.util.UiUtils;
-import xjunz.tool.wechat.util.UniUtils;
+import xjunz.tool.wechat.util.Utils;
 
 public class IntroAvailabilityFragment extends IntroFragment implements View.OnClickListener {
     private Dialog mProgressDialog;
     private Button mBtnCheck;
 
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (Environment.getInstance().initialized() && savedInstanceState != null) {
-            mBtnCheck.setText(R.string.check_succeeded);
-            mBtnCheck.setEnabled(false);
-            notifyStepDone();
-        }
-    }
 
     @Nullable
     @Override
@@ -47,7 +38,7 @@ public class IntroAvailabilityFragment extends IntroFragment implements View.OnC
         View view = inflater.inflate(R.layout.fragment_intro_availability, container, false);
         mBtnCheck = view.findViewById(R.id.btn_check);
         mBtnCheck.setOnClickListener(this);
-        mProgressDialog = UiUtils.createProgressDialog(requireActivity(), R.string.checking);
+        mProgressDialog = UiUtils.createProgress(requireActivity(), R.string.checking);
         return view;
     }
 
@@ -72,8 +63,8 @@ public class IntroAvailabilityFragment extends IntroFragment implements View.OnC
             final String log = e.getClass().getName() + ": " + e.getMessage() + "\n" + "Serial: " + Environment.getInstance().serialize();
             AlertDialog.Builder builder = UiUtils.createDialog(requireActivity(), R.string.error_occurred, log)
                     .setPositiveButton(R.string.feedback, (dialog, which) -> {
-                        if (UniUtils.feedbackTempQChat(requireActivity())) {
-                            UniUtils.copyPlainText("feedback message", log);
+                        if (Utils.feedbackTempQChat(requireActivity())) {
+                            Utils.copyPlainText("feedback message", log);
                             UiUtils.toast(R.string.q_chat_feedback_tip);
                         }
                     });
@@ -91,7 +82,7 @@ public class IntroAvailabilityFragment extends IntroFragment implements View.OnC
     @Override
     public void onClick(@NotNull View v) {
         v.setEnabled(false);
-        Environment.getInstance().init(mObserver);
+        Environment.createInstance().init(mObserver);
     }
 
 

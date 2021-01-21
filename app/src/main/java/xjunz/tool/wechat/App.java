@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat;
@@ -7,11 +7,7 @@ package xjunz.tool.wechat;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.lifecycle.ViewModelStore;
@@ -33,8 +29,6 @@ import xjunz.tool.wechat.util.IOUtils;
 public class App extends Application implements ViewModelStoreOwner {
     private static WeakReference<Context> sApplicationContext;
     private static final String DATA_SHARED_PREFS_NAME = "data";
-    public static int VERSION_CODE;
-    public static String VERSION_NAME;
     private static SharedPreferences gSharedPrefs;
     private static SharedPrefsManager gSharedPrefsManager;
     public static String DATA_PATH;
@@ -50,11 +44,15 @@ public class App extends Application implements ViewModelStoreOwner {
         return getContext().getString(strRes, args);
     }
 
+    public static CharSequence getTextOf(@StringRes int textRes) {
+        return getContext().getText(textRes);
+    }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        //初始化Cipher SQL
+        Thread.setDefaultUncaughtExceptionHandler(new CrashHandler());
+        //初始化CipherSQL
         SQLiteDatabase.loadLibs(this);
         //初始化拼音库
         Pinyin.init(null);
@@ -62,25 +60,11 @@ public class App extends Application implements ViewModelStoreOwner {
         gSharedPrefs = getApplicationContext().getSharedPreferences(DATA_SHARED_PREFS_NAME, Context.MODE_PRIVATE);
         gSharedPrefsManager = new SharedPrefsManager();
         DATA_PATH = getContext().getFilesDir().getPath();
-        try {
-            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_ACTIVITIES);
-            VERSION_CODE = packageInfo.versionCode;
-            VERSION_NAME = packageInfo.versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            if (BuildConfig.DEBUG)
-                e.printStackTrace();
-        }
         mViewModelStore = new ViewModelStore();
     }
 
     public static Context getContext() {
         return sApplicationContext.get();
-    }
-
-
-    @ColorInt
-    public static int getColorOf(@ColorRes int colorRes) {
-        return getContext().getResources().getColor(colorRes);
     }
 
     @Contract(pure = true)
@@ -128,13 +112,13 @@ public class App extends Application implements ViewModelStoreOwner {
             return gSharedPrefs.getInt(key_recorded_version_code, -1);
         }
 
-        private void setRecordedVersionCode(int versionCode) {
-            gSharedPrefs.edit().putInt(key_recorded_version_code, versionCode).apply();
+        private void setRecordedVersionCode() {
+            gSharedPrefs.edit().putInt(key_recorded_version_code, BuildConfig.VERSION_CODE).apply();
         }
 
         public boolean isAppUpdated() {
-            if (VERSION_CODE > getRecordedVersionCode()) {
-                setRecordedVersionCode(VERSION_CODE);
+            if (BuildConfig.VERSION_CODE > getRecordedVersionCode()) {
+                setRecordedVersionCode();
                 return true;
             }
             return false;

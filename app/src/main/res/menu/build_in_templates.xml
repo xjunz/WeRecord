@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/item_template_plain"
+        android:title="@string/msg_type_plain_text" />
+    <item
+        android:id="@+id/item_template_system"
+        android:title="@string/msg_type_system" />
+    <item
+        android:id="@+id/item_template_file"
+        android:title="@string/msg_type_file" />
+    <item
+        android:id="@+id/item_template_voice_call"
+        android:title="@string/msg_type_voice_call" />
+    <item
+        android:id="@+id/item_template_video_call"
+        android:title="@string/msg_type_video_call" />
+
+</menu>

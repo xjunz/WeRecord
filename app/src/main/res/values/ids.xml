@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 <resources>
     <item name="onHeightChanged" type="id" />
     <item name="onWidthChanged" type="id" />
     <item name="onPageChange" type="id" />
     <item name="onPanelSlide" type="id" />
-    <item name="rememberSelection" type="id" />
+
+    <item name="editorItemTitle" type="id" />
+    <item name="editorItemSender" type="id" />
+    <item name="editorItemDes" type="id" />
+    <item name="editorItemSource" type="id" />
+    <item name="editorItemSendTimestamp" type="id" />
+    <item name="editorItemContent" type="id" />
+    <item name="editorItemSendStatus" type="id" />
+
+    <item name="itemSeparator" type="id" />
 </resources>

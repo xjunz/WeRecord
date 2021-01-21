@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
-<!--suppress AndroidUnknownAttribute -->
-<!-- android:selection 属性无法被IDE识别，但是此属性已经在AdapterViewBindingAdapter中声明，且可正常使用-->
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -187,11 +185,12 @@
 
         <TextView
             android:id="@+id/tv_stats"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:ellipsize="start"
             android:letterSpacing=".05"
             android:text="@{Html.fromHtml(@string/format_count_stats(model.currentConfig.totalCount,model.currentConfig.filteredCount))}"
+            app:autoSizeTextType="uniform"
             app:layout_constraintBottom_toBottomOf="@+id/btn_reset_filter"
             app:layout_constraintEnd_toStartOf="@+id/space_center"
             app:layout_constraintHorizontal_bias="0.0"
@@ -200,7 +199,7 @@
 
         <Button
             android:id="@+id/btn_reset_filter"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored.Small.Framed"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored.Framed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_normal"
@@ -212,7 +211,7 @@
 
         <Button
             android:id="@+id/btn_confirm_filter"
-            style="@style/Widget.AppCompat.Button.Normal.Flat.Small"
+            style="@style/Widget.AppCompat.Button.Normal.Flat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="@{()->model.notifyFilterConfirmed()}"

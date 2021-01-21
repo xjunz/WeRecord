@@ -1,55 +1,74 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 package xjunz.tool.wechat.impl.model.message;
 
 import android.content.ContentValues;
-import android.text.Html;
+import android.os.Parcel;
 
 import androidx.annotation.NonNull;
+import androidx.core.text.HtmlCompat;
 
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * 普通文本消息类型
- * <p>
- * 微信会解析{@code &lt;a/&gt;}标签，因此我们需要判断文本内容里是否有该标签
- * </p>
  */
 public class PlainMessage extends Message {
-    private boolean isSpanned;
-    private String parsedContent;
-    private CharSequence spannedContent;
-
 
     public PlainMessage(ContentValues values) {
-        super(values);
+        super(values, MessageFactory.Type.PLAIN);
     }
 
     @NonNull
     @Override
     public String getParsedContent() {
         if (parsedContent == null) {
-            Pattern pattern = Pattern.compile("<a .+?=\".+?\">(.+?)</a>");
-            Matcher matcher = pattern.matcher(content);
-            this.parsedContent = content;
-            while (matcher.find()) {
-                isSpanned = true;
-                parsedContent = parsedContent.replace(matcher.group(), Objects.requireNonNull(matcher.group(1)));
-            }
+            parseSpan();
         }
         return parsedContent;
+    }
+
+    private void parseSpan() {
+        spannedContent = HtmlCompat.fromHtml(content.replace("\n", "<br>"), HtmlCompat.FROM_HTML_MODE_LEGACY);
+        parsedContent = spannedContent.toString();
     }
 
     @NonNull
     @Override
     public CharSequence getSpannedContent() {
         if (spannedContent == null) {
-            getParsedContent();
-            spannedContent = isSpanned ? Html.fromHtml(content.replaceAll("\n", "<br>")) : content;
+            parseSpan();
         }
         return spannedContent;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NotNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeString(this.parsedContent);
+    }
+
+    protected PlainMessage(Parcel in) {
+        super(in);
+        this.parsedContent = in.readString();
+    }
+
+    public static final Creator<PlainMessage> CREATOR = new Creator<PlainMessage>() {
+        @Override
+        public PlainMessage createFromParcel(Parcel source) {
+            return new PlainMessage(source);
+        }
+
+        @Override
+        public PlainMessage[] newArray(int size) {
+            return new PlainMessage[size];
+        }
+    };
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 <resources>
     <string-array name="talker_sorts">
@@ -56,5 +56,18 @@
         <item>@string/edition_type_rep</item>
         <item>@string/edition_type_insertion</item>
         <item>@string/edition_type_removal</item>
+    </string-array>
+    <string-array name="contact_header">
+        <item>找回已删除的好友</item>
+        <item>查找陌生人</item>
+        <item>根据微信ID添加好友</item>
+    </string-array>
+    <string-array name="templates">
+        <item>普通文本</item>
+        <item>系统消息</item>
+        <item>文件</item>
+        <item>分享</item>
+        <item><![CDATA[<自定义>]]></item>
+        <item><![CDATA[<复制其他消息>]]></item>
     </string-array>
 </resources>

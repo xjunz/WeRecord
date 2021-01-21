@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.impl.repo;
@@ -21,6 +21,7 @@ import xjunz.tool.wechat.impl.model.account.Talker;
 public class TalkerRepository extends AccountRepository<Talker> {
     private static final int CACHE_CAPACITY = 50;
     private final SimpleArrayMap<Contact.Type, List<Talker>> mMap = new SimpleArrayMap<>();
+    public static final String TABLE_CONVERSATION = "rconversation";
 
     TalkerRepository() {
     }
@@ -36,7 +37,7 @@ public class TalkerRepository extends AccountRepository<Talker> {
     @Override
     public void queryAllInternal(@NonNull List<Talker> all) {
         SQLiteDatabase database = getDatabase();
-        Cursor talkerQueryCursor = database.rawQuery("select username,conversationTime,msgCount from rconversation where not msgcount = 0", null);
+        Cursor talkerQueryCursor = database.rawQuery("select username,conversationTime,msgCount,parentRef from rconversation where not msgCount = 0", null);
         while (talkerQueryCursor.moveToNext()) {
             String id = talkerQueryCursor.getString(0);
             if (!TextUtils.isEmpty(id)) {
@@ -52,6 +53,7 @@ public class TalkerRepository extends AccountRepository<Talker> {
                 contactQueryCursor.close();
                 talker.lastMsgTimestamp = talkerQueryCursor.getLong(1);
                 talker.messageCount = talkerQueryCursor.getInt(2);
+                talker.parentRef = talkerQueryCursor.getString(3);
                 getAllOfType(talker.type).add(talker);
                 all.add(talker);
             }

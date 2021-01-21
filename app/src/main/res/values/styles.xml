@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <resources>
@@ -12,18 +12,18 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorButtonNormal">@color/button_normal</item>
-        <item name="colorBackgroundFloating">@android:color/white</item>
-        <item name="colorControlNormal">?colorAccent</item>
-        <item name="colorControlActivated">?colorAccent</item>
+        <item name="colorButtonNormal">@color/color_control_activate</item>
+        <item name="colorControlNormal">@color/color_control_normal</item>
+        <item name="colorControlActivated">@color/color_control_activate</item>
         <item name="android:textColorHighlight">?colorControlHighlight</item>
         <item name="android:colorEdgeEffect">@color/colorAccent</item>
         <item name="android:navigationBarColor">?colorPrimaryDark</item>
+        <item name="buttonStyle">@style/Widget.AppCompat.Button.Normal</item>
+        <item name="buttonBarButtonStyle">@style/Widget.AppCompat.Button.Borderless.Colored.Normal
+        </item>
     </style>
 
     <style name="Base.AppTheme">
-        <item name="alertDialogTheme">@style/Theme.AppCompat.Light.Dialog.Alert.Material
-        </item>
         <item name="android:ambientShadowAlpha">.039</item>
         <item name="android:spotShadowAlpha">.089</item>
     </style>
@@ -40,7 +40,8 @@
 
     <style name="Base.AppTheme.Main.Translucent">
         <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <style name="Base.AppTheme.Main.Translucent.Message">
@@ -52,6 +53,7 @@
 
     <style name="Base.AppTheme.Main.Translucent.Editor">
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowEnterTransition">@transition/editor_enter</item>
     </style>
 
     <style name="Base.AppTheme.Main.Translucent.Dialog">
@@ -77,21 +79,19 @@
     </style>
 
     <style name="Theme.AppCompat.Light.DialogWhenLarge.Material">
-        <item name="colorButtonNormal">@color/button_normal</item>
+        <item name="colorButtonNormal">@color/color_control_activate</item>
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="buttonBarPositiveButtonStyle">@style/Widget.AppCompat.Button.Normal.Flat.Small
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.AppCompat.Button.Normal.Flat
         </item>
         <item name="buttonBarNegativeButtonStyle">
-            @style/Widget.AppCompat.Button.Borderless.Colored.Small
+            @style/Widget.AppCompat.Button.Borderless.Colored.Normal
         </item>
         <item name="buttonBarNeutralButtonStyle">
-            @style/Widget.AppCompat.Button.Borderless.Colored.Small
+            @style/Widget.AppCompat.Button.Borderless.Colored.Normal
         </item>
         <item name="android:navigationBarColor">?colorPrimaryDark</item>
         <item name="android:windowAnimationStyle">@style/Sade</item>
     </style>
-
-    <style name="Base.AlertDialog"></style>
 
     <style name="SelectableCircleImageView">
         <item name="android:transitionName">@string/tn_avatar</item>
@@ -100,48 +100,57 @@
         <item name="android:foreground">@drawable/bg_selectable_circle</item>
     </style>
 
+    <style name="Base.AlertDialog"></style>
+
     <style name="Theme.AppCompat.Light.Dialog.Alert.Material">
-        <item name="colorButtonNormal">@color/button_normal</item>
+        <item name="colorButtonNormal">@color/color_control_activate</item>
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="android:windowMinWidthMinor">90%</item>
-        <item name="buttonBarPositiveButtonStyle">@style/Widget.AppCompat.Button.Normal.Flat.Small
+        <item name="android:windowMinWidthMinor">80%</item>
+        <item name="android:windowMinWidthMajor">80%</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.AppCompat.Button.Normal.Flat
         </item>
         <item name="buttonBarNegativeButtonStyle">
-            @style/Widget.AppCompat.Button.Borderless.Colored.Small
+            @style/Widget.AppCompat.Button.Borderless.Colored.Normal
         </item>
         <item name="buttonBarNeutralButtonStyle">
-            @style/Widget.AppCompat.Button.Borderless.Colored.Small
+            @style/Widget.AppCompat.Button.Borderless.Colored.Normal
         </item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:backgroundDimAmount">0.25</item>
         <item name="android:windowAnimationStyle">@style/Sade</item>
-        <item name="android:windowBackground">@drawable/bg_material_dialog</item>
     </style>
 
     <style name="Base.Dialog">
+        <item name="android:windowMinWidthMinor">80%</item>
+        <item name="android:windowMinWidthMajor">70%</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowAnimationStyle">@style/Sade</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">.3</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
-    <style name="Base.Dialog.ContentEditor">
+    <style name="Base.Dialog.Translucent">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
-    <style name="Base.Dialog.SenderChooser">
+    <style name="Base.Dialog.Translucent.NoDim">
         <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+    <style name="Base.Dialog.Normal">
+        <item name="android:windowBackground">@drawable/bg_material_dialog</item>
         <item name="android:windowElevation">@dimen/z_dialog</item>
         <item name="android:windowIsFloating">true</item>
-        <item name="android:windowBackground">@drawable/bg_material_dialog</item>
-        <item name="android:windowMinWidthMinor">100%</item>
     </style>
 
     <!-- normal-sized button style (for normal usage) -->
     <style name="Widget.AppCompat.Button.Normal">
         <item name="android:textColor">@android:color/white</item>
-        <item name="android:background">@drawable/bg_btn_normal</item>
+        <item name="android:background">@drawable/bg_btn</item>
     </style>
 
     <!-- flat button style -->
@@ -149,27 +158,18 @@
         <item name="android:stateListAnimator">@animator/flat_raise</item>
     </style>
 
-    <!-- flat small-sized button style (such as positive dialog button) -->
-    <style name="Widget.AppCompat.Button.Normal.Flat.Small">
-        <item name="android:background">@drawable/bg_btn_small</item>
-    </style>
-
-
     <!-- borderless small-sized button style (such as negative dialog button) -->
-    <style name="Widget.AppCompat.Button.Borderless.Colored.Small">
-        <item name="android:background">@drawable/bg_btn_borderless_small</item>
-        <item name="android:textColor">?attr/colorAccent</item>
+    <style name="Widget.AppCompat.Button.Borderless.Colored.Normal">
+        <item name="android:background">@drawable/bg_btn_borderless</item>
+        <item name="android:textColor">?colorControlActivated</item>
     </style>
 
     <!-- flat small-sized button with frame (such as negative dialog button) -->
-    <style name="Widget.AppCompat.Button.Borderless.Colored.Small.Framed">
-        <item name="android:background">@drawable/bg_btn_framed_small</item>
+    <style name="Widget.AppCompat.Button.Borderless.Colored.Framed">
+        <item name="android:textColor">?colorControlActivated</item>
+        <item name="android:background">@drawable/bg_btn_framed</item>
     </style>
 
-    <!-- borderless button style -->
-    <style name="Widget.AppCompat.Button.Borderless.Colored.Normal">
-        <item name="android:background">@drawable/bg_btn_borderless_normal</item>
-    </style>
 
     <style name="Widget.AppCompat.Spinner.Underlined.Filter">
         <item name="android:popupElevation">@dimen/z_popup</item>
@@ -185,21 +185,24 @@
     <style name="TextAppearance.AppCompat.Caption.Tag">
         <item name="android:textColor">@android:color/white</item>
         <item name="android:background">@drawable/bg_tag</item>
-        <item name="android:paddingStart">@dimen/dp_6</item>
-        <item name="android:paddingEnd">@dimen/dp_6</item>
-        <item name="android:paddingTop">@dimen/dp_2</item>
-        <item name="android:paddingBottom">@dimen/dp_2</item>
-        <item name="android:letterSpacing">0.05</item>
+        <item name="autoSizeTextType">uniform</item>
+        <item name="android:gravity">center</item>
     </style>
 
-    <style name="TimePicker">
-        <item name="android:padding">@dimen/spacing_unit</item>
+    <style name="TextAppearance.AppCompat.Caption.Tag.Framed">
+        <item name="android:textColor">?android:textColorSecondary</item>
+        <item name="android:background">@drawable/bg_framed</item>
+    </style>
+
+    <style name="TextAppearance.AppCompat.Small.Chip">
+        <item name="android:background">@drawable/bg_chip</item>
+        <item name="android:textColor">@android:color/white</item>
         <item name="android:clickable">true</item>
-        <item name="android:background">?android:selectableItemBackground</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:gravity">center</item>
+        <item name="android:focusable">true</item>
+        <item name="android:paddingStart">@dimen/spacing_normal</item>
+        <item name="android:paddingEnd">@dimen/spacing_normal</item>
+        <item name="android:paddingTop">@dimen/spacing_unit</item>
+        <item name="android:paddingBottom">@dimen/spacing_unit</item>
     </style>
 
     <integer name="animDurationNormal">300</integer>

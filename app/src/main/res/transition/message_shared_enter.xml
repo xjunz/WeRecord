@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 <transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
     android:interpolator="@android:interpolator/fast_out_slow_in">
@@ -10,7 +10,7 @@
         android:duration="@integer/animDurationNormal"
         android:text="@string/check_msg"
         android:textColor="?colorAccent"
-        app:opticalButtonColor="?android:colorBackground" />
+        app:opticalButtonColor="?android:colorBackgroundFloating" />
     <targets>
         <target android:targetId="@+id/rv_message" />
     </targets>

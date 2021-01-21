@@ -1,11 +1,14 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.impl.model.account;
 
+import android.os.Parcel;
+
 import androidx.annotation.NonNull;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Calendar;
@@ -14,9 +17,9 @@ import java.util.Date;
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.data.viewmodel.SortBy;
-import xjunz.tool.wechat.util.UniUtils;
+import xjunz.tool.wechat.util.Utils;
 
-import static xjunz.tool.wechat.util.UniUtils.arabicDigit2HanDigit;
+import static xjunz.tool.wechat.util.Utils.arabicDigit2HanDigit;
 
 /**
  * Talker是什么？{@link Contact}和{@code Talker}的区别是什么?
@@ -47,8 +50,14 @@ public class Talker extends Contact {
      */
     public String formatTimestamp;
 
+    public String parentRef;
+
     public Talker(String id) {
         super(id);
+    }
+
+    public boolean isHidden() {
+        return "hidden_conv_parent".equals(parentRef);
     }
 
     /**
@@ -81,11 +90,13 @@ public class Talker extends Contact {
                 }
             case TIMESTAMP:
                 if (timestampDes == null) {
+                    long current = System.currentTimeMillis();
                     Calendar lastMsg = Calendar.getInstance();
                     lastMsg.setTime(new Date(lastMsgTimestamp));
                     Calendar now = Calendar.getInstance();
-                    now.setTime(new Date(System.currentTimeMillis()));
+                    now.setTime(new Date(current));
                     int yearGap = now.get(Calendar.YEAR) - lastMsg.get(Calendar.YEAR);
+                    // if (current >= lastMsgTimestamp) {
                     //刚刚更新的消息，时间戳还没同步被微信同步到数据库
                     if (yearGap < 0) {
                         this.lastMsgTimestamp = System.currentTimeMillis();
@@ -93,7 +104,12 @@ public class Talker extends Contact {
                         formatTimestamp = App.getStringOf(R.string.not_long_ago);
                     } else if (yearGap == 0) {
                         int dayGap = now.get(Calendar.DAY_OF_YEAR) - lastMsg.get(Calendar.DAY_OF_YEAR);
+                        //如果这个星期是跨年的，无论你当前时间是哪一年，calendar.get(Calendar.WEEK_OF_YEAR)得到的都会是1
+                        //2020年12月27日的时候就遇到了BUG，因此当我们的星期差小于0时，为其加上52
                         int weekGap = now.get(Calendar.WEEK_OF_YEAR) - lastMsg.get(Calendar.WEEK_OF_YEAR);
+                        if (weekGap < 0) {
+                            weekGap += 52;
+                        }
                         int monthGap = now.get(Calendar.MONTH) - lastMsg.get(Calendar.MONTH);
                         if (dayGap == 0) {
                             timestampDes = App.getStringOf(R.string.today);
@@ -107,7 +123,7 @@ public class Talker extends Contact {
                         } else if (monthGap == 0) {
                             if (weekGap == 1) {
                                 timestampDes = App.getStringOf(R.string.last_week);
-                                formatTimestamp = App.getStringOf(R.string.format_week_of_day, UniUtils.dayOfWeek2Han(lastMsg.get(Calendar.DAY_OF_WEEK)));
+                                formatTimestamp = App.getStringOf(R.string.format_week_of_day, Utils.dayOfWeek2Han(lastMsg.get(Calendar.DAY_OF_WEEK)));
                             } else {
                                 timestampDes = App.getStringOf(R.string.format_weeks_ago, arabicDigit2HanDigit(weekGap));
                                 formatTimestamp = App.getStringOf(R.string.format_m_d, lastMsg.get(Calendar.MONTH) + 1, lastMsg.get(Calendar.DAY_OF_MONTH));
@@ -128,6 +144,15 @@ public class Talker extends Contact {
                         }
                         formatTimestamp = App.getStringOf(R.string.format_y_m_d, lastMsg.get(Calendar.YEAR), (lastMsg.get(Calendar.MONTH) + 1), lastMsg.get(Calendar.DAY_OF_MONTH));
                     }
+                   /* }
+                    //修改过的日期，有可能在未来（弃用）
+                    else {
+                        if (yearGap == 0) {
+                            timestampDes = formatTimestamp = App.getStringOf(R.string.format_m_d, lastMsg.get(Calendar.MONTH) + 1, lastMsg.get(Calendar.DAY_OF_MONTH));
+                        } else {
+                            timestampDes = formatTimestamp = App.getStringOf(R.string.format_y_m_d, lastMsg.get(Calendar.YEAR), (lastMsg.get(Calendar.MONTH) + 1), lastMsg.get(Calendar.DAY_OF_MONTH));
+                        }
+                    }*/
                 }
                 return timestampDes;
 
@@ -165,4 +190,42 @@ public class Talker extends Contact {
                 ", id='" + id + '\'' +
                 '}';
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NotNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeInt(this.messageCount);
+        dest.writeLong(this.lastMsgTimestamp);
+        dest.writeString(this.timestampDes);
+        dest.writeString(this.formatTimestamp);
+    }
+
+    protected Talker(Parcel in) {
+        super(in);
+        this.messageCount = in.readInt();
+        this.lastMsgTimestamp = in.readLong();
+        this.timestampDes = in.readString();
+        this.formatTimestamp = in.readString();
+    }
+
+    public static final Creator<Talker> CREATOR = new Creator<Talker>() {
+        @NotNull
+        @Contract("_ -> new")
+        @Override
+        public Talker createFromParcel(Parcel source) {
+            return new Talker(source);
+        }
+
+        @NotNull
+        @Contract(value = "_ -> new", pure = true)
+        @Override
+        public Talker[] newArray(int size) {
+            return new Talker[size];
+        }
+    };
 }

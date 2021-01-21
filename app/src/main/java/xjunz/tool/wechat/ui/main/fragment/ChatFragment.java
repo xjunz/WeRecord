@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.ui.main.fragment;
@@ -7,10 +7,13 @@ package xjunz.tool.wechat.ui.main.fragment;
 import android.text.Html;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +51,8 @@ public class ChatFragment extends ListPageFragment<Talker> {
     }
 
     @Override
-    public void initPageConfig(PageConfig config) {
+    public PageConfig getInitialConfig() {
+        PageConfig config = new PageConfig();
         config.caption = getString(R.string.chat);
         config.isChat.set(true);
         config.sortBy.set(SortBy.TIMESTAMP);
@@ -56,6 +60,7 @@ public class ChatFragment extends ListPageFragment<Talker> {
         config.typeList.addAll(captionList);
         config.sortByList.addAll(SortBy.getCaptionList());
         config.setEventHandler(this);
+        return config;
     }
 
 
@@ -65,7 +70,7 @@ public class ChatFragment extends ListPageFragment<Talker> {
     }
 
     @Override
-    public void resetFilterConfig(PageConfig config) {
+    public void resetFilterConfig(@NotNull PageConfig config) {
         config.sortBy.set(SortBy.TIMESTAMP);
         config.orderBy.set(PageConfig.ORDER_ASCENDING);
         config.typeSelection.set(0);
@@ -102,16 +107,20 @@ public class ChatFragment extends ListPageFragment<Talker> {
                 holder.tvTime.setText(item.content.formatTimestamp);
                 //设置记录数
                 holder.tvMsgCount.setText(Html.fromHtml(getString(R.string.format_total_records, item.content.messageCount)));
+                //是否为隐藏的消息
+                holder.ivHidden.setVisibility(item.content.isHidden() ? View.VISIBLE : View.GONE);
             }
         }
 
         private class ChatViewHolder extends ListPageViewHolder {
             TextView tvMsgCount, tvTime;
+            ImageView ivHidden;
 
             public ChatViewHolder(@NonNull View itemView) {
                 super(itemView);
                 tvMsgCount = itemView.findViewById(R.id.tv_msg_count);
                 tvTime = itemView.findViewById(R.id.tv_time);
+                ivHidden = itemView.findViewById(R.id.iv_hidden);
             }
         }
     }

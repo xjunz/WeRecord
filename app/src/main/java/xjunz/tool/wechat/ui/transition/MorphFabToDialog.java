@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.ui.transition;
@@ -60,10 +60,10 @@ public class MorphFabToDialog extends ChangeBounds {
 
     public MorphFabToDialog(Context context, AttributeSet attrs) {
         super(context, attrs);
-        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.FabTransform);
-        startColor = typedArray.getColor(R.styleable.FabTransform_startColor, startColor);
-        endCornerRadius = typedArray.getDimensionPixelSize(R.styleable.FabTransform_endCornerRadius, endCornerRadius);
-        startCornerRadius = typedArray.getDimensionPixelSize(R.styleable.FabTransform_startCornerRadius, startCornerRadius);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.Transform);
+        startColor = typedArray.getColor(R.styleable.Transform_startColor, startColor);
+        endCornerRadius = typedArray.getDimensionPixelSize(R.styleable.Transform_endCornerRadius, endCornerRadius);
+        startCornerRadius = typedArray.getDimensionPixelSize(R.styleable.Transform_startCornerRadius, startCornerRadius);
         typedArray.recycle();
     }
 

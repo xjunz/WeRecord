@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="?colorControlHighlight">
-    <item android:id="@android:id/mask">
-        <shape android:shape="rectangle">
-            <corners android:radius="@dimen/corner_dialog" />
-            <solid android:color="?android:attr/colorBackground" />
-        </shape>
-    </item>
+    <item
+        android:id="@android:id/mask"
+        android:drawable="@drawable/bg_btn" />
     <item>
-        <shape android:shape="rectangle">
-            <corners android:radius="@dimen/corner_dialog" />
-            <stroke
-                android:width="@dimen/dp_1"
-                android:color="?colorAccent" />
-        </shape>
+        <inset android:inset="@dimen/spacing_unit">
+            <shape android:shape="rectangle">
+                <corners android:radius="@dimen/corner_button" />
+                <stroke
+                    android:width="@dimen/dp_1"
+                    android:color="?colorControlActivated" />
+            </shape>
+        </inset>
     </item>
 </ripple>

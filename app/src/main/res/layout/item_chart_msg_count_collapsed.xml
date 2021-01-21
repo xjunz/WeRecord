@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="collapsedStats"
+            type="java.util.List" />
+
+        <variable
+            name="host"
+            type="xjunz.tool.wechat.ui.message.fragment.StatisticsFragment" />
+
+        <import type="xjunz.tool.wechat.ui.message.fragment.StatisticsFragment.MsgCountStat" />
+    </data>
+
+
+    <RelativeLayout
+        android:id="@+id/item_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackground"
+        android:onClick="@{()->host.showCollapsedSenders(itemView,collapsedStats)}">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="?android:attr/listDivider" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/avatar1"
+            android:layout_width="@dimen/fab_small"
+            android:layout_height="@dimen/fab_small"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/dp_12"
+            android:layout_marginBottom="@dimen/dp_12"
+            android:avatar="@{((MsgCountStat)collapsedStats.get(0)).sender}"
+            tools:src="@tools:sample/avatars" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/avatar2"
+            android:layout_width="@dimen/fab_small"
+            android:layout_height="@dimen/fab_small"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="-15dp"
+            android:layout_toEndOf="@+id/avatar1"
+            android:avatar="@{((MsgCountStat)collapsedStats.get(1)).sender}"
+            tools:src="@tools:sample/avatars" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/avatar3"
+            android:layout_width="@dimen/fab_small"
+            android:layout_height="@dimen/fab_small"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="-15dp"
+            android:layout_toEndOf="@+id/avatar2"
+            android:avatar="@{((MsgCountStat)collapsedStats.get(2)).sender}"
+            tools:src="@tools:sample/avatars" />
+
+        <ImageView
+            android:id="@+id/iv_more"
+            android:layout_width="@dimen/fab_small"
+            android:layout_height="@dimen/fab_small"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="-15dp"
+            android:layout_toEndOf="@+id/avatar3"
+            android:background="@drawable/bg_fab"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_baseline_more_horiz_24"
+            app:tint="@android:color/white"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/spacing_unit"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:layout_toEndOf="@id/iv_more"
+            android:text="@{@string/format_others(collapsedStats.size)}" />
+    </RelativeLayout>
+</layout>

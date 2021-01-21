@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.ui.customview;
@@ -16,6 +16,8 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
+import org.jetbrains.annotations.NotNull;
+
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
 
@@ -23,6 +25,9 @@ import xjunz.tool.wechat.R;
  * 简单地实现一个更美观的Toast，美其名曰<b>MasterToast</b>
  */
 public class MasterToast extends android.widget.Toast {
+    private static MasterToast sCurrentShownToast;
+    private static long sLastShowTime;
+
     /**
      * Construct an empty Toast object.  You must call {@link #setView} before you
      * can call {@link #show}.
@@ -41,6 +46,7 @@ public class MasterToast extends android.widget.Toast {
      * @param msg 要显示的信息
      * @return 创建的{@link MasterToast}
      */
+    @NotNull
     public static MasterToast make(@Nullable CharSequence msg) {
         MasterToast toast = new MasterToast(App.getContext());
         @SuppressLint("InflateParams") TextView content = (TextView) LayoutInflater.from(App.getContext()).inflate(R.layout.widget_toast, null);
@@ -56,12 +62,22 @@ public class MasterToast extends android.widget.Toast {
      * @param length 时长
      */
     private static void toast(@Nullable CharSequence msg, int length) {
-        MasterToast toast = new MasterToast(App.getContext());
+        if (sCurrentShownToast != null) {
+            if (System.currentTimeMillis() - sLastShowTime <= 500L) {
+                ((TextView) sCurrentShownToast.getView()).setText(msg);
+                return;
+            } else {
+                sCurrentShownToast.cancel();
+            }
+        }
+        sCurrentShownToast = new MasterToast(App.getContext());
         @SuppressLint("InflateParams") TextView content = (TextView) LayoutInflater.from(App.getContext()).inflate(R.layout.widget_toast, null);
-        toast.setView(content);
-        toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 200);
+        sCurrentShownToast.setView(content);
+        sCurrentShownToast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 200);
         content.setText(msg);
-        toast.show();
+        sCurrentShownToast.setDuration(length);
+        sCurrentShownToast.show();
+        sLastShowTime = System.currentTimeMillis();
     }
 
     /**

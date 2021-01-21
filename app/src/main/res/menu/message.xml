@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
@@ -19,6 +19,9 @@
         android:id="@+id/item_check"
         android:title="@string/check" />
     <item
-        android:id="@+id/restore"
+        android:id="@+id/item_restore"
         android:title="@string/restore" />
+    <item
+        android:id="@+id/item_set_as_template"
+        android:title="@string/set_as_template" />
 </menu>

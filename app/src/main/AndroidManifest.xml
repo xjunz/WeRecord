@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -38,7 +38,7 @@
             android:name=".ui.outer.DebugActivity"
             android:theme="@style/Base.AppTheme" />
         <activity
-            android:name=".ui.outer.SplashActivity"
+            android:name=".ui.outer.InitializationActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Base.AppTheme">
             <intent-filter>
@@ -48,7 +48,7 @@
         </activity>
         <activity
             android:name=".ui.main.DetailActivity"
-            android:screenOrientation="portrait"
+            android:parentActivityName=".ui.main.MainActivity"
             android:theme="@style/Base.AppTheme.Main.Translucent.Dialog.Detail">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -56,15 +56,16 @@
         </activity>
         <activity
             android:name=".ui.main.ImageViewerActivity"
-            android:screenOrientation="portrait"
+            android:parentActivityName=".ui.main.DetailActivity"
             android:theme="@style/Base.AppTheme.Main.Translucent.Dialog.ImageViewer" />
         <activity
             android:name=".ui.message.MessageActivity"
-            android:screenOrientation="portrait"
+            android:parentActivityName=".ui.main.MainActivity"
             android:theme="@style/Base.AppTheme.Main.Translucent.Message" />
         <activity
             android:name=".ui.message.EditorActivity"
+            android:parentActivityName=".ui.message.MessageActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Base.AppTheme" />
+            android:theme="@style/Base.AppTheme.Main.Translucent.Editor" />
     </application>
 </manifest>

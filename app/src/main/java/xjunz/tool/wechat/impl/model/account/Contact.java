@@ -1,13 +1,16 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.impl.model.account;
 
+import android.os.Parcel;
 import android.text.TextUtils;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +18,9 @@ import java.util.List;
 import xjunz.tool.wechat.App;
 import xjunz.tool.wechat.R;
 import xjunz.tool.wechat.data.viewmodel.SortBy;
+import xjunz.tool.wechat.impl.model.message.util.LvBufferUtils;
 import xjunz.tool.wechat.impl.repo.ContactRepository;
-import xjunz.tool.wechat.util.UniUtils;
+import xjunz.tool.wechat.util.Utils;
 
 public class Contact extends Account {
     /**
@@ -57,6 +61,10 @@ public class Contact extends Account {
      */
     protected static final int RAW_TYPE_UNSAVED_GROUP = 2;
     /**
+     * rawType: 不看朋友圈的朋友
+     */
+    protected static final int RAW_TYPE_BLOCK_PYQ = 0x10003;
+    /**
      * 处理得到的用于排序的名称拼音缩写
      *
      * @see Contact#getComparatorPyAbbr()
@@ -69,8 +77,42 @@ public class Contact extends Account {
      */
     private String pyAbbr;
 
+
+    private byte[] lvBuffer;
+    private Object[] parsedLvBuffer;
+    public static final int[] LV_BUFFER_READ_SERIAL = {1, 1, 0, 3, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 3, 3};
+
     public Contact(String id) {
         this.id = id;
+    }
+
+    public byte[] getLvBuffer() {
+        return lvBuffer;
+    }
+
+    public void setLvBuffer(byte[] lvBuffer) {
+        this.lvBuffer = lvBuffer;
+        LvBufferUtils utils = new LvBufferUtils();
+        try {
+            parsedLvBuffer = utils.readLvBuffer(lvBuffer, LV_BUFFER_READ_SERIAL);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Object[] getParsedLvBuffer() {
+        return parsedLvBuffer;
+    }
+
+    /**
+     * 返回某个好友是否为单向好友（僵尸）
+     */
+    public boolean isPossibleZombie() {
+        if (type == Type.FRIEND && parsedLvBuffer != null) {
+            String encrypted = (String) parsedLvBuffer[32];
+            return encrypted != null && encrypted.endsWith("@stranger");
+        }
+        return false;
     }
 
     /**
@@ -97,11 +139,10 @@ public class Contact extends Account {
 
     public String getNamePyAttr() {
         if (pyAbbr == null) {
-            pyAbbr = UniUtils.getPinYinAbbr(getName());
+            pyAbbr = Utils.getPinYinAbbr(getName());
         }
         return pyAbbr;
     }
-
 
     public int compareTo(@NonNull Contact o, SortBy by, boolean isAscending) {
         return (isAscending ? 1 : -1) * getComparatorPyAbbr().compareTo(o.getComparatorPyAbbr());
@@ -113,7 +154,7 @@ public class Contact extends Account {
      */
     public enum Type {
         /**
-         * 好友: （1||3）&& !endsWith("@chatroom")&&!startWith("gh_")
+         * 好友: （1||3||65539）&& !endsWith("@chatroom")&&!startWith("gh_")
          */
         FRIEND(R.string.type_friend),
         /**
@@ -154,7 +195,8 @@ public class Contact extends Account {
             this.caption = App.getStringOf(captionRes);
         }
 
-        public static List<String> getCaptionList(Type... types) {
+        @NotNull
+        public static List<String> getCaptionList(@NotNull Type... types) {
             List<String> captions = new ArrayList<>();
             for (Type type : types) {
                 captions.add(type.caption);
@@ -222,4 +264,44 @@ public class Contact extends Account {
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NotNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeString(this.remark);
+        dest.writeInt(this.rawType);
+        dest.writeInt(this.type == null ? -1 : this.type.ordinal());
+        dest.writeString(this.comparatorPyAbbr);
+        dest.writeString(this.pyAbbr);
+        dest.writeByteArray(this.lvBuffer);
+        dest.writeArray(this.parsedLvBuffer);
+    }
+
+    protected Contact(Parcel in) {
+        super(in);
+        this.remark = in.readString();
+        this.rawType = in.readInt();
+        int tmpType = in.readInt();
+        this.type = tmpType == -1 ? null : Type.values()[tmpType];
+        this.comparatorPyAbbr = in.readString();
+        this.pyAbbr = in.readString();
+        this.lvBuffer = in.createByteArray();
+        this.parsedLvBuffer = in.readArray(Object[].class.getClassLoader());
+    }
+
+    public static final Creator<Contact> CREATOR = new Creator<Contact>() {
+        @Override
+        public Contact createFromParcel(Parcel source) {
+            return new Contact(source);
+        }
+
+        @Override
+        public Contact[] newArray(int size) {
+            return new Contact[size];
+        }
+    };
 }

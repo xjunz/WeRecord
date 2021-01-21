@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -18,6 +18,6 @@
         android:id="@+id/iv_bottom_item"
         android:layout_width="@dimen/r_fab_normal"
         android:layout_height="@dimen/r_fab_normal"
-        android:tint="@color/bottom_bar_image_tint"
+        android:tint="@color/color_control_normal"
         tools:ignore="ContentDescription" />
 </FrameLayout>

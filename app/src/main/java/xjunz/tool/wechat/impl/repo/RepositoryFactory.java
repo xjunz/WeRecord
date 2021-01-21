@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 package xjunz.tool.wechat.impl.repo;
 
@@ -30,5 +30,9 @@ public final class RepositoryFactory {
         synchronized (sInstanceMap) {
             sInstanceMap.remove(tClass);
         }
+    }
+
+    public static void purge() {
+        sInstanceMap.clear();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.util;
@@ -24,7 +24,7 @@ import java.io.PrintStream;
 public class IOUtils {
 
     public static void transferStream(@NotNull InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[2048];
         int count;
         while ((count = in.read(buffer, 0, buffer.length)) != -1) {
             out.write(buffer, 0, count);
@@ -113,7 +113,7 @@ public class IOUtils {
 
     @NotNull
     @Contract("_ -> new")
-    public static String readExceptionStackTrace(@NotNull Throwable e) {
+    public static String readStackTraceFromThrowable(@NotNull Throwable e) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream stream = new PrintStream(out);
         e.printStackTrace(stream);

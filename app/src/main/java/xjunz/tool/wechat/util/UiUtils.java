@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.util;
@@ -19,6 +19,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.text.Editable;
 import android.transition.Transition;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.BounceInterpolator;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -59,6 +61,20 @@ public class UiUtils {
     }
 
     @CheckResult
+    public static AlertDialog.Builder createCaveat(Context context, Object msg) {
+        return createDialog(context, R.string.caveat, msg).setPositiveButton(android.R.string.ok, null);
+    }
+
+    @CheckResult
+    public static AlertDialog.Builder createLaunch(Context context) {
+        return UiUtils.createAlert(context, context.getString(R.string.alert_restart_after_changes_applied))
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok, (dialog1, which1) -> {
+                    Utils.openWeChat(context);
+                });
+    }
+
+    @CheckResult
     public static AlertDialog.Builder createAlert(Context context, Object msg) {
         return createDialog(context, R.string.alert, msg).setPositiveButton(android.R.string.ok, null);
     }
@@ -72,7 +88,7 @@ public class UiUtils {
     public static AlertDialog.Builder createError(Context context, Object msg) {
         return createDialog(context, R.string.error_occurred, msg).setPositiveButton(R.string.feedback, (dialog, which) -> {
             //TODO:反馈方式
-            // UniUtils.feedbackJoinQGroup(context);
+            // Utils.feedbackJoinQGroup(context);
         }).setNegativeButton(android.R.string.ok, null);
     }
 
@@ -127,24 +143,31 @@ public class UiUtils {
         return builder;
     }
 
-    public static int getBottomMargin(@NotNull View view) {
-        ViewGroup.LayoutParams lp = view.getLayoutParams();
-        try {
-            return (int) lp.getClass().getField("bottomMargin").get(lp);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
+    @CheckResult
+    @NotNull
+    public static Dialog createProgress(Context context, Object title) {
+        @SuppressLint("InflateParams") View content = LayoutInflater.from(context).inflate(R.layout.dialog_progress, null);
+        TextView tvTitle = content.findViewById(R.id.tv_msg);
+        if (title != null) {
+            if (title instanceof Integer) {
+                tvTitle.setText((Integer) title);
+            } else if (title instanceof CharSequence) {
+                tvTitle.setText((CharSequence) title);
+            } else {
+                tvTitle.setText(title.toString());
+            }
         }
-        return 0;
+        return new AlertDialog.Builder(context, R.style.Theme_AppCompat_Light_Dialog_Alert_Material).setView(content).setCancelable(false).create();
+    }
+
+    public static int getBottomMargin(@NotNull View view) {
+        ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+        return lp.bottomMargin;
     }
 
     public static int getTopMargin(@NotNull View view) {
-        ViewGroup.LayoutParams lp = view.getLayoutParams();
-        try {
-            return (int) lp.getClass().getField("topMargin").get(lp);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        return 0;
+        ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+        return lp.topMargin;
     }
 
     @NotNull
@@ -254,14 +277,6 @@ public class UiUtils {
         target.animate().translationX(transX).setInterpolator(AnimUtils.getFastOutSlowInInterpolator()).start();
     }
 
-    @CheckResult
-    @NotNull
-    public static Dialog createProgressDialog(Context context, int titleRes) {
-        @SuppressLint("InflateParams") View content = LayoutInflater.from(context).inflate(R.layout.dialog_progress, null);
-        TextView tvTitle = content.findViewById(R.id.tv_title);
-        tvTitle.setText(titleRes);
-        return new AlertDialog.Builder(context).setView(content).setCancelable(false).create();
-    }
 
     @ColorInt
     public static int getAttrColor(@NonNull Context context, @AttrRes int attrRes) {
@@ -374,6 +389,11 @@ public class UiUtils {
         out[1] = srcPos[1] - anchorPos[1];
     }
 
+    public static void setTextKeepSelection(@NotNull EditText et, CharSequence text) {
+        Editable editable = et.getText();
+        editable.replace(0, editable.length(), text);
+    }
+
     /**
      * Determine if the navigation bar will be on the bottom of the screen, based on logic in
      * PhoneWindowManager.
@@ -398,7 +418,6 @@ public class UiUtils {
         sTextColorSecondary = Objects.requireNonNull(typedArray.getColorStateList(2)).getDefaultColor();
         typedArray.recycle();
     }
-
 
     @ColorInt
     public static int getColorAccent() {

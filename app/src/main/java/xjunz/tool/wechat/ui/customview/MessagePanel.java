@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.ui.customview;
@@ -13,7 +13,10 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.widget.NestedScrollView;
 import androidx.customview.widget.ViewDragHelper;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -28,8 +31,9 @@ import xjunz.tool.wechat.R;
  */
 public class MessagePanel extends ConstraintLayout {
     private ViewDragHelper mHelper;
-    private View mIndicator, mIbStats, mIbSearch, mEtSearch, mIbEdit;
-    private ViewGroup mViewPager, mBottomBar, mCurtain, mIbContainer;
+    private View mIndicator, mEtSearch, mIbEdit;
+    private ViewPager2 mViewPager;
+    private ViewGroup mBottomBar, mCurtain, mIbContainer;
     private int mCurtainHeight;
     private int mMaxTop, mMinTop;
     private int mIbContainerWidth, mMinContainerWidth;
@@ -56,8 +60,10 @@ public class MessagePanel extends ConstraintLayout {
                 int containerWidth = (int) (mMinContainerWidth + (1 - fraction) * (mIbContainerWidth - mMinContainerWidth));
                 mIbContainer.setRight(containerWidth);
                 setWidth(mIbContainer, containerWidth);
-                setWidth(mIndicator, containerWidth / 3);
-                mEtSearch.setTranslationX(mIbContainerWidth - (mIbContainerWidth - mMinContainerWidth * (2f / 3f)) * fraction);
+                int indicatorWidth = containerWidth / 3;
+                setWidth(mIndicator, indicatorWidth);
+                mIndicator.setTranslationX(mViewPager.getCurrentItem() * indicatorWidth);
+                mEtSearch.setTranslationX(mIbContainerWidth - (mIbContainerWidth - mMinContainerWidth /* *(2f / 3f)*/) * fraction);
             }
 
             @Override
@@ -102,13 +108,19 @@ public class MessagePanel extends ConstraintLayout {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent event) {
+    public boolean onInterceptTouchEvent(@NotNull MotionEvent event) {
+        mX = event.getX();
+        mY = event.getY();
         return mHelper.shouldInterceptTouchEvent(event);
     }
 
+    private float mX, mY;
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(@NotNull MotionEvent event) {
+        mX = event.getX();
+        mY = event.getY();
         mHelper.processTouchEvent(event);
         return true;
     }
@@ -120,12 +132,37 @@ public class MessagePanel extends ConstraintLayout {
         mBottomBar = findViewById(R.id.bottom_bar);
         mCurtain = findViewById(R.id.ll_curtain);
         mIndicator = findViewById(R.id.indicator);
-        mIbEdit = findViewById(R.id.ib_edit);
-        mIbSearch = findViewById(R.id.ib_search);
-        mIbStats = findViewById(R.id.ib_stats);
         mEtSearch = findViewById(R.id.et_search);
+        mIbEdit = findViewById(R.id.ib_edit);
         mIbContainer = findViewById(R.id.ll_ib_container);
         mBottomBarElevation = mBottomBar.getElevation();
+        findViewById(R.id.ib_stats).setOnClickListener(v -> {
+            mViewPager.setCurrentItem(0, true);
+            if (!isOpen()) {
+                openPanel();
+            }
+        });
+        findViewById(R.id.ib_search).setOnClickListener(v -> {
+            mViewPager.setCurrentItem(2, true);
+            if (!isOpen()) {
+                openPanel();
+            }
+        });
+        findViewById(R.id.ib_edit).setOnClickListener(v -> {
+            mViewPager.setCurrentItem(1, true);
+            if (!isOpen()) {
+                openPanel();
+            }
+        });
+        mViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
+                if (positionOffset != 0) {
+                    mIndicator.setTranslationX(position * mIndicator.getWidth() + mIndicator.getWidth() * positionOffset);
+                }
+            }
+        });
     }
 
 
@@ -171,7 +208,36 @@ public class MessagePanel extends ConstraintLayout {
 
         @Override
         public boolean tryCaptureView(@NonNull View child, int pointerId) {
-            return child.getId() == mCurtain.getId();
+            if (child.getId() == mCurtain.getId()) {
+                //当我们的搜索结果列表在点击范围内且不能下滑时，才返回true
+                //不然我们的列表没法下滑
+                RecyclerView listResult = mCurtain.findViewById(R.id.rv_result);
+                RecyclerView listEdition = mCurtain.findViewById(R.id.rv_edition);
+                NestedScrollView statsScrollView = mCurtain.findViewById(R.id.nsv_stats);
+                if (listResult != null) {
+                    int[] lt = new int[2];
+                    listResult.getLocationInWindow(lt);
+                    if (mX >= lt[0] && mX <= lt[0] + listResult.getWidth() && mY >= lt[1] && mY <= lt[1] + listResult.getHeight()) {
+                        return !listResult.canScrollVertically(-1);
+                    }
+                }
+                if (listEdition != null) {
+                    int[] lt = new int[2];
+                    listEdition.getLocationInWindow(lt);
+                    if (mX >= lt[0] && mX <= lt[0] + listEdition.getWidth() && mY >= lt[1] && mY <= lt[1] + listEdition.getHeight()) {
+                        return !listEdition.canScrollVertically(-1);
+                    }
+                }
+                if (statsScrollView != null) {
+                    int[] lt = new int[2];
+                    statsScrollView.getLocationInWindow(lt);
+                    if (mX >= lt[0] && mX <= lt[0] + statsScrollView.getWidth() && mY >= lt[1] && mY <= lt[1] + statsScrollView.getHeight()) {
+                        return !statsScrollView.canScrollVertically(-1);
+                    }
+                }
+                return true;
+            }
+            return false;
         }
 
 
@@ -223,7 +289,6 @@ public class MessagePanel extends ConstraintLayout {
                     openPanel();
                 }
             }
-            super.onViewReleased(releasedChild, xvel, yvel);
         }
     };
 

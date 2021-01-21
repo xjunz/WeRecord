@@ -1,20 +1,22 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.ui.message;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.transition.Transition;
+import android.util.ArrayMap;
+import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,45 +24,52 @@ import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
+import io.reactivex.FlowableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.wechat.BR;
 import xjunz.tool.wechat.R;
-import xjunz.tool.wechat.data.viewmodel.EditorViewModel;
-import xjunz.tool.wechat.data.viewmodel.MessageEditorViewModel;
 import xjunz.tool.wechat.data.viewmodel.MessageViewModel;
 import xjunz.tool.wechat.databinding.ActivityMessageBinding;
 import xjunz.tool.wechat.impl.DatabaseModifier;
 import xjunz.tool.wechat.impl.Environment;
-import xjunz.tool.wechat.impl.model.account.Account;
 import xjunz.tool.wechat.impl.model.account.Talker;
-import xjunz.tool.wechat.impl.model.message.BackupMessage;
-import xjunz.tool.wechat.impl.model.message.Edition;
+import xjunz.tool.wechat.impl.model.message.ComplexMessage;
 import xjunz.tool.wechat.impl.model.message.Message;
-import xjunz.tool.wechat.impl.model.message.MessageFactory;
-import xjunz.tool.wechat.impl.repo.ContactRepository;
+import xjunz.tool.wechat.impl.model.message.SystemMessage;
+import xjunz.tool.wechat.impl.model.message.util.Edition;
+import xjunz.tool.wechat.impl.model.message.util.Template;
 import xjunz.tool.wechat.impl.repo.MessageRepository;
 import xjunz.tool.wechat.impl.repo.RepositoryFactory;
-import xjunz.tool.wechat.ui.BaseActivity;
+import xjunz.tool.wechat.ui.base.RecycleSensitiveActivity;
+import xjunz.tool.wechat.ui.customview.MasterToast;
 import xjunz.tool.wechat.ui.customview.MessagePanel;
 import xjunz.tool.wechat.ui.main.DetailActivity;
 import xjunz.tool.wechat.ui.message.fragment.EditionFragment;
 import xjunz.tool.wechat.ui.message.fragment.SearchFragment;
 import xjunz.tool.wechat.ui.message.fragment.StatisticsFragment;
+import xjunz.tool.wechat.ui.message.fragment.dialog.MessageViewerDialog;
+import xjunz.tool.wechat.ui.message.fragment.dialog.TemplateSetupDialog;
+import xjunz.tool.wechat.util.IOUtils;
 import xjunz.tool.wechat.util.RxJavaUtils;
 import xjunz.tool.wechat.util.UiUtils;
 
-public class MessageActivity extends BaseActivity {
+//TODO:高级编辑功能、模板功能
+public class MessageActivity extends RecycleSensitiveActivity {
     public static final String EXTRA_TALKER = "MessageActivity.extra.talker";
     /**
      * 初始加载的消息数，不宜也没必要过大，否则可能造成卡顿和内存的浪费
@@ -84,15 +93,12 @@ public class MessageActivity extends BaseActivity {
      */
     private List<Message> mMessageList;
     private MessageRepository mMessageRepo;
-    private ContactRepository mContactRepo;
     private MessageAdapter mAdapter;
     private ActivityMessageBinding mBinding;
     private MessageViewModel mModel;
     private Fragment[] mPages;
     /**
-     * 当前需要被导航的消息，此消息来源于{@link SearchFragment}的搜索结果被点击时
-     * 发送的{@link MessageViewModel#notifyNavigate(Message)}事件。接收到此事件后，
-     * 当前消息列表会滑动到此消息的位置，予以导航。
+     * 当前需要被导航的消息。当前消息列表会滑动到此消息的位置，予以导航。
      */
     private Message mMessageToNavigate;
     /**
@@ -102,83 +108,59 @@ public class MessageActivity extends BaseActivity {
      */
     private int mMessageIndexToBlink = -1;
     private DatabaseModifier mModifier;
-    private MessageEditorViewModel mMessageEditorViewModel;
-    private final MessageViewModel.EventHandler mHandler = new MessageViewModel.EventHandler() {
-        @Override
-        public void onNavigate(Message msg) {
-            super.onNavigate(msg);
-            mBinding.messagePanel.closePanel();
-            mMessageToNavigate = msg;
-        }
+    private int mSelectedMsgIndex;
+    private Message mSelectedMsg;
 
-        @Override
-        public void onAllLoaded(int preCount) {
-            mAdapter.notifyItemInserted(preCount);
-            if (mBinding.messagePanel.isOpen()) {
-                mBinding.etSearch.requestFocus();
-            }
-        }
-    };
-
-    private final MessageEditorViewModel.EditorEventHandler mEditorEventHandler = new MessageEditorViewModel.EditorEventHandler() {
-        @Override
-        public void onMessageChanged(boolean timestampChanged, Message changed) {
-            mMessageList.remove(mModel.selectedMessagePosition);
-            if (timestampChanged) {
-                mAdapter.notifyItemRemoved(mModel.selectedMessagePosition);
-                int index = Collections.binarySearch(mMessageList, changed, (o1, o2) -> -Long.compare(o1.getCreateTimeStamp(), o2.getCreateTimeStamp()));
-                if (index >= 0) {
-                    mMessageList.add(index + 1, changed);
-                    mAdapter.notifyItemInserted(index + 1);
-                } else {
-                    index = -(index + 1);
-                    mMessageList.add(index, changed);
-                    mAdapter.notifyItemInserted(index);
-                }
-            } else {
-                mMessageList.add(mModel.selectedMessagePosition, changed);
-                mAdapter.notifyItemChanged(mModel.selectedMessagePosition);
-            }
-        }
-
-        @Override
-        public void onMessageInserted(boolean addBefore, Message inserted) {
-            int insertion = addBefore ? mModel.selectedMessagePosition - 1 : mModel.selectedMessagePosition + 1;
-            mMessageList.add(insertion, inserted);
-            mAdapter.notifyItemInserted(insertion);
-        }
-
-        @Override
-        public void onMessageDeleted() {
-            mMessageList.remove(mModel.selectedMessagePosition);
-            mAdapter.notifyItemRemoved(mModel.selectedMessagePosition);
-        }
-    };
+    private void startEditorForResult(int editMode, @NotNull Intent intent) {
+        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
+        intent.putExtra(EditorActivity.EXTRA_MESSAGE_ORIGIN, mSelectedMsg);
+        intent.putExtra(EditorActivity.EXTRA_EDIT_MODE, editMode);
+        startActivityForResult(intent, editMode, options.toBundle());
+    }
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mTalker = (Talker) getIntent().getSerializableExtra(EXTRA_TALKER);
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onCreateNormally(@Nullable Bundle savedInstanceState) {
+        mTalker = getIntent().getParcelableExtra(EXTRA_TALKER);
         if (mTalker == null) {
-            // MasterToast.shortToast("No data passed in, who are u?");
             finish();
             return;
         }
         mMessageRepo = RepositoryFactory.get(MessageRepository.class);
-        mContactRepo = RepositoryFactory.get(ContactRepository.class);
         mModifier = Environment.getInstance().modifyDatabase();
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_message);
         mRvMessage = mBinding.rvMessage;
-        mModel = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory()).get(MessageViewModel.class);
-        mMessageEditorViewModel = MessageEditorViewModel.get(getApplication());
-        mMessageEditorViewModel.registerEventHandler(mEditorEventHandler);
+        mModel = getViewModel(MessageViewModel.class);
         mModel.currentTalker = mTalker;
-        mModel.addEventHandler(mHandler);
         mMessageList = mModel.currentLoadedMessages;
         mBinding.setModel(mModel);
         initList();
         initPages();
         initPanel();
+    }
+
+    public void restore(int index, @NotNull Message target) {
+        Message backup = mModel.getUnconfirmedBackup(target.getMsgId());
+        //删除的消息没有备份，加以判断
+        //新增的消息禁用还原，不必判断
+        if (backup == null) {
+            target.removeEdition();
+            mAdapter.notifyItemChanged(index);
+        } else {
+            mModel.removeUnconfirmedBackup(backup);
+            notifyItemChangedConsideringTimestamp(backup, index);
+        }
+        mModifier.removePendingEdition(target.getMsgId());
+    }
+
+
+    public void navigate(Message msg) {
+        mBinding.messagePanel.closePanel();
+        mMessageToNavigate = msg;
     }
 
     private void doNavigate(Message msg) {
@@ -212,7 +194,7 @@ public class MessageActivity extends BaseActivity {
             //在下一帧闪烁提示
             mRvMessage.post(() -> mAdapter.notifyItemChanged(index, MessageAdapter.PAYLOAD_NAVIGATE));
         } else {
-            UiUtils.toast("找不到该消息~");
+            UiUtils.toast(R.string.message_not_found);
         }
     }
 
@@ -222,6 +204,26 @@ public class MessageActivity extends BaseActivity {
         mPages[1] = new EditionFragment();
         mPages[2] = new SearchFragment();
         mBinding.vpMessage.setAdapter(new MessageFragmentAdapter(this));
+        mBinding.vpMessage.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            int cur;
+
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                cur = position;
+                if (mPages[position] instanceof SearchFragment && !mModel.isLoadingAll.get() && !mModel.hasLoadedAll.get()) {
+                    loadAllMessages(null);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                super.onPageScrollStateChanged(state);
+                if (state == ViewPager2.SCROLL_STATE_IDLE && mPages[cur] instanceof SearchFragment && mModel.hasLoadedAll.get()) {
+                    showImeFor(mBinding.etSearch);
+                }
+            }
+        });
     }
 
     private void initPanel() {
@@ -232,7 +234,7 @@ public class MessageActivity extends BaseActivity {
                     doNavigate(mMessageToNavigate);
                     mMessageToNavigate = null;
                 } else if (isOpen) {
-                    if (mModel.hasLoadAll.get()) {
+                    if (mModel.hasLoadedAll.get()) {
                         mBinding.etSearch.requestFocus();
                     }
                 }
@@ -252,34 +254,78 @@ public class MessageActivity extends BaseActivity {
         });
     }
 
-    private final Comparator<Message> mBackupComparator = (o1, o2) -> {
-        int comparison = Long.compare(o1.getCreateTimeStamp(), o2.getCreateTimeStamp());
-        return comparison == 0 ? Integer.compare(o1.getMsgId(), o2.getMsgId()) : comparison;
-    };
+    private Disposable mLoadAllDisposable;
 
-    private void loadData() {
+    /**
+     * 并发加载所有的消息记录，默认的并发线程数为CPU核心数+1
+     */
+    public void loadAllMessages(@Nullable Runnable onSuccess) {
+        //如果已经全部加载完，直接返回
+        if (mModel.hasLoadedAll.get()) {
+            return;
+        }
+        //否则设置并发数
+        int defaultGroupCount = Runtime.getRuntime().availableProcessors() + 1;
+        //获取已经加载的消息数
+        int preloadedCount = mModel.currentLoadedMessages.size();
+        //获取需要加载的消息数（总消息数减去已加载的消息数）
+        long msgCount = mModel.actualMessageCount - preloadedCount;
+        //每个线程平均要加载的消息数
+        int unitCount = (int) (msgCount / defaultGroupCount);
+        //初始化ExecutorService
+        ExecutorService executor = Executors.newFixedThreadPool(defaultGroupCount);
+        //显示进度条
+        mModel.isLoadingAll.set(true);
+        mLoadAllDisposable = Flowable.range(0, defaultGroupCount).map(groupOrdinal -> {
+            //返回每个线程需要加载的消息起点和消息数
+            //最后一个分组需要多加载平均分后剩余的消息数
+            int offset = unitCount * groupOrdinal;
+            long count = unitCount;
+            if (groupOrdinal == defaultGroupCount - 1) {
+                count = msgCount - (groupOrdinal) * unitCount;
+            }
+            return new Pair<>(offset + preloadedCount, count);
+        })
+                .parallel()
+                .runOn(Schedulers.from(executor))
+                .flatMap(offsetLimitPair -> Flowable.create((FlowableOnSubscribe<List<Message>>) emitter -> {
+                    if (offsetLimitPair.second != 0) {
+                        //从数据库加载消息
+                        emitter.onNext(RepositoryFactory.get(MessageRepository.class).queryMessageByTalkerLimit(mModel.currentTalker.id, offsetLimitPair.first, offsetLimitPair.second));
+                    }
+                    emitter.onComplete();
+                }, BackpressureStrategy.BUFFER))
+                .sequential()
+                .observeOn(AndroidSchedulers.mainThread())
+                //对消息进行排序，并行加载的消息是无序的
+                .sorted((o1, o2) -> -Long.compare(o1.get(0).getCreateTimeStamp(), o2.get(0).getCreateTimeStamp()))
+                .subscribe(messages -> {
+                    //添加进消息列表
+                    mMessageList.addAll(messages);
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    mModel.isLoadingAll.set(false);
+                    executor.shutdown();
+                }, () -> {
+                    //通知更新
+                    mModel.hasLoadedAll.set(true);
+                    mAdapter.notifyItemInserted(preloadedCount);
+                    showImeFor(mBinding.etSearch);
+                    mModel.isLoadingAll.set(false);
+                    executor.shutdown();
+                    if (onSuccess != null) {
+                        onSuccess.run();
+                    }
+                });
+    }
+
+    private void initList() {
         RxJavaUtils.complete(() -> {
             mModel.actualMessageCount = mMessageRepo.getActualMessageCountOf(mTalker.id);
             mMessageRepo.queryMessageByTalkerLimit(mTalker.id, INITIAL_LOAD_COUNT, mMessageList);
-            mModel.hasLoadAll.set(mMessageList.size() >= mModel.actualMessageCount);
-            if (mModifier.backupTableExists()) {
-                mMessageRepo.queryBackupMessagesByTalker(mTalker.id, mModel.allBackupMessages);
-                int index;
-                for (BackupMessage backup : mModel.allBackupMessages) {
-                    if ((index = mMessageList.indexOf(backup)) >= 0) {
-                        mMessageList.get(index).setEditionFlag(backup.getEditionFlag());
-                    } else if (backup.getEditionFlag() == Edition.FLAG_REMOVAL) {
-                        int i = Collections.binarySearch(mMessageList, backup, mBackupComparator);
-                        if (i >= 0) {
-                            throw new IllegalArgumentException("Found a deleted message(" + backup.getMsgId() + ") in message list.");
-                        } else {
-                            int insertion = -(i + 1);
-                            if (insertion > 0 || (insertion == 0 && mModel.hasLoadAll.get())) {
-                                mMessageList.add(insertion, backup);
-                            }
-                        }
-                    }
-                }
+            mModel.hasLoadedAll.set(mMessageList.size() >= mModel.actualMessageCount);
+            if (mModifier.isBackupTableExists()) {
+                mMessageRepo.queryBackupMessagesByTalker(mTalker.id, mModel.confirmedBackups);
             }
         }).subscribe(new RxJavaUtils.CompletableObservableAdapter() {
             @Override
@@ -290,25 +336,6 @@ public class MessageActivity extends BaseActivity {
                 mRvMessage.scrollToPosition(0);
             }
         });
-    }
-
-    private AvatarScrollHandler mScrollListener;
-
-    private void initList() {
-       /* RxJavaUtils.complete(() -> {
-            mModel.actualMessageCount = mMessageRepo.getActualMessageCountOf(mTalker.id);
-            mMessageRepo.queryMessageByTalkerLimit(mTalker.id, INITIAL_LOAD_COUNT, mMessageList);
-        }).subscribe(new RxJavaUtils.CompletableObservableAdapter() {
-            @Override
-            public void onComplete() {
-                mModel.hasLoadAll.set(mMessageList.size() >= mModel.actualMessageCount);
-                mAdapter = new MessageAdapter();
-                mRvMessage.setAdapter(mAdapter);
-                //回到最底部，显示最新的消息记录（因为是reverseLayout的）
-                mRvMessage.scrollToPosition(0);
-            }
-        });*/
-        loadData();
         //处理消息的闪烁提示，消息的加载
         mBinding.rvMessage.addOnScrollListener(new RecyclerView.OnScrollListener() {
             int formerState = RecyclerView.SCROLL_STATE_IDLE;
@@ -331,7 +358,7 @@ public class MessageActivity extends BaseActivity {
                 //当用户滑动到顶部的时候
                 if (formerState != RecyclerView.SCROLL_STATE_IDLE && !mBinding.rvMessage.canScrollVertically(-1)) {
                     //如果已经数据已经全部加载完
-                    if (mModel.hasLoadAll.get()) {
+                    if (mModel.hasLoadedAll.get()) {
                         //直接返回
                         return;
                     }
@@ -350,7 +377,7 @@ public class MessageActivity extends BaseActivity {
                             super.onSuccess(count);
                             //关闭加载进度条并更新数据
                             UiUtils.fadeOut(mBinding.pbLoad);
-                            mModel.hasLoadAll.set(mMessageList.size() >= mModel.actualMessageCount);
+                            mModel.hasLoadedAll.set(mMessageList.size() >= mModel.actualMessageCount);
                             mAdapter.notifyItemInserted(mMessageList.size() - count);
                             mBinding.rvMessage.smoothScrollBy(0, -100, new AccelerateDecelerateInterpolator());
                             mBinding.rvMessage.setNestedScrollingEnabled(true);
@@ -359,82 +386,266 @@ public class MessageActivity extends BaseActivity {
                 }
             }
         });
-        getWindow().getSharedElementEnterTransition().addListener(new UiUtils.TransitionListenerAdapter() {
-            @Override
-            public void onTransitionEnd(@NonNull Transition transition) {
-                mScrollListener = new AvatarScrollHandler((LinearLayoutManager) Objects.requireNonNull(mRvMessage.getLayoutManager())) {
-                    @Override
-                    public void notifyAvatarInvisible(int position) {
-                        mAdapter.mInvisibleAvatarIndex = position;
-                    }
-
-                    @Override
-                    public void notifyAvatarVisible() {
-                        mAdapter.mInvisibleAvatarIndex = -1;
-                    }
-                };
-                mRvMessage.addOnScrollListener(mScrollListener);
-            }
-        });
-        getWindow().getSharedElementReturnTransition().addListener(new UiUtils.TransitionListenerAdapter() {
-
-            @Override
-            public void onTransitionStart(@NonNull Transition transition) {
-                mRvMessage.removeOnScrollListener(mScrollListener);
-            }
-        });
     }
 
+    /**
+     * 重新从数据库加载消息
+     */
+    public void reloadMessages() {
+        //获取真实消息数（修改后）
+        ArrayMap<Long, Edition> all = mModifier.getAllPendingEditions();
+        int delCount = 0;
+        int insCount = 0;
+        for (int i = 0; i < all.size(); i++) {
+            int flag = all.valueAt(i).getFlag();
+            if (flag == Edition.FLAG_INSERTION) {
+                insCount++;
+            } else if (flag == Edition.FLAG_REMOVAL) {
+                delCount++;
+            }
+        }
+        int loadCount = mMessageList.size() - delCount + insCount;
+        mModel.actualMessageCount = mMessageRepo.getActualMessageCountOf(mTalker.id);
+        //清空
+        mMessageList.clear();
+        //重新查询消息
+        mMessageRepo.queryMessageByTalkerLimit(mTalker.id, loadCount, mMessageList);
+        mModel.hasLoadedAll.set(mMessageList.size() >= mModel.actualMessageCount);
+    }
+
+    private void reloadBackupMessages() {
+        mModel.confirmedBackups.clear();
+        //重新查询备份
+        if (mModifier.isBackupTableExists()) {
+            mMessageRepo.queryBackupMessagesByTalker(mTalker.id, mModel.confirmedBackups);
+        }
+    }
+
+    public void notifyMessageListChanged() {
+        mAdapter.notifyDataSetChanged();
+    }
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         getMenuInflater().inflate(R.menu.message, menu);
+        menu.setHeaderTitle(R.string.operation);
+        //如果消息未编辑
+        if (!mSelectedMsg.isEdited()) {
+            //禁用还原
+            menu.findItem(R.id.item_restore).setEnabled(false);
+        } else {
+            //如果选中消息已删除
+            if (mSelectedMsg.getEditionFlag() == Edition.FLAG_REMOVAL) {
+                //禁用编辑和删除
+                menu.findItem(R.id.item_edit).setEnabled(false);
+                menu.findItem(R.id.item_delete).setEnabled(false);
+            }
+            //如果选中消息是新增的
+            else if (mSelectedMsg.getEditionFlag() == Edition.FLAG_INSERTION) {
+                //禁用还原（没有原消息，删除即还原）
+                menu.findItem(R.id.item_restore).setEnabled(false);
+            }
+        }
     }
+
 
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
+        //如果消息解析失败，除了“还原”，不允许其他操作
+        if (mSelectedMsg.isParseError() && item.getItemId() != R.id.item_restore) {
+            MasterToast.shortToast(getString(R.string.format_error_parse_message, mSelectedMsg.getParseErrorCode()));
+            return super.onContextItemSelected(item);
+        }
         mModifier = getEnvironment().modifyDatabase();
         mBinding.setModifier(mModifier);
-        Message selectedMessage = mModel.getSelectedMessage();
-        mMessageEditorViewModel.passMessageToEdit(selectedMessage);
         switch (item.getItemId()) {
             case R.id.item_add_before:
                 Intent intentAddBefore = new Intent(this, EditorActivity.class);
-                intentAddBefore.putExtra(EditorActivity.EXTRA_EDIT_MODE, EditorViewModel.EDIT_MODE_ADD_BEFORE);
-                if (mModel.selectedMessagePosition < mMessageList.size() - 1) {
-                    Message before = mMessageList.get(mModel.selectedMessagePosition + 1);
+                if (mSelectedMsgIndex < mMessageList.size() - 1) {
+                    Message before = mMessageList.get(mSelectedMsgIndex + 1);
                     intentAddBefore.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_START, before.getCreateTimeStamp());
                 }
-                intentAddBefore.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_STOP, selectedMessage.getCreateTimeStamp());
-                startActivity(intentAddBefore);
+                intentAddBefore.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_STOP, mSelectedMsg.getCreateTimeStamp());
+                startEditorForResult(EditorActivity.EDIT_MODE_ADD_BEFORE, intentAddBefore);
                 break;
             case R.id.item_add_after:
                 Intent intentAddAfter = new Intent(this, EditorActivity.class);
-                intentAddAfter.putExtra(EditorActivity.EXTRA_EDIT_MODE, EditorViewModel.EDIT_MODE_ADD_AFTER);
-                if (mModel.selectedMessagePosition > 0) {
-                    Message after = mMessageList.get(mModel.selectedMessagePosition - 1);
+                if (mSelectedMsgIndex > 0) {
+                    Message after = mMessageList.get(mSelectedMsgIndex - 1);
                     intentAddAfter.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_STOP, after.getCreateTimeStamp());
                 }
-                intentAddAfter.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_START, selectedMessage.getCreateTimeStamp());
-                startActivity(intentAddAfter);
-                break;
-            case R.id.item_delete:
-                mModifier.putPendingEdition(Edition.remove(selectedMessage));
-                mMessageEditorViewModel.notifyMessageDeleted();
+                intentAddAfter.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_START, mSelectedMsg.getCreateTimeStamp());
+                startEditorForResult(EditorActivity.EDIT_MODE_ADD_AFTER, intentAddAfter);
                 break;
             case R.id.item_edit:
                 Intent intentEdit = new Intent(this, EditorActivity.class);
-                intentEdit.putExtra(EditorActivity.EXTRA_EDIT_MODE, EditorViewModel.EDIT_MODE_EDIT);
-                startActivity(intentEdit);
+                startEditorForResult(EditorActivity.EDIT_MODE_EDIT, intentEdit);
+                break;
+            case R.id.item_delete:
+                //如果是新增的消息，删除后直接从列表移除
+                if (mSelectedMsg.getEditionFlag() == Edition.FLAG_INSERTION) {
+                    mMessageList.remove(mSelectedMsg);
+                    mAdapter.notifyItemRemoved(mSelectedMsgIndex);
+                    mModifier.removePendingEdition(mSelectedMsg.getMsgId());
+                    mModel.notifyMessageRestored(Edition.FLAG_INSERTION, EditionFragment.EDITION_SET_INDEX_UNCONFIRMED);
+                }
+                //否则
+                else {
+                    //添加未处理编辑
+                    mModifier.putPendingEdition(Edition.remove(mSelectedMsg));
+                    //设置编辑标志
+                    mSelectedMsg.setEditionFlag(Edition.FLAG_REMOVAL);
+                    //更新UI
+                    mAdapter.notifyItemChanged(mSelectedMsgIndex);
+                    //发布全局事件
+                    mModel.notifyMessageDeleted();
+                }
                 break;
             case R.id.item_check:
-                UiUtils.createDialog(this, mModel.selectedMessagePosition + "",
-                        mModel.getSelectedMessage() == null ? "null" : mModel.getSelectedMessage().toSpannedString()).show();
+                new MessageViewerDialog().setMessage(mSelectedMsg).show(getSupportFragmentManager(), "message_viewer");
+                break;
+            case R.id.item_restore:
+                int editionFlag = mSelectedMsg.getEditionFlag();
+                restore(mSelectedMsgIndex, mSelectedMsg);
+                mModel.notifyMessageRestored(editionFlag, EditionFragment.EDITION_SET_INDEX_UNCONFIRMED);
+                break;
+            case R.id.item_set_as_template:
+                new TemplateSetupDialog().setSourceTemplate(Template.fromMessage(mSelectedMsg)).show(getSupportFragmentManager(), "template");
                 break;
         }
         return super.onContextItemSelected(item);
+    }
+
+    private void notifyItemChangedConsideringTimestamp(@NotNull Message edited, int editedIndex) {
+        boolean timestampChanged = edited.getCreateTimeStamp() != mSelectedMsg.getCreateTimeStamp();
+        if (timestampChanged) {
+            mMessageList.remove(editedIndex);
+            int index = Collections.binarySearch(mMessageList, edited, (o1, o2) -> -Long.compare(o1.getCreateTimeStamp(), o2.getCreateTimeStamp()));
+            int insertion = index >= 0 ? index + 1 : -(index + 1);
+            mMessageList.add(insertion, edited);
+            mAdapter.notifyItemChanged(editedIndex);
+            if (insertion != editedIndex) {
+                mAdapter.notifyItemMoved(editedIndex, insertion);
+            }
+        } else {
+            mMessageList.set(editedIndex, edited);
+            mAdapter.notifyItemChanged(editedIndex);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (data == null) {
+            return;
+        }
+        Message returned = data.getParcelableExtra(EditorActivity.EXTRA_MESSAGE_ORIGIN);
+        switch (requestCode) {
+            case EditorActivity.EDIT_MODE_EDIT:
+                Message backup = mModel.getUnconfirmedBackup(mSelectedMsg.getMsgId());
+                //如果发送者不是用户本人，恢复消息状态，否则消息状态可能混乱（比如对方拥有发送失败标志）
+                if (backup != null && returned.getSenderId() != null && !returned.getSenderId().equals(getCurrentUser().id)) {
+                    returned.setStatus(backup.getStatus());
+                }
+                //如果内容无更改
+                if (returned.deepEquals(mSelectedMsg)) {
+                    MasterToast.shortToast(R.string.no_change_was_made);
+                    return;
+                }
+                //如果更改后的内容和备份的内容一致，说明此次更改恢复了原来的消息
+                if (backup != null && backup.deepEquals(returned)) {
+                    MasterToast.shortToast("还原消息");
+                    mModel.removeUnconfirmedBackup(backup);
+                    mModifier.removePendingEdition(mSelectedMsg.getMsgId());
+                    notifyItemChangedConsideringTimestamp(backup, mSelectedMsgIndex);
+                    mModel.notifyMessageRestored(mSelectedMsg.getEditionFlag(), EditionFragment.EDITION_SET_INDEX_UNCONFIRMED);
+                    return;
+                }
+                //备份...
+                mModel.addUnconfirmedBackupIfNotExists(mSelectedMsg);
+                //添加...
+                mModifier.putPendingEdition(Edition.replace(mSelectedMsg, returned));
+                //设置...
+                if (mSelectedMsg.getEditionFlag() != Edition.FLAG_INSERTION) {
+                    returned.setEditionFlag(Edition.FLAG_REPLACEMENT);
+                }
+                notifyItemChangedConsideringTimestamp(returned, mSelectedMsgIndex);
+                mModel.notifyMessageChanged();
+                break;
+            case EditorActivity.EDIT_MODE_ADD_AFTER:
+            case EditorActivity.EDIT_MODE_ADD_BEFORE:
+                returned.setEditionFlag(Edition.FLAG_INSERTION);
+                mModifier.putPendingEdition(Edition.insert(returned));
+                int insertion = requestCode == EditorActivity.EDIT_MODE_ADD_AFTER ? mSelectedMsgIndex : mSelectedMsgIndex + 1;
+                mMessageList.add(insertion, returned);
+                mAdapter.notifyItemInserted(insertion);
+                mModel.notifyMessageInserted();
+                break;
+        }
+    }
+
+    public void checkParseFailedMessages(Runnable ok) {
+        ArrayMap<Long, Edition> all = mModifier.getAllPendingEditions();
+        for (int i = 0; i < all.size(); i++) {
+            Message rep = all.valueAt(i).getFiller();
+            if (rep != null && rep.isParseError()) {
+                UiUtils.createCaveat(this, getString(R.string.warning_parse_failed_message)).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (ok != null) {
+                            ok.run();
+                        }
+                    }
+                }).setNegativeButton(android.R.string.cancel, null).show();
+                return;
+            }
+        }
+        ok.run();
+    }
+
+    public void applyChanges(View view) {
+        checkParseFailedMessages(() -> UiUtils.createAlert(this, getString(R.string.alert_apply_changes))
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> RxJavaUtils.complete(() -> mModifier.applyAllPendingEditions()).subscribe(new RxJavaUtils.CompletableObservableAdapter() {
+                    Dialog progress;
+
+                    @Override
+                    public void onSubscribe(@NotNull Disposable d) {
+                        progress = UiUtils.createProgress(MessageActivity.this, R.string.applying_changes);
+                        progress.show();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        RxJavaUtils.complete(() -> {
+                            reloadMessages();
+                            reloadBackupMessages();
+                        }).subscribe(new RxJavaUtils.CompletableObservableAdapter() {
+                            @Override
+                            public void onComplete() {
+                                mModel.notifyEditionListChanged(EditionFragment.EDITION_SET_INDEX_CONFIRMED);
+                                mAdapter.notifyDataSetChanged();
+                                progress.dismiss();
+                                UiUtils.createLaunch(MessageActivity.this).show();
+                            }
+
+                            @Override
+                            public void onError(@NotNull Throwable e) {
+                                progress.dismiss();
+                                UiUtils.createError(MessageActivity.this, IOUtils.readStackTraceFromThrowable(e)).show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(@NotNull Throwable e) {
+                        e.printStackTrace();
+                        progress.dismiss();
+                        UiUtils.createError(MessageActivity.this, IOUtils.readStackTraceFromThrowable(e)).show();
+                    }
+                })).setNegativeButton(android.R.string.cancel, null).show());
+
     }
 
     private class MessageFragmentAdapter extends FragmentStateAdapter {
@@ -460,15 +671,7 @@ public class MessageActivity extends BaseActivity {
         private final int ITEM_TYPE_PLAIN = 1;
         private final int ITEM_TYPE_SYSTEM = 2;
         private final int ITEM_TYPE_COMPLEX = 3;
-        private static final int POSITION_TYPE_TOP = 2;
-        private static final int POSITION_TYPE_BOTTOM = 0;
-        private static final int POSITION_TYPE_CENTER = 1;
-        private static final int POSITION_TYPE_SINGLE = -1;
-        private final int SEPARATOR_MILLS = 5 * 60 * 1000;
-        private int mInvisibleAvatarIndex = -1;
         private static final int PAYLOAD_NAVIGATE = 0;
-        private static final int PAYLOAD_HIDE_AVATAR = 1;
-        private static final int PAYLOAD_SHOW_AVATAR = 2;
 
         private boolean isSend(int compositeType) {
             return compositeType % FLAG_IS_SEND == 0;
@@ -485,10 +688,9 @@ public class MessageActivity extends BaseActivity {
                 case ITEM_TYPE_SYSTEM:
                     return R.layout.item_bubble_system;
                 case ITEM_TYPE_COMPLEX:
-                    return left ? R.layout.item_bubble_cl : R.layout.item_bubble_cr;
+                    return left ? R.layout.item_bubble_complex_left : R.layout.item_bubble_complex_right;
                 case ITEM_TYPE_PLAIN:
-                    return left ? R.layout.item_bubble_pl : R.layout.item_bubble_pr;
-
+                    return left ? R.layout.item_bubble_plain_left : R.layout.item_bubble_plain_right;
             }
             throw new IllegalArgumentException("No such type: " + compositeType);
         }
@@ -496,11 +698,10 @@ public class MessageActivity extends BaseActivity {
         @Override
         public int getItemViewType(int position) {
             Message message = mMessageList.get(position);
-            MessageFactory.Type type = message.getType();
-            if (message.getType() == MessageFactory.Type.SYSTEM) {
+            if (message instanceof SystemMessage) {
                 return ITEM_TYPE_SYSTEM;
             } else {
-                if (type.isComplex()) {
+                if (message instanceof ComplexMessage) {
                     return (message.isSend() ? FLAG_IS_SEND : 1) * ITEM_TYPE_COMPLEX;
                 } else {
                     return (message.isSend() ? FLAG_IS_SEND : 1) * ITEM_TYPE_PLAIN;
@@ -519,81 +720,21 @@ public class MessageActivity extends BaseActivity {
         public void onBindViewHolder(@NonNull MessageViewHolder holder, int position, @NonNull List<Object> payloads) {
             if (payloads.size() > 0) {
                 int payload = (int) payloads.get(0);
-                switch (payload) {
-                    case PAYLOAD_NAVIGATE:
-                        View container = holder.binding.getRoot().findViewById(R.id.msg_container);
-                        container.setPressed(true);
-                        container.setPressed(false);
-                        break;
-                    case PAYLOAD_HIDE_AVATAR:
-                       /* mInvisibleAvatarIndex = position;
-                        holder.binding.getRoot().findViewById(R.id.iv_avatar).setVisibility(View.INVISIBLE);*/
-                        break;
-                    case PAYLOAD_SHOW_AVATAR:
-                        /*mInvisibleAvatarIndex = -1;
-                        holder.binding.getRoot().findViewById(R.id.iv_avatar).setVisibility(View.VISIBLE);
-                        */
-                        break;
+                if (payload == PAYLOAD_NAVIGATE) {
+                    View container = holder.binding.getRoot().findViewById(R.id.msg_container);
+                    container.setPressed(true);
+                    container.setPressed(false);
                 }
             } else {
                 super.onBindViewHolder(holder, position, payloads);
             }
         }
 
-        private boolean isLegalNeighborWithNext(int position, Message cur) {
-            if (position != 0) {
-                Message nex = mMessageList.get(position - 1);
-                return (nex.getSenderId() != null && nex.getSenderId().equals(cur.getSenderId())) && Math.abs(nex.getCreateTimeStamp() - cur.getCreateTimeStamp()) <= SEPARATOR_MILLS;
-            }
-            return false;
-        }
-
-        private boolean isLegalNeighborWithPrevious(int position, Message cur) {
-            if (position != mMessageList.size() - 1) {
-                Message pre = mMessageList.get(position + 1);
-                return (pre.getSenderId() != null && pre.getSenderId().equals(cur.getSenderId())) && Math.abs(pre.getCreateTimeStamp() - cur.getCreateTimeStamp()) <= SEPARATOR_MILLS;
-            }
-            return false;
-        }
-
-
-        private int getPositionType(int position, Message cur) {
-            if (isLegalNeighborWithNext(position, cur)) {
-                if (isLegalNeighborWithPrevious(position, cur)) {
-                    return POSITION_TYPE_CENTER;
-                } else {
-                    return POSITION_TYPE_TOP;
-                }
-            } else {
-                if (isLegalNeighborWithPrevious(position, cur)) {
-                    return POSITION_TYPE_BOTTOM;
-                } else {
-                    return POSITION_TYPE_SINGLE;
-                }
-            }
-        }
-
-        @Nullable
-        private Account getAccount(@NotNull Message message) {
-            if (!message.getType().isSystem()) {
-                if (message.isSend()) {
-                    return getCurrentUser();
-                } else {
-                    return message.isInGroupChat() ? message.getSenderAccount() : mTalker;
-                }
-            }
-            return null;
-        }
-
         @Override
         public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
             Message message = mMessageList.get(position);
-            holder.binding.setVariable(BR.message, message);
-            holder.binding.setVariable(BR.positionType, getPositionType(position, message));
-            holder.binding.setVariable(BR.account, getAccount(message));
-            if (holder.ivAvatar != null) {
-                holder.ivAvatar.setVisibility(position == mInvisibleAvatarIndex ? View.INVISIBLE : View.VISIBLE);
-            }
+            holder.binding.setVariable(BR.msg, message);
+            holder.binding.setVariable(BR.vh, holder);
             holder.binding.executePendingBindings();
         }
 
@@ -605,7 +746,6 @@ public class MessageActivity extends BaseActivity {
 
     public class MessageViewHolder extends RecyclerView.ViewHolder {
         ViewDataBinding binding;
-        ImageView ivAvatar;
 
         public void gotoDetail(View view) {
             Intent intent = new Intent(MessageActivity.this, DetailActivity.class);
@@ -613,12 +753,14 @@ public class MessageActivity extends BaseActivity {
             startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(MessageActivity.this, view, view.getTransitionName()).toBundle());
         }
 
+        public void setSelectedMsgIndex(int index) {
+            mSelectedMsgIndex = index;
+            mSelectedMsg = mMessageList.get(index);
+        }
+
         public MessageViewHolder(@NonNull ViewDataBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
-            ivAvatar = itemView.findViewById(R.id.iv_avatar);
-            this.binding.setVariable(BR.model, mModel);
-            // this.itemView.findViewById(R.id.msg_container).setOnClickListener();
         }
 
     }
@@ -628,9 +770,23 @@ public class MessageActivity extends BaseActivity {
         if (mBinding.messagePanel.isOpen()) {
             mBinding.messagePanel.closePanel();
         } else {
-            mModifier.removeAllPendingEditions();
-            mMessageEditorViewModel.purge();
-            super.onBackPressed();
+            if (mModifier.getAllPendingEditions().size() > 0) {
+                UiUtils.createAlert(this, R.string.alert_quit_discard_changes).setPositiveButton(R.string.quit, (dialog, which) -> {
+                    mModifier.removeAllPendingEditions();
+                    MessageActivity.super.onBackPressed();
+                }).show();
+            } else {
+                mModifier.removeAllPendingEditions();
+                super.onBackPressed();
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mLoadAllDisposable != null && !mLoadAllDisposable.isDisposed()) {
+            mLoadAllDisposable.dispose();
         }
     }
 }

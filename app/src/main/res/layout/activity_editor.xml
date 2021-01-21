@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,12 +7,12 @@
 
     <data>
 
+
         <variable
-            name="model"
-            type="xjunz.tool.wechat.data.viewmodel.EditorViewModel" />
+            name="edited"
+            type="androidx.databinding.ObservableBoolean" />
 
-        <import type="xjunz.tool.wechat.util.UniUtils" />
-
+        <import type="xjunz.tool.wechat.util.Utils" />
     </data>
 
     <FrameLayout
@@ -30,12 +30,11 @@
             android:id="@+id/elastic"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?android:colorBackground"
-            android:onDismiss="@{()->UniUtils.getHostActivity(context).finishAfterTransition()}"
+            android:onDismiss="@{()->Utils.getHostActivity(context).finishAfterTransition()}"
             android:transitionGroup="false"
             app:dragDismissDistance="112dp"
             app:dragDismissScale=".95"
-            app:dragDismissTarget="@id/nsv_container">
+            app:dragDismissTarget="@+id/rv_editor">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -74,7 +73,7 @@
                         android:layout_marginEnd="@dimen/dp_12"
                         android:background="?android:attr/selectableItemBackgroundBorderless"
                         android:contentDescription="@string/filter"
-                        android:onClick="@{()->UniUtils.getHostActivity(context).finishAfterTransition()}"
+                        android:onClick="@{()->Utils.getHostActivity(context).finishAfterTransition()}"
                         android:src="@drawable/ic_close_24dp"
                         android:tint="?colorButtonNormal"
                         android:tooltip="@{@string/close}"
@@ -82,6 +81,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <LinearLayout
@@ -99,9 +99,11 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:background="?selectableItemBackgroundBorderless"
+                        android:enabled="@{edited}"
+                        android:onClick="resetClone"
                         android:src="@drawable/ic_replay_24dp"
-                        android:textColor="?colorAccent"
-                        android:tooltip="@{@string/reset}" />
+                        android:tooltip="@{@string/reset}"
+                        bind:ignore="ContentDescription" />
 
                     <ImageButton
                         android:layout_width="0dp"
@@ -110,26 +112,79 @@
                         android:background="?selectableItemBackgroundBorderless"
                         android:onClick="confirmEdition"
                         android:src="@drawable/ic_check_24dp"
-                        android:textColor="?colorAccent"
-                        android:tooltip="@{@android:string/ok}" />
+                        android:tooltip="@{@android:string/ok}"
+                        bind:ignore="ContentDescription" />
                 </LinearLayout>
 
-                <androidx.core.widget.NestedScrollView
-                    android:id="@+id/nsv_container"
+                <LinearLayout
+                    android:id="@+id/tab_bar"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:fillViewport="true"
-                    app:layout_constraintBottom_toTopOf="@+id/bottom_bar"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_height="?actionBarSize"
+                    android:background="?colorAccent"
+                    android:elevation="@dimen/z_item"
+                    android:orientation="horizontal"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/top_bar">
 
-                    <include
-                        layout="@layout/layout_editor"
-                        android:layout_width="match_parent"
+                    <FrameLayout
+                        android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        bind:model="@{model}" />
-                </androidx.core.widget.NestedScrollView>
+                        android:layout_weight="1"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:onClick="@{()->vpEditor.setCurrentItem(0,true)}">
+
+                        <TextView
+                            android:id="@+id/tv_tab_simple_editor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:background="@drawable/bg_indicator"
+                            android:text="@string/simple_edit"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                            android:textColor="@android:color/white" />
+                    </FrameLayout>
+
+
+                    <View
+                        android:id="@+id/view"
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginVertical="@dimen/spacing_normal"
+                        android:background="?android:listDivider"
+                        android:theme="@style/ThemeOverlay.AppCompat.Dark"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:onClick="@{()->vpEditor.setCurrentItem(1,true)}">
+
+                        <TextView
+                            android:id="@+id/tv_tab_advanced_editor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:background="@drawable/bg_indicator"
+                            android:text="@string/advanced_edit"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                            android:textColor="@android:color/white" />
+                    </FrameLayout>
+                </LinearLayout>
+
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/vp_editor"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="?android:colorBackground"
+                    app:layout_constraintBottom_toTopOf="@+id/bottom_bar"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tab_bar" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </xjunz.tool.wechat.ui.customview.ElasticDragDismissFrameLayout>
     </FrameLayout>

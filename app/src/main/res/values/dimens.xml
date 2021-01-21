@@ -1,9 +1,10 @@
 <!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="dp_0">0dp</dimen>
     <dimen name="dp_1">1dp</dimen>
     <dimen name="dp_2">2dp</dimen>
     <dimen name="dp_4">4dp</dimen>
@@ -17,8 +18,8 @@
     <dimen name="minus_r_fab_small">-20dp</dimen>
     <dimen name="fab_medium">48dp</dimen>
     <dimen name="fab_normal">56dp</dimen>
-    <dimen name="fab_normal_radius">28dp</dimen>
-    <dimen name="fab_normal_radius_minus">-28dp</dimen>
+    <dimen name="r_fab_normal">28dp</dimen>
+    <dimen name="minus_r_fab_normal">-28dp</dimen>
     <dimen name="z_toolbar">2.5dp</dimen>
     <dimen name="z_bottom_bar">6dp</dimen>
     <dimen name="z_popup">3dp</dimen>
@@ -33,10 +34,16 @@
     <dimen name="ts_medium">20sp</dimen>
     <dimen name="dp_48">48dp</dimen>
     <dimen name="dp_20">20dp</dimen>
-    <dimen name="divider_thickness">.5dp</dimen>
+    <dimen name="divider_thickness">1px</dimen>
     <dimen name="z_bubble">1dp</dimen>
-    <dimen name="max_bubble_width">300dp</dimen>
-    <dimen name="r_bubble_obtuse">20dp</dimen>
-    <dimen name="r_bubble_acute">5dp</dimen>
+    <dimen name="max_bubble_width">250dp</dimen>
+    <dimen name="r_bubble_obtuse">16dp</dimen>
+    <dimen name="r_bubble_acute">2dp</dimen>
     <dimen name="min_complex_msg_width">250dp</dimen>
+    <dimen name="dp_64">64dp</dimen>
+    <dimen name="dp_24">24dp</dimen>
+    <dimen name="corner_frame">2dp</dimen>
+    <dimen name="corner_chip">24dp</dimen>
+    <dimen name="thickness_chart">20dp</dimen>
+    <dimen name="width_progress">150dp</dimen>
 </resources>

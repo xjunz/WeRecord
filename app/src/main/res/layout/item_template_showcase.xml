@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<layout xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="template"
+            type="xjunz.tool.wechat.impl.model.message.util.Template" />
+
+        <variable
+            name="host"
+            type="xjunz.tool.wechat.ui.message.fragment.dialog.TemplateShowcaseDialog" />
+
+        <import type="xjunz.tool.wechat.BuildConfig" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dp_4"
+        android:background="@drawable/bg_chip"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="@{()->host.confirmTemplate(template)}"
+        android:padding="@dimen/spacing_unit">
+
+
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@{template.name}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:textColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ib_edit"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@tools:sample/lorem" />
+
+        <ImageButton
+            android:id="@+id/ib_edit"
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:layout_marginEnd="8dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:onClick="@{()->host.editTemplate(template)}"
+            android:scaleType="centerInside"
+            android:src="@{template.custom?@drawable/ic_baseline_edit_24:@drawable/ic_baseline_eye_24}"
+            android:theme="@style/ThemeOverlay.AppCompat.Light"
+            android:tint="@android:color/white"
+            android:tooltip="@{template.custom?@string/edit:@string/check}"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_name"
+            app:layout_constraintEnd_toStartOf="@+id/ib_delete"
+            app:layout_constraintTop_toTopOf="@+id/tv_name"
+            tools:ignore="ContentDescription" />
+
+        <ImageButton
+            android:id="@+id/ib_delete"
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:layout_marginEnd="8dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_baseline_delete_24"
+            android:theme="@style/ThemeOverlay.AppCompat.Light"
+            android:tint="@android:color/white"
+            android:tooltip="@{@string/delete}"
+            android:visible="@{BuildConfig.DEBUG||template.custom}"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_name"
+            tools:ignore="ContentDescription" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

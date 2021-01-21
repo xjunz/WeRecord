@@ -1,14 +1,16 @@
 /*
- * Copyright (c) 2020 xjunz. 保留所有权利
+ * Copyright (c) 2021 xjunz. 保留所有权利
  */
 
 package xjunz.tool.wechat.impl.model.account;
 
+import android.os.Parcel;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import org.apaches.commons.codec.digest.DigestUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -19,8 +21,15 @@ import xjunz.tool.wechat.impl.Environment;
 public class User extends Account {
     public final String dirPath;
     public final String originalDatabaseFilePath;
-    public String backupDatabaseFilePath;
-    public String databasePragmaKey;
+    /**
+     * 工作数据库: 即我们用于各种数据库操作的数据库，替换微信的源数据库以实现功能
+     */
+    public String workerDatabaseFilePath;
+    /**
+     * 备份数据库: 备份的微信源数据库，用于出现意外时的还原
+     */
+    public String backupDatabasePath;
+    public String databasePassword;
     public final String imageCachePath;
     public final String videoCachePath;
     public boolean isLastLogin;
@@ -41,12 +50,12 @@ public class User extends Account {
         return originalDatabaseFilePath;
     }
 
-    public void deleteBackupDatabase() {
-        final File backup = new File(backupDatabaseFilePath);
+    public void deleteWorkerDatabase() {
+        final File backup = new File(workerDatabaseFilePath);
         if (backup.exists()) {
             new Thread(() -> {
                 if (!backup.delete()) {
-                    Log.wtf("?o?", "Failed to delete backup files");
+                    Log.wtf("?o?", "Failed to delete backup file: " + workerDatabaseFilePath);
                 }
             }).start();
         }
@@ -70,4 +79,48 @@ public class User extends Account {
         }
         return output.toString();
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NotNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeString(this.dirPath);
+        dest.writeString(this.originalDatabaseFilePath);
+        dest.writeString(this.workerDatabaseFilePath);
+        dest.writeString(this.backupDatabasePath);
+        dest.writeString(this.databasePassword);
+        dest.writeString(this.imageCachePath);
+        dest.writeString(this.videoCachePath);
+        dest.writeByte(this.isLastLogin ? (byte) 1 : (byte) 0);
+        dest.writeString(this.uin);
+    }
+
+    protected User(Parcel in) {
+        super(in);
+        this.dirPath = in.readString();
+        this.originalDatabaseFilePath = in.readString();
+        this.workerDatabaseFilePath = in.readString();
+        this.backupDatabasePath = in.readString();
+        this.databasePassword = in.readString();
+        this.imageCachePath = in.readString();
+        this.videoCachePath = in.readString();
+        this.isLastLogin = in.readByte() != 0;
+        this.uin = in.readString();
+    }
+
+    public static final Creator<User> CREATOR = new Creator<User>() {
+        @Override
+        public User createFromParcel(Parcel source) {
+            return new User(source);
+        }
+
+        @Override
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
 }
