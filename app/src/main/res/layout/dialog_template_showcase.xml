@@ -9,9 +9,9 @@
 
         <variable
             name="host"
-            type="xjunz.tool.wechat.ui.message.fragment.dialog.TemplateShowcaseDialog" />
+            type="xjunz.tool.werecord.ui.message.fragment.dialog.TemplateShowcaseDialog" />
 
-        <import type="xjunz.tool.wechat.impl.model.message.util.Template" />
+        <import type="xjunz.tool.werecord.impl.model.message.util.Template" />
     </data>
 
     <androidx.core.widget.NestedScrollView

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
+    <fade>
+        <targets>
+            <target android:targetId="@+id/multi_selection_top_bar" />
+        </targets>
+    </fade>
+    <transition class="xjunz.tool.werecord.ui.transition.Pop">
+        <targets>
+            <target android:targetId="@id/ib_option" />
+        </targets>
+    </transition>
+    <transition class="xjunz.tool.werecord.ui.transition.Sade">
+        <targets>
+            <target android:targetId="@id/rv_menu" />
+        </targets>
+    </transition>
+</transitionSet>

@@ -4,13 +4,12 @@
 
 <resources>
     <!--application-->
-    <string name="copyright">Copyright © 2020 <b>WeRecord</b> \n All rights reserved.</string>
+    <string name="copyright">Copyright © 2021 <b>WeRecord</b> \n All rights reserved.</string>
     <string name="app_name">WeRecord</string>
     <!--intro-->
     <string name="intro">引导</string>
     <string name="welcome">欢迎</string>
     <string name="super_user">ROOT</string>
-    <string name="indicator_text">%d/%d</string>
     <string name="caption_welcome">欢迎使用 <b>微记录</b> 。本应用支持将您的微信<b>聊天记录，联系人</b>等信息保存为<i>TXT,HTML</i>等可随时查看、永久保存的格式。
         此外，本应用为您提供了本地记录的增删改查，统计等操作。\n不过，在使用之前，您需要<b>完成设置向导</b>以确保应用能正常工作。
     </string>
@@ -39,7 +38,7 @@
     <string name="availability">可用性</string>
     <string name="permission_access_wx_sandbox">访问微信的私有文件</string>
     <string name="caption_permission_wx_sandbox">如数据库、图片等</string>
-    <string name="declaration">声明</string>
+    <string name="declaration">隐私政策及免责声明</string>
     <string name="read_and_approved">我已阅读并同意</string>
     <!--debug-->
     <string name="q_chat_feedback_tip">已复制错误信息到剪贴板，粘贴后发送即可反馈</string>
@@ -110,7 +109,7 @@
     <string name="type_gzh">公众号</string>
     <string name="type_service">服务号</string>
     <string name="format_search_result">共%s条搜索结果</string>
-    <string name="format_count_stats"><![CDATA[共<b>%d</b>条记录 已筛选出<b>%d</b>条]]></string>
+    <string name="format_count_stats"><![CDATA[共<b>%d</b>条记录 已筛选出<b>%d</b>条]]> </string>
     <string name="bracketed_all"><i>&lt;全部&gt;</i></string>
     <string name="bracketed_none"><i>&lt;无&gt;</i></string>
     <string name="bracketed_empty"><i>&lt;空&gt;</i></string>
@@ -213,11 +212,11 @@
     <string name="help_send_timestamp">时间戳精确到毫秒，一秒包含1000毫秒。为了防止错误，默认不允许设置未来的时间。</string>
     <string name="help_edition">“<b>已应用的更改</b>”是指已经同步到微信的消息更改；“<b>未应用的更改</b>”是指您仅在本应用内对消息做的更改，尚未同步到微信。</string>
     <string name="operation">操作</string>
-    <string name="no_change_was_made">内容无更改</string>
+    <string name="no_change_was_made">无更改</string>
     <string name="message_not_found">找不到该消息~</string>
     <string name="alert_quit_discard_changes">仍有未应用的更改，确定要退出吗？退出后这些更改会被舍弃。</string>
     <string name="quit">退出</string>
-    <string name="relaunching_from_recycled">应用意外终止，正在重新启动…</string>
+    <string name="relaunching_from_recycle">应用意外终止，正在重新启动…</string>
     <string name="title">标题</string>
     <string name="description">描述</string>
     <string name="pls_input">在此输入内容</string>
@@ -256,13 +255,13 @@
     <string name="rep_group">替换组</string>
     <string name="format_hint_editor">在此输入%s</string>
     <string name="template_name">模板名称</string>
-    <string name="format_require_nonnull">%s不能为空</string>
-    <string name="format_require_unique">“%s”已存在</string>
+    <string name="format_require_nonnull">"%s"不能为空</string>
+    <string name="format_require_unique">"%s"已存在</string>
     <string name="build_in">预设</string>
     <string name="custom">自定义</string>
     <string name="hidden_msg">此消息已隐藏</string>
-    <string name="format_template_added">已添加模板“%s”</string>
-    <string name="format_template_edited">已修改模板“%s”</string>
+    <string name="format_template_added">已添加模板"%s"</string>
+    <string name="format_template_edited">已修改模板"%s"</string>
     <string name="use_no_template">不使用模板</string>
     <string name="note_from_template">*来自模板</string>
     <string name="error_type_inconsistent">所有使用相同名称的替换组必须使用相同的类型。</string>
@@ -292,7 +291,7 @@
     <string name="caption_zombie_friend">单向好友俗称"僵尸"好友，是指对方已将您从联系人列表中删除，而仍然在您的联系人列表中存在的好友。
         此功能可以无打扰式地查找可能存在的单向好友。\n注：<b>结果仅供参考</b>。点击打开查看，可请在<b>通讯录->标签->可能的单向好友</b>中查看、删除单向好友。</string>
     <string name="delete_all">全部删除</string>
-    <string name="format_colon">%s: </string>
+    <string name="colon">: </string>
     <string name="possible_zombies">可能的单向好友</string>
     <string name="start_search_for">开始查找</string>
     <string name="nothing_was_found">什么都没找到~</string>
@@ -300,4 +299,100 @@
     <string name="send_friend_request">发送朋友验证</string>
     <string name="open_to_check">打开查看</string>
     <string name="all_contacts_loaded">已经加载所有联系人</string>
+    <string name="format_multi_selection">已选择%d项</string>
+    <string name="select_all">全选</string>
+    <string name="quit_multi_selection_mode">退出多选模式</string>
+    <string name="options">选项</string>
+    <string name="mark_as_read">标记已读</string>
+    <string name="delete_chat">删除聊天</string>
+    <string name="hide_chat">隐藏聊天</string>
+    <string name="reshow_chat">显示聊天</string>
+    <string name="alert_chat_option">你确定要对所有选中的对话执行\"%s\"吗？</string>
+    <string name="warning_delete_chat">你确定要删除所有选中对话吗？对应的<b>聊天记录也会被删除</b>。注：<b>此操作不可逆</b>。</string>
+    <string name="executing">执行中…</string>
+    <string name="restart">重新启动</string>
+    <string name="alert_restart_to_sync">若应用当前数据已过时，您可重新启动以加载最新的数据。是否要重新启动以同步数据库？</string>
+    <string name="config">配置</string>
+    <string name="start_time">起始时间</string>
+    <!--export-->
+    <string name="export_format_plain_text">文本</string>
+    <string name="export_format_html">富文本</string>
+    <string name="export_format_db">数据库</string>
+    <string name="export_format_table">表格</string>
+    <string name="export_type">导出格式</string>
+    <string name="export_time_span">时间范围</string>
+    <string name="all">全部</string>
+    <string name="no_limit">无限制</string>
+    <string name="stop_time">结束时间</string>
+    <string name="message">消息</string>
+    <string name="chat_records">聊天记录</string>
+    <string name="exporting">导出中…</string>
+    <string name="format_export_name">[%s]导出的%s(%s)</string>
+    <string name="format_export_db_name">导出的数据库(%s)</string>
+    <string name="export_successfully">导出成功</string>
+    <string name="db_password">数据库密码</string>
+    <string name="no_data">无数据</string>
+    <string name="help_message_export_format">
+        <b>文字</b>: 导出速度快，体积占用小，但是无法导出图片等媒体资源。<i>(多个源会被压缩为.zip格式)</i>\n
+        <b>富文本</b>: 导出速度较慢，体积占用大，支持导出媒体资源。\n
+        <b>数据库</b>: 导出速度较快，体积占用较小，允许保留消息的所有信息，且方便对消息进行自动化处理，不支持导出媒体文件资源。<i>(多个源会合并为一个数据库文件)</i>\n
+    </string>
+    <string name="help_contact_export_format">
+        <b>文字</b>: 将联系人各种信息保存为文本形式，方便随时查看。\n
+        <b>数据库</b>: 导出联系人在数据库中的原数据，方便对联系人进行自动化处理。\n
+        <b>表格</b>: 将联系人的各种信息保存为表格形式，更直观。
+    </string>
+    <string name="help_sqlite_password">数据库密码用于对数据库进行加密，无密码则不加密。最终导出文件为<b>.zip压缩包</b>，内容包括
+    导出信息文件(包含数据库密码等信息)，以及一个数据库文件。</string>
+    <string name="export_current_list">导出当前列表</string>
+    <string name="template_contact_export_header">
+        #联系人导出
+        \n#导出时间: %s
+        \n#导出数量: %s
+        \n#Generated by [xjunz.tool.werecord]\n\n
+    </string>
+    <string name="template_message_export_header">
+        #聊天记录导出
+        \n#来源: %s
+        \n#导出时间: %s
+        \n#导出消息数量: %s
+        \n#Generated by [xjunz.tool.werecord]\n\n
+    </string>
+    <string name="tn_contact_export">contact_export</string>
+    <string name="format_time_consumed">已用时%.03f秒</string>
+    <string name="writing">正在写入…</string>
+    <string name="pls_select_export_dir">请选择导出位置</string>
+    <string name="export_to">导出到…</string>
+    <string name="option">选项</string>
+    <string name="enable_verify_owner">机主身份验证</string>
+    <string name="des_verify_owner">启用后需要验证机主身份才能运行此应用</string>
+    <string name="enable_edit_mode">编辑模式</string>
+    <string name="des_edit_mode">启用后可以使用需要修改数据的功能</string>
+    <string name="unable_to_verify_device_credential">无法确认机主身份</string>
+    <string name="verify_owner_title">身份验证</string>
+    <string name="verify_owner_des">确认机主身份后才能继续使用微记录</string>
+    <string name="warning_edit_mode">开启编辑模式后，将允许您使用需要编辑数据的功能。尽管已经通过大量测试，但是仍然不排除开启此模式后导致数据丢失、损坏的可能。
+    <b>请审慎开启此模式</b>。注：开启后应用会重启以生效。</string>
+    <string name="edit_mode_not_enabled">编辑模式未启用</string>
+    <string name="function">功能</string>
+    <string name="export_decrypted_database">导出明文数据库</string>
+    <string name="des_export_decrypted_database">导出解密后的原数据库</string>
+    <string name="open_source_licenses">开源项目许可证</string>
+    <string name="about">关于</string>
+    <string name="get_latest_version">获取最新版</string>
+    <string name="format_current_app_version">应用当前版本为: %s</string>
+    <string name="original_database">原数据库</string>
+    <string name="decrypted_database">明文数据库</string>
+    <string name="open_via">请选择打开方式</string>
+    <string name="switch_account">切换账号</string>
+    <string name="last_login">上次登录</string>
+    <string name="current_used">当前使用</string>
+    <string name="format_switch_account">确定要切换到账号“%s”吗?</string>
+    <string name="no_candidate_account">无可切换账号</string>
+    <string name="read_and_approved_dc">已阅读并同意<a href="wr://dc">隐私政策及免责声明</a></string>
+    <string name="filename">文件名</string>
+    <string name="file_size">文件大小</string>
+    <string name="generated">已生成</string>
+    <string name="unable_to_open">找不到打开方式</string>
+    <string name="message_restored">消息已还原</string>
 </resources>

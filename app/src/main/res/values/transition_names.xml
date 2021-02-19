@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <resources>
     <string name="tn_avatar">tn_avatar</string>
     <string name="tn_name">tn_name</string>
+    <string name="tn_option_menu">tn_option_menu</string>
+    <string name="tn_source_list">source_list</string>
 </resources>

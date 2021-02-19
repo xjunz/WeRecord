@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="@dimen/spacing_normal"
-    xmlns:tools="http://schemas.android.com/tools"
     tools:context=".ui.intro.fragment.IntroSuFragment">
 
     <TextView
@@ -23,6 +23,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="@dimen/spacing_large"
+        android:drawableStart="@drawable/ic_baseline_touch_app_24"
+        android:drawablePadding="@dimen/dp_4"
         android:padding="@dimen/spacing_normal"
         android:text="@string/start_check"
         android:textColor="@android:color/white" />

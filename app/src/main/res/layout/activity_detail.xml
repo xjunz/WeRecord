@@ -10,11 +10,11 @@
 
         <variable
             name="contact"
-            type="xjunz.tool.wechat.impl.model.account.Contact" />
+            type="xjunz.tool.werecord.impl.model.account.Contact" />
 
         <variable
             name="talker"
-            type="xjunz.tool.wechat.impl.model.account.Talker" />
+            type="xjunz.tool.werecord.impl.model.account.Talker" />
 
         <variable
             name="id"
@@ -22,7 +22,7 @@
 
         <import type="android.text.TextUtils" />
 
-        <import type="xjunz.tool.wechat.util.Utils" />
+        <import type="xjunz.tool.werecord.util.Utils" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -274,8 +274,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:drawableStart="@drawable/ic_export_24dp"
+            android:drawableTint="?colorAccent"
+            android:onClick="exportMessages"
             android:text="@string/export_msg"
             android:textColor="?colorAccent"
+            android:transitionName="@string/tn_source_list"
             android:visible="@{talker!=null}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_check_msg"

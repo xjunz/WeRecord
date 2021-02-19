@@ -7,6 +7,7 @@
       <w>emoji</w>
       <w>flowable</w>
       <w>imei</w>
+      <w>linkify</w>
       <w>lvbuffer</w>
       <w>previewable</w>
       <w>rconversation</w>
@@ -17,6 +18,7 @@
       <w>unpreviewable</w>
       <w>viewmodel</w>
       <w>wechat</w>
+      <w>werecord</w>
       <w>wxid</w>
       <w>xjunz</w>
     </words>

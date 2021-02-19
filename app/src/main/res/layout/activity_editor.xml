@@ -12,7 +12,7 @@
             name="edited"
             type="androidx.databinding.ObservableBoolean" />
 
-        <import type="xjunz.tool.wechat.util.Utils" />
+        <import type="xjunz.tool.werecord.util.ActivityUtils" />
     </data>
 
     <FrameLayout
@@ -26,11 +26,11 @@
             android:layout_height="match_parent"
             android:background="@color/colorMask" />
 
-        <xjunz.tool.wechat.ui.customview.ElasticDragDismissFrameLayout
+        <xjunz.tool.werecord.ui.customview.ElasticDragDismissFrameLayout
             android:id="@+id/elastic"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:onDismiss="@{()->Utils.getHostActivity(context).finishAfterTransition()}"
+            android:onDismiss="@{()->ActivityUtils.getHostActivity(context).finishAfterTransition()}"
             android:transitionGroup="false"
             app:dragDismissDistance="112dp"
             app:dragDismissScale=".95"
@@ -67,13 +67,13 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageButton
-                        android:id="@+id/ib_close"
+                        android:id="@+id/ib_filter"
                         android:layout_width="@dimen/fab_small"
                         android:layout_height="@dimen/fab_small"
                         android:layout_marginEnd="@dimen/dp_12"
                         android:background="?android:attr/selectableItemBackgroundBorderless"
                         android:contentDescription="@string/filter"
-                        android:onClick="@{()->Utils.getHostActivity(context).finishAfterTransition()}"
+                        android:onClick="@{()->ActivityUtils.getHostActivity(context).finishAfterTransition()}"
                         android:src="@drawable/ic_close_24dp"
                         android:tint="?colorButtonNormal"
                         android:tooltip="@{@string/close}"
@@ -186,6 +186,6 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/tab_bar" />
             </androidx.constraintlayout.widget.ConstraintLayout>
-        </xjunz.tool.wechat.ui.customview.ElasticDragDismissFrameLayout>
+        </xjunz.tool.werecord.ui.customview.ElasticDragDismissFrameLayout>
     </FrameLayout>
 </layout>

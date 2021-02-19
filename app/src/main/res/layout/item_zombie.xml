@@ -9,7 +9,7 @@
 
         <variable
             name="contact"
-            type="xjunz.tool.wechat.impl.model.account.Contact" />
+            type="xjunz.tool.werecord.impl.model.account.Contact" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -9,7 +9,7 @@
 
         <variable
             name="stat"
-            type="xjunz.tool.wechat.ui.message.fragment.StatisticsFragment.MsgStat" />
+            type="xjunz.tool.werecord.ui.message.fragment.StatisticsFragment.MsgStat" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -35,7 +35,7 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@tools:sample/lorem" />
 
-        <xjunz.tool.wechat.ui.customview.ChartBarView
+        <xjunz.tool.werecord.ui.customview.ChartBarView
             android:id="@+id/chart_bar"
             android:layout_width="0dp"
             android:layout_height="20dp"
@@ -61,7 +61,7 @@
             tools:text="@tools:sample/lorem" />
 
         <TextView
-            android:id="@+id/tv_percentage"
+            android:id="@+id/tv_consumed_time"
             style="@style/TextAppearance.AppCompat.Caption.Tag.Framed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

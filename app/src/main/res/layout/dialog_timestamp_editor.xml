@@ -6,13 +6,13 @@
 
     <data>
 
-        <import type="xjunz.tool.wechat.util.UiUtils" />
+        <import type="xjunz.tool.werecord.util.UiUtils" />
 
-        <import type="xjunz.tool.wechat.util.Utils" />
+        <import type="xjunz.tool.werecord.util.Utils" />
 
         <variable
             name="host"
-            type="xjunz.tool.wechat.ui.message.fragment.dialog.TimestampEditorDialog" />
+            type="xjunz.tool.werecord.ui.message.fragment.dialog.TimestampEditorDialog" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,12 +21,12 @@
 
 
         <TextView
-            android:id="@+id/tv_msg"
+            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/spacing_normal"
             android:labelFor="@+id/et_editor"
-            android:text="@string/edit_send_timestamp"
+            android:text="@{@string/edit+host.label}"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -38,11 +38,11 @@
             android:layout_marginStart="@dimen/spacing_unit"
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/help"
-            android:help="@{@string/help_send_timestamp}"
+            android:help="@{host.helpText}"
             android:tint="?android:textColorSecondary"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_msg"
-            app:layout_constraintStart_toEndOf="@+id/tv_msg"
-            app:layout_constraintTop_toTopOf="@+id/tv_msg"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_title"
+            app:layout_constraintStart_toEndOf="@+id/tv_title"
+            app:layout_constraintTop_toTopOf="@+id/tv_title"
             app:srcCompat="@drawable/ic_help_outline_black_20dp" />
 
         <EditText
@@ -59,8 +59,8 @@
             android:padding="@dimen/spacing_unit"
             android:text="@{Utils.formatDate(host.defaultValue)}"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/tv_msg"
-            app:layout_constraintTop_toBottomOf="@+id/tv_msg" />
+            app:layout_constraintStart_toStartOf="@+id/tv_title"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title" />
 
         <TextView
             android:id="@+id/tv_hint"

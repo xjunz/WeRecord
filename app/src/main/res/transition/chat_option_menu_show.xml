@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
+    <transition xmlns:app="http://schemas.android.com/apk/res-auto"
+        class="xjunz.tool.werecord.ui.transition.RevealTransform"
+        android:duration="@integer/animDurationShort"
+        app:fabIcon="@drawable/ic_baseline_more_horiz_24"
+        app:startColor="?colorAccent">
+        <targets>
+            <target android:targetName="@string/tn_option_menu" />
+        </targets>
+    </transition>
+    <fade>
+        <targets>
+            <target android:targetId="@+id/mask" />
+        </targets>
+    </fade>
+    <transition class="xjunz.tool.werecord.ui.transition.Elevate">
+        <targets>
+            <target android:targetName="@string/tn_option_menu" />
+        </targets>
+    </transition>
+</transitionSet>

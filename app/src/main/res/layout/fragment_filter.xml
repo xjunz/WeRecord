@@ -9,11 +9,11 @@
 
         <import type="android.text.Html" />
 
-        <import type="xjunz.tool.wechat.data.viewmodel.SortBy" />
+        <import type="xjunz.tool.werecord.data.viewmodel.SortBy" />
 
         <variable
             name="model"
-            type="xjunz.tool.wechat.data.viewmodel.PageViewModel" />
+            type="xjunz.tool.werecord.data.viewmodel.PageViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,7 +21,7 @@
         android:layout_height="match_parent"
         android:clickable="true"
         android:focusable="true"
-        android:padding="@dimen/spacing_normal">
+        android:paddingVertical="@dimen/spacing_normal">
 
         <Space
             android:id="@+id/space_center"
@@ -36,6 +36,7 @@
             android:id="@+id/tv_caption_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:text="@string/filter_caption_name"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -66,7 +67,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_unit"
-            android:layout_marginEnd="@dimen/spacing_unit"
+            android:layout_marginEnd="16dp"
             android:entries="@{model.currentConfig.typeList}"
             android:popupElevation="@dimen/z_popup"
             android:selection="@={model.currentConfig.typeSelection}"
@@ -113,12 +114,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_unit"
-            android:layout_marginEnd="@dimen/spacing_unit"
             android:enabled="@{model.currentConfig.isChat}"
             android:entries="@{model.currentConfig.descriptionListMap[SortBy.MSG_COUNT]}"
             android:popupElevation="@dimen/z_popup"
             android:selection="@={model.currentConfig.descriptionSelectionMap[SortBy.MSG_COUNT]}"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/sp_type"
             app:layout_constraintStart_toStartOf="@id/tv_caption_msg_count"
             app:layout_constraintTop_toBottomOf="@+id/tv_caption_msg_count" />
 
@@ -167,11 +167,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_unit"
-            android:layout_marginEnd="@dimen/spacing_unit"
             android:entries="@array/orders"
             android:popupElevation="@dimen/z_popup"
             android:selection="@={model.currentConfig.orderBy}"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/sp_msg_count"
             app:layout_constraintStart_toStartOf="@id/tv_caption_order_by"
             app:layout_constraintTop_toBottomOf="@+id/tv_caption_order_by" />
 
@@ -187,12 +186,13 @@
             android:id="@+id/tv_stats"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:ellipsize="start"
             android:letterSpacing=".05"
             android:text="@{Html.fromHtml(@string/format_count_stats(model.currentConfig.totalCount,model.currentConfig.filteredCount))}"
             app:autoSizeTextType="uniform"
             app:layout_constraintBottom_toBottomOf="@+id/btn_reset_filter"
-            app:layout_constraintEnd_toStartOf="@+id/space_center"
+            app:layout_constraintEnd_toStartOf="@+id/btn_reset_filter"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/btn_reset_filter" />
@@ -206,7 +206,6 @@
             android:onClick="@{()->model.notifyFilterReset()}"
             android:text="@string/reset_filter"
             app:layout_constraintEnd_toStartOf="@+id/btn_confirm_filter"
-            app:layout_constraintStart_toStartOf="@+id/space_center"
             app:layout_constraintTop_toBottomOf="@+id/divider2" />
 
         <Button
@@ -214,6 +213,7 @@
             style="@style/Widget.AppCompat.Button.Normal.Flat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:onClick="@{()->model.notifyFilterConfirmed()}"
             android:text="@string/confirm_filter"
             app:layout_constraintBottom_toBottomOf="@+id/btn_reset_filter"

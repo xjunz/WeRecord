@@ -9,7 +9,7 @@
 
         <variable
             name="host"
-            type="xjunz.tool.wechat.ui.main.fragment.dialog.CheckZombiesDialog" />
+            type="xjunz.tool.werecord.ui.main.fragment.dialog.CheckZombiesDialog" />
     </data>
 
     <RelativeLayout

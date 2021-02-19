@@ -8,14 +8,10 @@
     <data>
 
         <variable
-            name="label"
-            type="String" />
-
-        <variable
             name="host"
-            type="xjunz.tool.wechat.ui.base.ContentEditorDialog" />
+            type="xjunz.tool.werecord.ui.base.ContentEditorDialog" />
 
-        <import type="xjunz.tool.wechat.util.UiUtils" />
+        <import type="xjunz.tool.werecord.util.UiUtils" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -49,7 +45,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginStart="@dimen/spacing_normal"
                 android:layout_marginTop="@dimen/spacing_normal"
-                android:text="@{label==null?@string/edit:@string/format_editor_title(label)}"
+                android:text="@{@string/edit+host.label}"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
                 tools:text="@tools:sample/lorem" />
 
@@ -77,7 +73,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <xjunz.tool.wechat.ui.customview.LineCounter
+                <xjunz.tool.werecord.ui.customview.LineCounter
                     android:id="@+id/line_counter"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"

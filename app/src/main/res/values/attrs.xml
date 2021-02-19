@@ -3,16 +3,22 @@
   -->
 
 <resources>
-    <declare-styleable name="Transform">
+    <declare-styleable name="Morph">
         <attr name="startColor" format="color|reference" />
         <attr name="endColor" format="color|reference" />
         <attr name="endCornerRadius" format="dimension|reference" />
         <attr name="startCornerRadius" format="dimension|reference" />
         <attr name="opticalButtonColor" format="color|reference" />
-    </declare-styleable>
-    <declare-styleable name="FabRevealTransform">
-        <attr name="fabColor" format="color|reference" />
         <attr name="fabIcon" format="reference" />
+        <attr name="fabIconTint" format="reference|color" />
+        <attr name="holdAtEnd" format="reference|boolean" />
+    </declare-styleable>
+    <declare-styleable name="OptionItemView">
+        <attr name="optionTitle" format="string|reference" />
+        <attr name="optionDes" format="string|reference" />
+        <attr name="optionIcon" format="reference" />
+        <attr name="optionShowSwitch" format="reference|boolean" />
+        <attr name="optionShowTopDivider" format="reference|boolean" />
     </declare-styleable>
     <declare-styleable name="BottomBar">
         <attr name="imageEntries" format="reference" />

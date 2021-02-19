@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<transition xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+    class="xjunz.tool.werecord.ui.transition.GenericButtonMorph"
+    android:drawableLeft="@drawable/ic_export_24dp"
+    android:drawableTint="?colorAccent"
+    android:duration="@integer/animDurationNormal"
+    android:interpolator="@android:interpolator/fast_out_slow_in"
+    android:text="@string/export_msg"
+    android:textColor="?colorAccent"
+    app:opticalButtonColor="?android:colorBackgroundFloating">
+    <targets>
+        <target android:targetId="@id/rv_source" />
+    </targets>
+</transition>

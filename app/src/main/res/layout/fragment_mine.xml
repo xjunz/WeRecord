@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="user"
+            type="xjunz.tool.werecord.impl.model.account.User" />
+
+        <variable
+            name="settings"
+            type="xjunz.tool.werecord.Settings" />
+
+        <variable
+            name="host"
+            type="xjunz.tool.werecord.ui.main.fragment.MineFragment" />
+    </data>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="?actionBarSize">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/civ_avatar"
+                android:layout_width="@dimen/fab_normal"
+                android:layout_height="@dimen/fab_normal"
+                android:layout_marginStart="@dimen/spacing_normal"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:avatar="@{user}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:src="@tools:sample/avatars"
+                tools:srcCompat="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/tv_username"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:copyable="@{true}"
+                android:text="@{user.name}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                app:layout_constraintStart_toEndOf="@+id/civ_avatar"
+                app:layout_constraintTop_toTopOf="@+id/civ_avatar"
+                tools:text="XJUNZ" />
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_dash"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/civ_avatar" />
+
+            <ImageButton
+                android:id="@+id/ib_switch_account"
+                android:layout_width="42dp"
+                android:layout_height="35dp"
+                android:layout_marginEnd="16dp"
+                android:background="?selectableItemBackgroundBorderless"
+                android:onClick="@{()->host.showSwitchAccountDialog()}"
+                android:padding="@dimen/dp_4"
+                android:scaleType="fitCenter"
+                android:tint="?colorControlActivated"
+                android:tooltip="@{@string/switch_account}"
+                app:layout_constraintBottom_toBottomOf="@+id/civ_avatar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/civ_avatar"
+                app:srcCompat="@drawable/ic_baseline_swap_horiz_24"
+                tools:ignore="ContentDescription" />
+
+            <TextView
+                android:id="@+id/tv_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:copyable="@{true}"
+                android:text="@{user.aliasOrId}"
+                app:layout_constraintBottom_toBottomOf="@+id/civ_avatar"
+                app:layout_constraintStart_toStartOf="@+id/tv_username"
+                tools:text="wxid_xjunz" />
+
+            <LinearLayout
+                android:id="@+id/option_container"
+                android:layout_width="match_parent"
+                android:layout_height="466dp"
+                android:clipToPadding="false"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/dp_4"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_normal"
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:text="@string/option"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                    android:textColor="?colorControlActivated" />
+
+                <xjunz.tool.werecord.ui.customview.OptionItemView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:checked="@{settings.editMode.value}"
+                    android:elevation="@dimen/z_item"
+                    android:onClick="@{()->host.toggleEditMode()}"
+                    app:optionDes="@string/des_edit_mode"
+                    app:optionIcon="@drawable/ic_baseline_edit_24"
+                    app:optionShowSwitch="true"
+                    app:optionTitle="@string/enable_edit_mode" />
+
+                <xjunz.tool.werecord.ui.customview.OptionItemView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="@{settings.verifyDeviceCredential.value}"
+                    android:elevation="@dimen/z_item"
+                    android:onClick="@{()->host.toggleEnableVerifyDeviceCredential()}"
+                    app:optionDes="@string/des_verify_owner"
+                    app:optionIcon="@drawable/ic_baseline_key_24"
+                    app:optionShowSwitch="true"
+                    app:optionShowTopDivider="true"
+                    app:optionTitle="@string/enable_verify_owner" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_normal"
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:text="@string/function"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                    android:textColor="?colorControlActivated" />
+
+                <xjunz.tool.werecord.ui.customview.OptionItemView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:elevation="@dimen/z_item"
+                    android:onClick="@{()->host.exportDecryptedDatabase()}"
+                    app:optionDes="@string/des_export_decrypted_database"
+                    app:optionIcon="@drawable/ic_export_24dp"
+                    app:optionTitle="@string/export_decrypted_database" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_normal"
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:text="@string/about"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                    android:textColor="?colorControlActivated" />
+
+                <xjunz.tool.werecord.ui.customview.OptionItemView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_unit"
+                    android:elevation="@dimen/z_item"
+                    android:onClick="@{()->host.getLatestVersion()}"
+                    app:optionIcon="@drawable/ic_baseline_get_app_24"
+                    app:optionTitle="@string/get_latest_version" />
+
+                <xjunz.tool.werecord.ui.customview.OptionItemView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:elevation="@dimen/z_item"
+                    android:onClick="@{()->host.showOssLicenses()}"
+                    app:optionIcon="@drawable/ic_baseline_code_24"
+                    app:optionShowTopDivider="true"
+                    app:optionTitle="@string/open_source_licenses" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_dc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:text="@string/read_and_approved_dc"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/option_container" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+</layout>

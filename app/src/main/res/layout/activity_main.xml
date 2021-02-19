@@ -11,22 +11,22 @@
 
         <variable
             name="model"
-            type="xjunz.tool.wechat.data.viewmodel.PageViewModel" />
+            type="xjunz.tool.werecord.data.viewmodel.PageViewModel" />
 
         <variable
             name="activity"
-            type="xjunz.tool.wechat.ui.main.MainActivity" />
+            type="xjunz.tool.werecord.ui.main.MainActivity" />
 
-        <import type="xjunz.tool.wechat.BuildConfig" />
+        <import type="xjunz.tool.werecord.BuildConfig" />
     </data>
 
-    <xjunz.tool.wechat.ui.customview.MainPanel
+    <xjunz.tool.werecord.ui.customview.MainPanel
         android:id="@+id/main_panel"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:onPanelClose="@{()->!model.currentConfig.filterConfirmed?model.notifyCancelFilter():null}"
-        android:onPanelOpen="@{()->model.notifyPrepareFilter()}">
-
+        android:onPanelOpen="@{()->model.notifyPrepareFilter()}"
+        android:slideEnabled="@{model.currentConfig.filterEnabled}">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -40,15 +40,15 @@
                 android:layout_height="match_parent"
                 android:background="?android:colorBackground"
                 android:currentItem="@={activity.mCurrentPageIndex}"
-                android:userInputEnabled="@{!model.currentConfig.isInSearchMode}" />
+                android:userInputEnabled="@{!model.currentConfig.isInSearchMode&amp;&amp;!model.currentConfig.isInMultiSelectionMode}" />
 
 
-            <xjunz.tool.wechat.ui.customview.BottomBar
+            <xjunz.tool.werecord.ui.customview.BottomBar
                 android:id="@+id/main_bottom_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:animateHide="@{model.currentConfig.isInSearchMode}"
+                android:animateHide="@{model.currentConfig.isInMultiSelectionMode||model.currentConfig.isInSearchMode}"
                 android:background="?colorPrimary"
                 android:elevation="@dimen/z_bottom_bar"
                 android:minHeight="?actionBarSize"
@@ -81,7 +81,7 @@
 
             <fragment
                 android:id="@+id/fl_filter"
-                class="xjunz.tool.wechat.ui.main.fragment.FilterFragment"
+                class="xjunz.tool.werecord.ui.main.fragment.FilterFragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?android:colorBackground" />
@@ -98,10 +98,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/spacing_normal"
+                    android:animateText="@{model.currentConfig.isInSearchMode?@string/search:model.currentConfig.caption}"
                     android:letterSpacing=".1"
                     android:textColor="?colorAccent"
                     android:textSize="@dimen/ts_medium"
-                    android:title="@{model.currentConfig.isInSearchMode?@string/search:model.currentConfig.caption}"
+                    app:autoSizeMaxTextSize="@dimen/ts_medium"
+                    app:autoSizeTextType="uniform"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -113,14 +115,14 @@
                     android:layout_marginStart="@dimen/spacing_unit"
                     android:layout_marginEnd="@dimen/spacing_unit"
                     android:afterTextChanged="@{model::notifySearch}"
-                    android:animateVisible="@{model.currentConfig.isInSearchMode}"
                     android:autofillHints="name"
                     android:background="@null"
                     android:enabled="@{model.currentConfig.isInSearchMode}"
+                    android:fadeVisible="@{model.currentConfig.isInSearchMode}"
                     android:imeOptions="actionSearch"
                     android:importantForAutofill="no"
                     android:inputType="text"
-                    android:labelFor="@+id/tv_msg"
+                    android:labelFor="@+id/tv_title"
                     android:text="@={model.currentConfig.searchKeyword}"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -129,45 +131,49 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageButton
-                    android:id="@+id/ib_debug"
+                    android:id="@+id/ib_sync"
                     android:layout_width="@dimen/fab_small"
                     android:layout_height="@dimen/fab_small"
                     android:layout_marginEnd="@dimen/spacing_unit"
                     android:background="?android:selectableItemBackgroundBorderless"
-                    android:onClick="gotoDebugActivity"
+                    android:contentDescription="@string/debug"
+                    android:onClick="restartToSync"
+                    android:onLongClick="@{v->activity.gotoDebugActivity(v)}"
+                    android:longClickable="true"
                     android:tint="?colorButtonNormal"
-                    android:visible="@{BuildConfig.DEBUG}"
+                    android:tooltip="@{@string/restart}"
                     app:layout_constraintBottom_toBottomOf="@+id/ib_search"
                     app:layout_constraintEnd_toStartOf="@+id/ib_search"
                     app:layout_constraintTop_toTopOf="@+id/ib_search"
-                    app:srcCompat="@drawable/ic_baseline_adb_24" />
+                    app:srcCompat="@drawable/ic_baseline_sync_24" />
 
                 <ImageButton
                     android:id="@+id/ib_search"
                     android:layout_width="@dimen/fab_small"
                     android:layout_height="@dimen/fab_small"
                     android:layout_marginEnd="@dimen/spacing_unit"
+                    android:enabled="@{model.currentConfig.filterEnabled}"
+                    android:animateSrc="@{model.currentConfig.isInSearchMode?@drawable/ic_close_24dp:@drawable/ic_search_24dp}"
                     android:background="?android:selectableItemBackgroundBorderless"
                     android:contentDescription="@string/search"
                     android:labelFor="@+id/et_search"
-                    android:searchMode="@={model.currentConfig.isInSearchMode}"
-                    android:searchModeOnClick="@{activity::autoSearchMode}"
-                    android:src="@drawable/ic_search_24dp"
+                    android:onClick="@{()->activity.toggleSearchMode()}"
                     android:tint="?colorButtonNormal"
                     android:tooltip="@{@string/search}"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/ib_close"
+                    app:layout_constraintEnd_toStartOf="@+id/ib_filter"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageButton
-                    android:id="@+id/ib_close"
+                    android:id="@+id/ib_filter"
                     android:layout_width="@dimen/fab_small"
                     android:layout_height="@dimen/fab_small"
                     android:layout_marginEnd="@dimen/spacing_normal"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/filter"
-                    android:onClick="showFilterPanel"
+                    android:enabled="@{model.currentConfig.filterEnabled}"
+                    android:onClick="@{()->activity.showFilterPanel()}"
                     android:src="@drawable/ic_filter_24dp"
                     android:tint="?colorButtonNormal"
                     android:tooltip="@{@string/filter}"
@@ -177,5 +183,5 @@
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
-    </xjunz.tool.wechat.ui.customview.MainPanel>
+    </xjunz.tool.werecord.ui.customview.MainPanel>
 </layout>

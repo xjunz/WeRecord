@@ -7,9 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_selectable_item_floating"
-    android:clickable="true"
-    android:elevation="@dimen/z_item"
-    android:focusable="true">
+    android:elevation="@dimen/z_item">
 
     <Space
         android:id="@+id/space_center"
@@ -94,4 +92,18 @@
         app:layout_constraintEnd_toStartOf="@+id/tv_time"
         app:layout_constraintTop_toTopOf="@+id/tv_name"
         app:srcCompat="@drawable/ic_baseline_visibility_off_24" />
+
+    <TextView
+        android:id="@+id/tv_unread_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_chip"
+        android:backgroundTint="@color/colorAccentWeak"
+        android:gravity="center"
+        android:minWidth="@dimen/dp_20"
+        android:paddingHorizontal="@dimen/dp_4"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_msg_count"
+        app:layout_constraintEnd_toEndOf="@+id/tv_time"
+        app:layout_constraintTop_toTopOf="@+id/tv_msg_count" />
 </androidx.constraintlayout.widget.ConstraintLayout>

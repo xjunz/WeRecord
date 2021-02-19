@@ -9,8 +9,8 @@
                 <corners android:radius="@dimen/corner_button" />
                 <solid android:color="?colorButtonNormal" />
                 <padding
-                    android:left="@dimen/spacing_unit"
-                    android:right="@dimen/spacing_unit" />
+                    android:left="@dimen/spacing_normal"
+                    android:right="@dimen/spacing_normal" />
             </shape>
         </item>
     </ripple>

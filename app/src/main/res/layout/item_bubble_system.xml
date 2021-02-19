@@ -9,12 +9,12 @@
 
         <variable
             name="vh"
-            type="xjunz.tool.wechat.ui.message.MessageActivity.MessageViewHolder" />
+            type="xjunz.tool.werecord.ui.message.MessageActivity.MessageViewHolder" />
 
 
         <variable
             name="msg"
-            type="xjunz.tool.wechat.impl.model.message.Message" />
+            type="xjunz.tool.werecord.impl.model.message.Message" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

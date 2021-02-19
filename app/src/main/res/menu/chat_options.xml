@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/item_mark_as_read"
+        android:icon="@drawable/ic_baseline_mark_chat_read_24"
+        android:title="@string/mark_as_read" />
+    <item
+        android:id="@+id/item_mark_as_unread"
+        android:icon="@drawable/ic_baseline_mark_chat_unread_24"
+        android:title="@string/mark_as_unread" />
+    <item
+        android:id="@+id/item_delete_chat"
+        android:icon="@drawable/ic_baseline_clear_all_24"
+        android:title="@string/delete_chat" />
+    <item
+        android:id="@+id/item_hide_chat"
+        android:icon="@drawable/ic_baseline_visibility_off_24"
+        android:title="@string/hide_chat" />
+      <item
+        android:id="@+id/item_reshow_chat"
+        android:icon="@drawable/ic_baseline_eye_24"
+        android:title="@string/reshow_chat" />
+    <item
+        android:id="@+id/item_export_message"
+        android:icon="@drawable/ic_export_24dp"
+        android:title="@string/export_msg" />
+</menu>

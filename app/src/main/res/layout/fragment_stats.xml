@@ -9,14 +9,15 @@
 
         <variable
             name="host"
-            type="xjunz.tool.wechat.ui.message.fragment.StatisticsFragment" />
+            type="xjunz.tool.werecord.ui.message.fragment.StatisticsFragment" />
     </data>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nsv_stats"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:overScrollMode="always">
+        android:overScrollMode="always"
+        android:scrollbars="vertical">
 
         <FrameLayout
             android:id="@+id/stats_container"
@@ -61,7 +62,7 @@
                     android:elevation="@dimen/z_item"
                     android:orientation="vertical"
                     android:paddingHorizontal="@dimen/spacing_normal"
-                    android:paddingVertical="@dimen/spacing_unit"
+                    android:paddingVertical="@dimen/dp_12"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="@+id/textView5"
                     app:layout_constraintTop_toBottomOf="@+id/textView5">
@@ -167,9 +168,9 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_stats_msg_type"
-                    android:layout_marginBottom="@dimen/spacing_unit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/spacing_unit"
                     android:background="?android:colorBackgroundFloating"
                     android:elevation="@dimen/z_item"
                     android:overScrollMode="never"
@@ -186,8 +187,7 @@
                 android:elevation="@dimen/z_card"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="gone">
+                app:layout_constraintTop_toTopOf="parent">
 
                 <Button
                     android:id="@+id/btn_start"
@@ -195,8 +195,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:onClick="@{()->host.startAnalyze()}"
-                    android:text="@string/check_stats" />
+                    android:onClick="@{v->host.startAnalyze(v)}"
+                    android:text="@string/check_stats"
+                    tools:visibility="visible" />
             </FrameLayout>
         </FrameLayout>
     </androidx.core.widget.NestedScrollView>

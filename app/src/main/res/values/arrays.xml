@@ -70,4 +70,10 @@
         <item><![CDATA[<自定义>]]></item>
         <item><![CDATA[<复制其他消息>]]></item>
     </string-array>
+    <string-array name="chat_option_menu_items">
+        <item>标记已读</item>
+        <item>标记未读</item>
+        <item>删除聊天</item>
+        <item>隐藏聊天</item>
+    </string-array>
 </resources>

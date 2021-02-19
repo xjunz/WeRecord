@@ -13,9 +13,9 @@
 
         <variable
             name="host"
-            type="xjunz.tool.wechat.ui.message.fragment.StatisticsFragment" />
+            type="xjunz.tool.werecord.ui.message.fragment.StatisticsFragment" />
 
-        <import type="xjunz.tool.wechat.ui.message.fragment.StatisticsFragment.MsgCountStat" />
+        <import type="xjunz.tool.werecord.ui.message.fragment.StatisticsFragment.MsgCountStat" />
     </data>
 
 

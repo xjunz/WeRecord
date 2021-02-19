@@ -10,11 +10,11 @@
 
         <variable
             name="msg"
-            type="xjunz.tool.wechat.impl.model.message.ComplexMessage" />
+            type="xjunz.tool.werecord.impl.model.message.ComplexMessage" />
 
         <variable
             name="vh"
-            type="xjunz.tool.wechat.ui.message.MessageActivity.MessageViewHolder" />
+            type="xjunz.tool.werecord.ui.message.MessageActivity.MessageViewHolder" />
 
         <import type="android.text.TextUtils" />
     </data>

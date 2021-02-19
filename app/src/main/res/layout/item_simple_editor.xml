@@ -9,7 +9,7 @@
 
         <variable
             name="item"
-            type="xjunz.tool.wechat.ui.message.fragment.SimpleEditorFragment.EditorItem" />
+            type="xjunz.tool.werecord.ui.message.fragment.SimpleEditorFragment.EditorItem" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

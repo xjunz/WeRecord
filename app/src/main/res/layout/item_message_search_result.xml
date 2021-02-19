@@ -9,13 +9,13 @@
 
         <variable
             name="item"
-            type="xjunz.tool.wechat.ui.message.fragment.SearchFragment.MessageItem" />
+            type="xjunz.tool.werecord.ui.message.fragment.SearchFragment.MessageItem" />
 
         <variable
             name="host"
-            type="xjunz.tool.wechat.ui.message.MessageActivity" />
+            type="xjunz.tool.werecord.ui.message.MessageActivity" />
 
-        <import type="xjunz.tool.wechat.util.Utils" />
+        <import type="xjunz.tool.werecord.util.Utils" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

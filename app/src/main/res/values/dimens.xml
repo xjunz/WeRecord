@@ -46,4 +46,5 @@
     <dimen name="corner_chip">24dp</dimen>
     <dimen name="thickness_chart">20dp</dimen>
     <dimen name="width_progress">150dp</dimen>
+    <dimen name="dialog_horizontal_spacing">48dp</dimen>
 </resources>

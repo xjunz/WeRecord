@@ -9,7 +9,7 @@
     <changeImageTransform />
     <changeClipBounds />
     <transition xmlns:app="http://schemas.android.com/apk/res-auto"
-        class="xjunz.tool.wechat.ui.transition.ChangeCorners"
+        class="xjunz.tool.werecord.ui.transition.ChangeCorners"
         app:endCornerRadius="0dp"
         app:startCornerRadius="@dimen/r_fab_normal" />
     <targets>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<transition xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    class="xjunz.tool.werecord.ui.transition.RevealTransform"
+    android:duration="@integer/animDurationShort"
+    app:fabIcon="@drawable/ic_export_24dp"
+    app:holdAtEnd="true"
+    app:startColor="?colorAccent">
+    <targets>
+        <target android:targetName="@string/tn_contact_export" />
+    </targets>
+</transition>

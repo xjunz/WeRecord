@@ -10,12 +10,12 @@
 
         <variable
             name="msg"
-            type="xjunz.tool.wechat.impl.model.message.Message" />
+            type="xjunz.tool.werecord.impl.model.message.Message" />
 
 
         <variable
             name="vh"
-            type="xjunz.tool.wechat.ui.message.MessageActivity.MessageViewHolder" />
+            type="xjunz.tool.werecord.ui.message.MessageActivity.MessageViewHolder" />
 
     </data>
 
@@ -83,7 +83,7 @@
                 android:paddingVertical="@dimen/spacing_unit">
 
                 <TextView
-                    android:id="@+id/tv_msg"
+                    android:id="@+id/tv_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@{msg.spannedContent}"

@@ -9,9 +9,9 @@
 
         <variable
             name="host"
-            type="xjunz.tool.wechat.ui.base.SingleLineEditorDialog" />
+            type="xjunz.tool.werecord.ui.base.SingleLineEditorDialog" />
 
-        <import type="xjunz.tool.wechat.util.UiUtils" />
+        <import type="xjunz.tool.werecord.util.UiUtils" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -41,7 +41,6 @@
             android:hint="@{@string/format_hint_editor(host.label)}"
             android:importantForAutofill="no"
             android:inputType="textPersonName"
-            android:maxCount="@{20}"
             android:singleLine="true"
             android:text="@{host.defaultValue}"
             app:layout_constraintEnd_toEndOf="parent"

@@ -9,21 +9,21 @@
 
         <variable
             name="fragment"
-            type="xjunz.tool.wechat.ui.message.fragment.EditionFragment" />
+            type="xjunz.tool.werecord.ui.message.fragment.EditionFragment" />
 
         <variable
             name="host"
-            type="xjunz.tool.wechat.ui.message.MessageActivity" />
+            type="xjunz.tool.werecord.ui.message.MessageActivity" />
 
         <variable
             name="item"
-            type="xjunz.tool.wechat.ui.message.fragment.EditionFragment.EditionItem" />
+            type="xjunz.tool.werecord.ui.message.fragment.EditionFragment.EditionItem" />
 
         <variable
             name="vh"
-            type="xjunz.tool.wechat.ui.message.fragment.EditionFragment.EditionAdapter.EditionViewHolder" />
+            type="xjunz.tool.werecord.ui.message.fragment.EditionFragment.EditionAdapter.EditionViewHolder" />
 
-        <import type="xjunz.tool.wechat.impl.model.message.util.Edition" />
+        <import type="xjunz.tool.werecord.impl.model.message.util.Edition" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

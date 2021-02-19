@@ -9,7 +9,7 @@
 
         <variable
             name="host"
-            type="xjunz.tool.wechat.ui.message.fragment.dialog.LvBufferEditorDialog" />
+            type="xjunz.tool.werecord.ui.message.fragment.dialog.LvBufferEditorDialog" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -7,13 +7,13 @@
 
         <variable
             name="template"
-            type="xjunz.tool.wechat.impl.model.message.util.Template" />
+            type="xjunz.tool.werecord.impl.model.message.util.Template" />
 
         <variable
             name="host"
-            type="xjunz.tool.wechat.ui.message.fragment.dialog.TemplateShowcaseDialog" />
+            type="xjunz.tool.werecord.ui.message.fragment.dialog.TemplateShowcaseDialog" />
 
-        <import type="xjunz.tool.wechat.BuildConfig" />
+        <import type="xjunz.tool.werecord.BuildConfig" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"

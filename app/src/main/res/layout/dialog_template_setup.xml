@@ -9,16 +9,16 @@
 
         <variable
             name="host"
-            type="xjunz.tool.wechat.ui.message.fragment.dialog.TemplateSetupDialog" />
+            type="xjunz.tool.werecord.ui.message.fragment.dialog.TemplateSetupDialog" />
 
         <variable
             name="template"
-            type="xjunz.tool.wechat.impl.model.message.util.Template" />
+            type="xjunz.tool.werecord.impl.model.message.util.Template" />
 
-        <import type="xjunz.tool.wechat.util.UiUtils" />
+        <import type="xjunz.tool.werecord.util.UiUtils" />
     </data>
 
-    <xjunz.tool.wechat.ui.customview.TemplatePanel
+    <xjunz.tool.werecord.ui.customview.TemplatePanel
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?android:colorBackground">
@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <xjunz.tool.wechat.ui.customview.LineCounter
+                <xjunz.tool.werecord.ui.customview.LineCounter
                     android:id="@+id/line_counter"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -187,5 +187,5 @@
         </RelativeLayout>
 
 
-    </xjunz.tool.wechat.ui.customview.TemplatePanel>
+    </xjunz.tool.werecord.ui.customview.TemplatePanel>
 </layout>

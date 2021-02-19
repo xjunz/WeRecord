@@ -56,6 +56,23 @@
         <item name="android:windowEnterTransition">@transition/editor_enter</item>
     </style>
 
+    <style name="Base.AppTheme.Main.Translucent.MessageExport">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowSharedElementEnterTransition">
+            @transition/message_export_shared_enter
+        </item>
+        <item name="android:windowEnterTransition">@transition/message_export_enter</item>
+        <item name="android:windowSharedElementsUseOverlay">false</item>
+    </style>
+
+    <style name="Base.AppTheme.Main.Translucent.ContactExport">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowSharedElementEnterTransition">
+            @transition/contact_export_shared_enter
+        </item>
+        <item name="android:windowEnterTransition">@transition/contact_export_enter</item>
+    </style>
+
     <style name="Base.AppTheme.Main.Translucent.Dialog">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
@@ -100,8 +117,6 @@
         <item name="android:foreground">@drawable/bg_selectable_circle</item>
     </style>
 
-    <style name="Base.AlertDialog"></style>
-
     <style name="Theme.AppCompat.Light.Dialog.Alert.Material">
         <item name="colorButtonNormal">@color/color_control_activate</item>
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -132,6 +147,7 @@
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
+    <!--无背景的Dialog-->
     <style name="Base.Dialog.Translucent">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -141,6 +157,7 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
+    <!--自带背景的Dialog-->
     <style name="Base.Dialog.Normal">
         <item name="android:windowBackground">@drawable/bg_material_dialog</item>
         <item name="android:windowElevation">@dimen/z_dialog</item>

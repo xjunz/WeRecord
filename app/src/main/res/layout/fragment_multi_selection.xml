@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="host"
+            type="xjunz.tool.werecord.ui.main.fragment.MultiSelectionFragment" />
+
+        <variable
+            name="model"
+            type="xjunz.tool.werecord.data.viewmodel.PageViewModel" />
+
+        <variable
+            name="activity"
+            type="xjunz.tool.werecord.ui.main.MainActivity" />
+    </data>
+
+    <FrameLayout
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="@dimen/z_popup">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/multi_selection_top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="@android:color/white"
+            android:clickable="true"
+            android:focusable="true"
+            android:minHeight="?actionBarSize">
+
+            <TextView
+                android:id="@+id/tv_top_bar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_normal"
+                android:animateText="@{@string/format_multi_selection(model.currentConfig.selectionCount)}"
+                android:letterSpacing=".1"
+                android:textColor="?colorAccent"
+                android:textSize="@dimen/ts_medium"
+                app:autoSizeMaxTextSize="@dimen/ts_medium"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.517" />
+
+            <ImageButton
+                android:id="@+id/ib_select_all"
+                android:layout_width="@dimen/fab_small"
+                android:layout_height="@dimen/fab_small"
+                android:layout_marginEnd="@dimen/spacing_unit"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:contentDescription="@string/search"
+                android:labelFor="@+id/et_search"
+                android:onClick="@{()->activity.selectAll()}"
+                android:src="@drawable/ic_baseline_select_all_24"
+                android:tint="?colorButtonNormal"
+                android:tooltip="@{@string/select_all}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/ib_quit"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/ib_quit"
+                android:layout_width="@dimen/fab_small"
+                android:layout_height="@dimen/fab_small"
+                android:layout_marginEnd="@dimen/spacing_normal"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/filter"
+                android:onClick="@{()->activity.quitMultiSelectionMode()}"
+                android:src="@drawable/ic_close_24dp"
+                android:tint="?colorButtonNormal"
+                android:tooltip="@{@string/quit_multi_selection_mode}"
+                android:transitionName="@string/tn_filter"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/mask"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorMask"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_menu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="@dimen/dialog_horizontal_spacing"
+            android:background="@drawable/bg_cornered_card"
+            android:elevation="@dimen/z_dialog"
+            android:transitionName="@string/tn_option_menu"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="4"
+            tools:listitem="@layout/item_chat_option_menu" />
+
+        <ImageButton
+            android:id="@+id/ib_option"
+            android:layout_width="@dimen/fab_normal"
+            android:layout_height="@dimen/fab_normal"
+            android:layout_gravity="end|bottom"
+            android:layout_marginEnd="@dimen/spacing_large"
+            android:layout_marginBottom="?actionBarSize"
+            android:background="@drawable/bg_fab"
+            android:clickable="@{model.currentConfig.isInMultiSelectionMode}"
+            android:elevation="@dimen/z_fab"
+            android:onClick="@{()->host.showOptionMenu()}"
+            android:src="@drawable/ic_baseline_more_horiz_24"
+            android:stateListAnimator="@animator/flat_raise"
+            android:tint="@android:color/white"
+            android:tooltip="@{@string/options}"
+            android:transitionName="@string/tn_option_menu"
+            tools:ignore="ContentDescription" />
+    </FrameLayout>
+</layout>

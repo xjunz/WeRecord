@@ -14,6 +14,5 @@
     <item name="editorItemSendTimestamp" type="id" />
     <item name="editorItemContent" type="id" />
     <item name="editorItemSendStatus" type="id" />
-
     <item name="itemSeparator" type="id" />
 </resources>

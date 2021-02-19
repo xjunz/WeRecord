@@ -9,7 +9,7 @@
 
         <variable
             name="host"
-            type="xjunz.tool.wechat.ui.message.fragment.dialog.SenderChooserDialog" />
+            type="xjunz.tool.werecord.ui.message.fragment.dialog.SenderChooserDialog" />
 
         <variable
             name="groupOwnerId"
@@ -19,7 +19,7 @@
 
         <variable
             name="account"
-            type="xjunz.tool.wechat.impl.model.account.Account" />
+            type="xjunz.tool.werecord.impl.model.account.Account" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

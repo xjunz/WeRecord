@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<layout>
+
+    <data>
+
+        <variable
+            name="item"
+            type="android.view.MenuItem" />
+
+        <variable
+            name="dividerVisible"
+            type="boolean" />
+
+        <variable
+            name="host"
+            type="xjunz.tool.werecord.ui.main.MainActivity" />
+    </data>
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="@{()->host.onChatOptionMenuClicked(item,root)}">
+
+        <ImageView
+            android:id="@+id/iv_icon"
+            android:layout_width="@dimen/fab_small"
+            android:layout_height="@dimen/fab_small"
+            android:layout_marginVertical="@dimen/spacing_unit"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:scaleType="centerInside"
+            android:src="@{item.icon}"
+            app:tint="?colorAccent"
+            tools:ignore="ContentDescription"
+            tools:srcCompat="@drawable/ic_baseline_clear_all_24" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginHorizontal="@dimen/spacing_normal"
+            android:layout_toEndOf="@+id/iv_icon"
+            android:text="@{item.title}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            tools:text="@tools:sample/lorem" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="?android:attr/listDivider" />
+    </RelativeLayout>
+</layout>

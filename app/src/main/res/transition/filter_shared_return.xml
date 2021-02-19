@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2020 xjunz. 保留所有权利
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 
 <transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <transition
-        class="xjunz.tool.wechat.ui.transition.MorphDialogToFab"
+        class="xjunz.tool.werecord.ui.transition.MorphDialogToFab"
         android:duration="300"
         android:interpolator="@android:interpolator/fast_out_slow_in"
         app:endColor="@color/colorPrimary"
         app:endCornerRadius="@dimen/fab_normal"
         app:startCornerRadius="@dimen/corner_card" />
-    <transition class="xjunz.tool.wechat.ui.transition.Elevate" />
     <targets>
         <target android:targetId="@+id/cl_filter" />
     </targets>

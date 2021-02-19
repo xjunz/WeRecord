@@ -110,7 +110,7 @@
             app:layout_constraintTop_toBottomOf="@+id/button9" />
 
 
-        <xjunz.tool.wechat.ui.customview.NestedEditText
+        <xjunz.tool.werecord.ui.customview.NestedEditText
             android:id="@+id/et_serial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -145,7 +145,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/et_serial" />
 
-        <xjunz.tool.wechat.ui.customview.NestedEditText
+        <xjunz.tool.werecord.ui.customview.NestedEditText
             android:id="@+id/et_output"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

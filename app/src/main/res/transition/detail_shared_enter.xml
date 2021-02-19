@@ -5,9 +5,9 @@
 <transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
     android:duration="@android:integer/config_shortAnimTime"
     android:interpolator="@android:interpolator/fast_out_slow_in">
-    <autoTransition>
+    <changeBounds>
         <arcMotion />
-    </autoTransition>
+    </changeBounds>
     <targets>
         <target android:targetId="@+id/iv_avatar" />
     </targets>
