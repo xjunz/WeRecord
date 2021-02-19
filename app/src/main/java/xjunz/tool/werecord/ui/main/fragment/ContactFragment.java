@@ -6,6 +6,7 @@ package xjunz.tool.werecord.ui.main.fragment;
 
 import android.app.ActivityOptions;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -112,8 +113,8 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
     };
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
         mRepository = RepositoryFactory.get(ContactRepository.class);
     }
 

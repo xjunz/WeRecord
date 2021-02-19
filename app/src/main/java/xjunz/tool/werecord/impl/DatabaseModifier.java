@@ -200,16 +200,6 @@ public class DatabaseModifier extends BaseObservable {
         return count > 0;
     }
 
-    public long generateMsgId() {
-        long max = 0;
-        Cursor cursor = getDb().rawQuery("select max(msgId) from message", null);
-        if (cursor.moveToNext()) {
-            max = cursor.getLong(0);
-        }
-        cursor.close();
-        return max;
-    }
-
     ;
 
     /**

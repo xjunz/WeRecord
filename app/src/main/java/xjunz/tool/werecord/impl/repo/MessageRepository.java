@@ -127,6 +127,16 @@ public class MessageRepository extends LifecyclePerceptiveRepository {
         return queried;
     }
 
+    public long getMaxMsgId() {
+        long max = 0;
+        Cursor cursor = getDatabase().rawQuery("select max(msgId) from " + TABLE_MESSAGE, null);
+        if (cursor.moveToNext()) {
+            max = cursor.getLong(0);
+        }
+        cursor.close();
+        return max;
+    }
+
     public List<Message> rawQueryMessageByTalker(@NonNull String whereClause) {
         List<Message> queried = new ArrayList<>();
         Cursor cursor = getDatabase().rawQuery(String.format("select * from %s where %s", TABLE_MESSAGE, whereClause), null);

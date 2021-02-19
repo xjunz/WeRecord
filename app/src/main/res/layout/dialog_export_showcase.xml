@@ -93,14 +93,14 @@
             app:layout_constraintTop_toBottomOf="@+id/tv_filename" />
 
         <Button
-            android:id="@+id/btn_export_to"
+            android:id="@+id/btn_save_to"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:onClick="@{()->host.exportTo()}"
-            android:text="@string/export_to"
+            android:onClick="@{()->host.saveTo()}"
+            android:text="@string/save_to"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/divider6" />
@@ -111,9 +111,9 @@
             android:layout_height="wrap_content"
             android:onClick="@{()->host.share()}"
             android:text="@string/share"
-            app:layout_constraintBottom_toBottomOf="@+id/btn_export_to"
-            app:layout_constraintEnd_toStartOf="@+id/btn_export_to"
-            app:layout_constraintTop_toTopOf="@+id/btn_export_to" />
+            app:layout_constraintBottom_toBottomOf="@+id/btn_save_to"
+            app:layout_constraintEnd_toStartOf="@+id/btn_save_to"
+            app:layout_constraintTop_toTopOf="@+id/btn_save_to" />
 
         <Button
             style="@style/Widget.AppCompat.Button.Borderless.Colored.Framed"

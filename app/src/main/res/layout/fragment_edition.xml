@@ -8,12 +8,8 @@
     <data>
 
         <variable
-            name="editionSetSelection"
-            type="androidx.databinding.ObservableInt" />
-
-        <variable
-            name="editionFlagSelection"
-            type="androidx.databinding.ObservableInt" />
+            name="host"
+            type="xjunz.tool.werecord.ui.message.fragment.EditionFragment" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,7 +23,7 @@
             android:layout_marginHorizontal="@dimen/spacing_unit"
             android:layout_marginVertical="@dimen/spacing_normal"
             android:entries="@array/type_edition"
-            android:selection="@={editionSetSelection}"
+            android:selection="@={host.editionSetSelection}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -38,7 +34,7 @@
             android:layout_marginHorizontal="@dimen/spacing_unit"
             android:layout_marginVertical="@dimen/spacing_normal"
             android:entries="@array/type_edition_flag"
-            android:selection="@={editionFlagSelection}"
+            android:selection="@={host.editionFlagSelection}"
             app:layout_constraintStart_toEndOf="@+id/sp_edition_type"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -71,6 +67,19 @@
             app:layout_constraintTop_toBottomOf="@+id/sp_edition_type"
             tools:itemCount="10"
             tools:listitem="@layout/item_edition" />
+
+        <ImageView
+            android:id="@+id/iv_art_no_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/nothing_here"
+            android:elevation="@dimen/z_card"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@mipmap/art_no_item" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

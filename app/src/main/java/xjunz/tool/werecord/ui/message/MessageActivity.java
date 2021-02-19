@@ -110,6 +110,7 @@ public class MessageActivity extends RecycleSensitiveActivity {
     private DatabaseModifier mModifier;
     private int mSelectedMsgIndex;
     private Message mSelectedMsg;
+    private long mGeneratedMsgId = -1;
 
     private void startEditorForResult(int editMode, @NotNull Intent intent) {
         ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
@@ -587,6 +588,11 @@ public class MessageActivity extends RecycleSensitiveActivity {
                 break;
             case EditorActivity.EDIT_MODE_ADD_AFTER:
             case EditorActivity.EDIT_MODE_ADD_BEFORE:
+                if (mGeneratedMsgId == -1) {
+                    mGeneratedMsgId = mMessageRepo.getMaxMsgId();
+                }
+                //为它设置一个独一无二的ID
+                returned.getValues().put(Message.KEY_MSG_ID, ++mGeneratedMsgId);
                 returned.setEditionFlag(Edition.FLAG_INSERTION);
                 mModifier.putPendingEdition(Edition.insert(returned));
                 int insertion = requestCode == EditorActivity.EDIT_MODE_ADD_AFTER ? mSelectedMsgIndex : mSelectedMsgIndex + 1;

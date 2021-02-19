@@ -512,6 +512,7 @@ public class SimpleEditorFragment extends EditorFragment {
         }
     }
 
+    @NotNull
     private Account getCurrentUser() {
         return Environment.getInstance().getCurrentUser();
     }

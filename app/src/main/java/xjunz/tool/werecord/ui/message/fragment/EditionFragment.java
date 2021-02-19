@@ -27,10 +27,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.werecord.R;
+import xjunz.tool.werecord.data.databinding.UniversalBindingAdapter;
 import xjunz.tool.werecord.data.viewmodel.MessageViewModel;
 import xjunz.tool.werecord.databinding.FragmentEditionBinding;
 import xjunz.tool.werecord.databinding.ItemEditionBinding;
@@ -84,6 +83,7 @@ public class EditionFragment extends Fragment {
                 mHost.restore(index, msg);
                 mUnconfirmedEditionItemList.remove(position);
                 mAdapter.notifyItemRemoved(position);
+                showOrHidNoItemArt(mUnconfirmedEditionItemList.isEmpty());
             } else {
                 throw new IllegalArgumentException("Message " + msg.getMsgId() + " not found");
             }
@@ -114,6 +114,7 @@ public class EditionFragment extends Fragment {
                     mHost.notifyMessageListChanged();
                     //更新当前列表
                     mAdapter.notifyItemRemoved(position);
+                    showOrHidNoItemArt(mConfirmedEditionItemList.isEmpty());
                     progress.dismiss();
                     UiUtils.createAlert(requireContext(), getString(R.string.alert_restart_after_changes_applied))
                             .setPositiveButton(android.R.string.ok, (dialog, which) -> {
@@ -191,34 +192,42 @@ public class EditionFragment extends Fragment {
         }
     }
 
+    private void showOrHidNoItemArt(boolean show) {
+        if (show) {
+            UniversalBindingAdapter.setFadeVisible(mBinding.ivArtNoItem, false, true);
+        } else {
+            UiUtils.gone(mBinding.ivArtNoItem);
+        }
+    }
+
+    private void setCurrentEditionItemList(@NotNull List<EditionItem> items) {
+        mCurrentEditionItemList = items;
+        showOrHidNoItemArt(items.isEmpty());
+        mAdapter.notifyDataSetChanged();
+    }
+
     /**
      * 更新列表
      */
     private void refreshList() {
         loadUnconfirmedEditions();
         loadConfirmedEditions();
-        mCurrentEditionItemList = editionSetSelection.get() == 0 ? mConfirmedEditionItemList : mUnconfirmedEditionItemList;
         int flag = editionFlagSelection.get();
         if (flag != 0) {
-            RxJavaUtils.stream(mCurrentEditionItemList).parallel().filter(editionItem -> editionItem.getFlag() == flag).runOn(Schedulers.computation())
-                    .sequential().toSortedList().observeOn(AndroidSchedulers.mainThread()).subscribe(new RxJavaUtils.SingleObserverAdapter<List<EditionItem>>() {
-                @Override
-                public void onSuccess(@NotNull List<EditionItem> o) {
-                    mCurrentEditionItemList = o;
-                    mAdapter.notifyDataSetChanged();
-                }
-            });
+            RxJavaUtils.stream(mCurrentEditionItemList).filter(editionItem -> editionItem.getEditionFlag() == flag)
+                    .toSortedList()
+                    .doOnSuccess(this::setCurrentEditionItemList).subscribe();
         } else {
-            mAdapter.notifyDataSetChanged();
+            setCurrentEditionItemList(editionSetSelection.get() == 0 ? mConfirmedEditionItemList : mUnconfirmedEditionItemList);
         }
     }
 
     private void initList() {
         loadUnconfirmedEditions();
         loadConfirmedEditions();
-        mCurrentEditionItemList = mConfirmedEditionItemList;
         mAdapter = new EditionAdapter();
         mBinding.rvEdition.setAdapter(mAdapter);
+        setCurrentEditionItemList(mConfirmedEditionItemList);
         editionSetSelection.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
@@ -242,7 +251,7 @@ public class EditionFragment extends Fragment {
             return showcase;
         }
 
-        public int getFlag() {
+        public int getEditionFlag() {
             return flag;
         }
 
@@ -270,7 +279,7 @@ public class EditionFragment extends Fragment {
 
         @StringRes
         public int getEditionFlagCaption() {
-            switch (getFlag()) {
+            switch (getEditionFlag()) {
                 case Edition.FLAG_REMOVAL:
                     return R.string.edition_type_removal;
                 case Edition.FLAG_INSERTION:
@@ -278,7 +287,7 @@ public class EditionFragment extends Fragment {
                 case Edition.FLAG_REPLACEMENT:
                     return R.string.edition_type_rep;
             }
-            throw new IllegalArgumentException("Unknown edition flag: " + getFlag());
+            throw new IllegalArgumentException("Unknown edition flag: " + getEditionFlag());
         }
 
         @Override
@@ -291,14 +300,13 @@ public class EditionFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_edition, container, false);
-        mBinding.setEditionFlagSelection(editionFlagSelection);
-        mBinding.setEditionSetSelection(editionSetSelection);
         return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mBinding.setHost(this);
         initList();
     }
 

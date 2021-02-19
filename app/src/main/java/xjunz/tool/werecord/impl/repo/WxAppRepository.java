@@ -5,6 +5,8 @@ package xjunz.tool.werecord.impl.repo;
 
 import android.util.ArrayMap;
 
+import net.sqlcipher.Cursor;
+
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -15,11 +17,11 @@ public class WxAppRepository extends LifecyclePerceptiveRepository {
     public String TABLE_APP_INFO = "AppInfo";
 
     public void queryAll() {
-       /* try (Cursor cursor = getDatabase().rawQuery(String.format("select appId,appName from %s", TABLE_APP_INFO), null)) {
+        try (Cursor cursor = getDatabase().rawQuery(String.format("select appId,appName from %s", TABLE_APP_INFO), null)) {
             while (cursor.moveToNext()) {
                 mAll.put(cursor.getString(0), cursor.getString(1));
             }
-        }*/
+        }
     }
 
     @Nullable

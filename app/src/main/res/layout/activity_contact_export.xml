@@ -92,7 +92,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/rv_config"
-                tools:text="@string/writing" />
+                tools:text="@string/saving" />
 
             <Button
                 android:id="@+id/btn_cancel"

@@ -295,6 +295,7 @@
     <string name="possible_zombies">可能的单向好友</string>
     <string name="start_search_for">开始查找</string>
     <string name="nothing_was_found">什么都没找到~</string>
+    <string name="nothing_here">空空如也</string>
     <string name="label_name_local_contacts">本地好友</string>
     <string name="send_friend_request">发送朋友验证</string>
     <string name="open_to_check">打开查看</string>
@@ -360,9 +361,9 @@
     </string>
     <string name="tn_contact_export">contact_export</string>
     <string name="format_time_consumed">已用时%.03f秒</string>
-    <string name="writing">正在写入…</string>
-    <string name="pls_select_export_dir">请选择导出位置</string>
-    <string name="export_to">导出到…</string>
+    <string name="saving">正在保存…</string>
+    <string name="pls_select_save_dir">请选择保存位置</string>
+    <string name="save_to">保存到…</string>
     <string name="option">选项</string>
     <string name="enable_verify_owner">机主身份验证</string>
     <string name="des_verify_owner">启用后需要验证机主身份才能运行此应用</string>
@@ -395,4 +396,5 @@
     <string name="generated">已生成</string>
     <string name="unable_to_open">找不到打开方式</string>
     <string name="message_restored">消息已还原</string>
+    <string name="operation_cancelled">操作取消</string>
 </resources>

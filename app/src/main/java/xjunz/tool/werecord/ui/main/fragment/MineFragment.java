@@ -4,7 +4,6 @@
 package xjunz.tool.werecord.ui.main.fragment;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,10 +27,7 @@ import net.sqlcipher.database.SQLiteDatabase;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 
 import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.BuildConfig;
@@ -44,6 +40,7 @@ import xjunz.tool.werecord.impl.Environment;
 import xjunz.tool.werecord.impl.model.export.DatabaseExporter;
 import xjunz.tool.werecord.ui.base.ProgressDialog;
 import xjunz.tool.werecord.ui.customview.MasterToast;
+import xjunz.tool.werecord.ui.export.ExportShowcaseDialog;
 import xjunz.tool.werecord.ui.main.fragment.dialog.SwitchAccountDialog;
 import xjunz.tool.werecord.util.ActivityUtils;
 import xjunz.tool.werecord.util.IoUtils;
@@ -151,8 +148,6 @@ public class MineFragment extends PageFragment {
         }
     }
 
-    private static final int REQ_CODE_SAVE_DB = 5;
-
     public void exportDecryptedDatabase() {
         if (!App.config().isEditModeEnabled()) {
             MasterToast.shortToast(R.string.edit_mode_not_enabled);
@@ -176,16 +171,13 @@ public class MineFragment extends PageFragment {
 
                         @Override
                         public void onComplete() {
-                            MasterToast.shortToast(R.string.pls_select_export_dir);
-                            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-                            intent.addCategory(Intent.CATEGORY_OPENABLE);
-                            intent.setType("*/*");
-                            intent.putExtra(Intent.EXTRA_TITLE, exporter.getExportFileName());
-                            startActivityForResult(intent, REQ_CODE_SAVE_DB);
+                            new ExportShowcaseDialog().setFile(mDatabaseExportTempFile)
+                                    .setFilename(exporter.getExportFileName())
+                                    .show(requireFragmentManager(), "decrypted_db_export_showcase");
                         }
                     });
         } catch (IOException e) {
-            e.printStackTrace();
+            MasterToast.shortToast(e.getMessage());
         }
     }
 
@@ -203,40 +195,6 @@ public class MineFragment extends PageFragment {
             } else {
                 MasterToast.shortToast(R.string.unable_to_verify_device_credential);
             }
-        } else if (requestCode == REQ_CODE_SAVE_DB) {
-            if (data == null || data.getData() == null) {
-                return;
-            }
-            if (mDatabaseExportTempFile != null && mDatabaseExportTempFile.exists()) {
-                Dialog progress = UiUtils.createProgress(requireContext(), R.string.writing);
-                progress.show();
-                RxJavaUtils.complete(() -> {
-                    FileChannel inChannel = new FileInputStream(mDatabaseExportTempFile).getChannel();
-                    FileOutputStream outputStream = (FileOutputStream) requireActivity().getContentResolver().openOutputStream(data.getData(), "wa");
-                    inChannel.transferTo(0, mDatabaseExportTempFile.length(), outputStream.getChannel());
-                    inChannel.close();
-                    outputStream.close();
-                }).doFinally(() -> {
-                    progress.dismiss();
-                    clearExportCacheIfExists();
-                }).subscribe(new RxJavaUtils.CompletableObservableAdapter() {
-                    @Override
-                    public void onComplete() {
-                        MasterToast.shortToast(R.string.export_successfully);
-                    }
-
-                    @Override
-                    public void onError(@NotNull Throwable e) {
-                        UiUtils.createError(requireContext(), e).show();
-                    }
-                });
-            }
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        clearExportCacheIfExists();
     }
 }

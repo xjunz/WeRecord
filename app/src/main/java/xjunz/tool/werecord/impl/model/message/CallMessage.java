@@ -8,6 +8,7 @@ import android.os.Parcel;
 
 import androidx.annotation.Nullable;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public class CallMessage extends ComplexMessage {
@@ -89,11 +90,15 @@ public class CallMessage extends ComplexMessage {
     }
 
     public static final Creator<CallMessage> CREATOR = new Creator<CallMessage>() {
+        @NotNull
+        @Contract("_ -> new")
         @Override
         public CallMessage createFromParcel(Parcel source) {
             return new CallMessage(source);
         }
 
+        @NotNull
+        @Contract(value = "_ -> new", pure = true)
         @Override
         public CallMessage[] newArray(int size) {
             return new CallMessage[size];

@@ -120,7 +120,7 @@ public class EditorActivity extends RecycleSensitiveActivity {
      */
     public void confirmEdition(View view) {
         EditorFragment editor = mEditorPages[mBinding.vpEditor.getCurrentItem()];
-        if (!editor.isEdited().get()) {
+        if (editor.isInEditionMode() && !editor.isEdited().get()) {
             MasterToast.shortToast(R.string.no_change_was_made);
         } else {
             Intent intent = new Intent();

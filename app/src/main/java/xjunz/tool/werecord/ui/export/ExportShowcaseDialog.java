@@ -124,8 +124,8 @@ public class ExportShowcaseDialog extends DialogFragment {
         ActivityUtils.startActivityCreateChooser(requireContext(), intent);
     }
 
-    public void exportTo() {
-        MasterToast.shortToast(R.string.pls_select_export_dir);
+    public void saveTo() {
+        MasterToast.shortToast(R.string.pls_select_save_dir);
         try {
             Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -143,7 +143,7 @@ public class ExportShowcaseDialog extends DialogFragment {
         if (requestCode == REQUEST_CODE_SAVE_EXPORT_FILE) {
             if (data != null) {
                 Uri uri = data.getData();
-                Dialog progress = UiUtils.createProgress(requireContext(), R.string.writing);
+                Dialog progress = UiUtils.createProgress(requireContext(), R.string.saving);
                 RxJavaUtils.complete(() -> IoUtils.transferFileViaChannel(new FileInputStream(mFile), (FileOutputStream) requireActivity().getContentResolver().openOutputStream(uri))).doFinally(progress::dismiss).subscribe(new CompletableObserver() {
                     @Override
                     public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
@@ -160,6 +160,8 @@ public class ExportShowcaseDialog extends DialogFragment {
                         UiUtils.createError(requireContext(), e).show();
                     }
                 });
+            } else {
+                MasterToast.shortToast(R.string.operation_cancelled);
             }
         }
     }

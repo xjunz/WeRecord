@@ -3,6 +3,9 @@
  */
 package xjunz.tool.werecord.ui.main.fragment;
 
+import android.os.Bundle;
+
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import xjunz.tool.werecord.data.viewmodel.PageConfig;
@@ -17,13 +20,19 @@ public abstract class PageFragment extends Fragment {
     protected PageConfig mConfig;
 
     /**
-     * 初始化配置
+     * 初始化配置，在{@link Fragment#onCreate(Bundle)}中执行
      *
      * @return 当前配置
      */
     public abstract PageConfig getInitialConfig();
 
     public PageConfig getCurrentConfig() {
-        return mConfig = (mConfig == null ? getInitialConfig() : mConfig);
+        return mConfig;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mConfig = getInitialConfig();
     }
 }

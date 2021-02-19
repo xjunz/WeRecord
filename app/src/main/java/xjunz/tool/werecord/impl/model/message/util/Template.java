@@ -34,7 +34,7 @@ import xjunz.tool.werecord.impl.repo.RepositoryFactory;
  * 新增消息时使用的消息模板，所有消息模板都储存在数据库中，且由{@link TemplateManager}进行管理。
  * <p>
  * 消息模板包含一个{@link Message}的完整的{@link ContentValues}、名称、自定义标志以及从{@link ContentValues}
- * 里的{@link Message#KEY_CONTENT}内容总通过{@link RepGroup#MATCH_PATTERN}捕获的替换模板组。
+ * 里的{@link Message#KEY_CONTENT}内容中通过{@link RepGroup#MATCH_PATTERN}捕获的替换模板组。
  * </p>
  *
  * @author xjunz 2020/12/30
