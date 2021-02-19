@@ -65,7 +65,6 @@ import xjunz.tool.werecord.ui.message.fragment.SearchFragment;
 import xjunz.tool.werecord.ui.message.fragment.StatisticsFragment;
 import xjunz.tool.werecord.ui.message.fragment.dialog.MessageViewerDialog;
 import xjunz.tool.werecord.ui.message.fragment.dialog.TemplateSetupDialog;
-import xjunz.tool.werecord.util.IoUtils;
 import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.UiUtils;
 
@@ -117,11 +116,6 @@ public class MessageActivity extends RecycleSensitiveActivity {
         intent.putExtra(EditorActivity.EXTRA_MESSAGE_ORIGIN, mSelectedMsg);
         intent.putExtra(EditorActivity.EXTRA_EDIT_MODE, editMode);
         startActivityForResult(intent, editMode, options.toBundle());
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -638,28 +632,25 @@ public class MessageActivity extends RecycleSensitiveActivity {
                         RxJavaUtils.complete(() -> {
                             reloadMessages();
                             reloadBackupMessages();
-                        }).subscribe(new RxJavaUtils.CompletableObservableAdapter() {
+                        }).doFinally(progress::dismiss).subscribe(new RxJavaUtils.CompletableObservableAdapter() {
                             @Override
                             public void onComplete() {
                                 mModel.notifyEditionListChanged(EditionFragment.EDITION_SET_INDEX_CONFIRMED);
                                 mAdapter.notifyDataSetChanged();
-                                progress.dismiss();
                                 UiUtils.createLaunch(MessageActivity.this).show();
                             }
 
                             @Override
                             public void onError(@NotNull Throwable e) {
-                                progress.dismiss();
-                                UiUtils.createError(MessageActivity.this, IoUtils.readStackTraceFromThrowable(e)).show();
+                                UiUtils.createError(MessageActivity.this, e).show();
                             }
                         });
                     }
 
                     @Override
                     public void onError(@NotNull Throwable e) {
-                        e.printStackTrace();
                         progress.dismiss();
-                        UiUtils.createError(MessageActivity.this, IoUtils.readStackTraceFromThrowable(e)).show();
+                        UiUtils.createError(MessageActivity.this, e).show();
                     }
                 })).setNegativeButton(android.R.string.cancel, null).show());
 
@@ -787,13 +778,11 @@ public class MessageActivity extends RecycleSensitiveActivity {
         if (mBinding.messagePanel.isOpen()) {
             mBinding.messagePanel.closePanel();
         } else {
-            if (mModifier.getAllPendingEditions().size() > 0) {
+            if (mModifier.isThereAnyPendingEdition()) {
                 UiUtils.createAlert(this, R.string.alert_quit_discard_changes).setPositiveButton(R.string.quit, (dialog, which) -> {
-                    mModifier.removeAllPendingEditions();
                     MessageActivity.super.onBackPressed();
                 }).show();
             } else {
-                mModifier.removeAllPendingEditions();
                 super.onBackPressed();
             }
         }
@@ -802,6 +791,8 @@ public class MessageActivity extends RecycleSensitiveActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        //清空所有未应用的编辑
+        mModifier.discardAllPendingEditions();
         if (mLoadAllDisposable != null && !mLoadAllDisposable.isDisposed()) {
             mLoadAllDisposable.dispose();
         }

@@ -10,7 +10,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +40,7 @@ import xjunz.tool.werecord.impl.model.export.DatabaseExporter;
 import xjunz.tool.werecord.ui.base.ProgressDialog;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 import xjunz.tool.werecord.ui.export.ExportShowcaseDialog;
+import xjunz.tool.werecord.ui.main.fragment.dialog.AboutDialog;
 import xjunz.tool.werecord.ui.main.fragment.dialog.SwitchAccountDialog;
 import xjunz.tool.werecord.util.ActivityUtils;
 import xjunz.tool.werecord.util.IoUtils;
@@ -72,14 +72,13 @@ public class MineFragment extends PageFragment {
         mBinding.setUser(Environment.getInstance().getCurrentUser());
         mBinding.setSettings(mSettings);
         mBinding.setHost(this);
-        mBinding.tvDc.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     @Override
     public PageConfig getInitialConfig() {
         PageConfig pageConfig = new PageConfig();
         pageConfig.filterEnabled = false;
-        pageConfig.caption = getString(R.string.mine);
+        pageConfig.caption = App.getStringOf(R.string.mine);
         return pageConfig;
     }
 
@@ -184,6 +183,15 @@ public class MineFragment extends PageFragment {
     public void getLatestVersion() {
         MasterToast.longToast(getString(R.string.format_current_app_version, BuildConfig.VERSION_NAME));
         ActivityUtils.viewUri(requireContext(), Constants.URL_APP_DOWNLOAD_PAGE);
+    }
+
+    public void showAppInfo() {
+        new AboutDialog().show(requireFragmentManager(), "about");
+    }
+
+    public void gotoFeedback(View view) {
+        //todo:debug模式允许私人临时聊天
+        ActivityUtils.feedbackJoinQGroup(requireContext());
     }
 
     @Override

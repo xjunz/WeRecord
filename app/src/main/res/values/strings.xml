@@ -4,7 +4,7 @@
 
 <resources>
     <!--application-->
-    <string name="copyright">Copyright © 2021 <b>WeRecord</b> \n All rights reserved.</string>
+    <string name="copyright">Copyright © 2021 <b>WeRecord</b></string>
     <string name="app_name">WeRecord</string>
     <!--intro-->
     <string name="intro">引导</string>
@@ -397,4 +397,9 @@
     <string name="unable_to_open">找不到打开方式</string>
     <string name="message_restored">消息已还原</string>
     <string name="operation_cancelled">操作取消</string>
+    <string name="support_me">支持作者</string>
+    <string name="app_info">应用信息</string>
+    <string name="feedback_via">请选择反馈方式</string>
+    <string name="feeback_via_group">群聊</string>
+    <string name="operation_failed">操作失败</string>
 </resources>

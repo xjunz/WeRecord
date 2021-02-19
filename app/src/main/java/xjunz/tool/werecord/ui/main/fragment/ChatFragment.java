@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.reactivex.FlowableEmitter;
+import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.data.viewmodel.PageConfig;
 import xjunz.tool.werecord.data.viewmodel.SortBy;
@@ -83,10 +84,10 @@ public class ChatFragment extends ListPageFragment<Talker> {
     @Override
     public PageConfig getInitialConfig() {
         PageConfig config = new PageConfig();
-        config.caption = getString(R.string.chat);
+        config.caption = App.getStringOf(R.string.chat);
         config.isChat.set(true);
         config.sortBy.set(SortBy.TIMESTAMP);
-        List<String> captionList = Arrays.asList(getResources().getStringArray(R.array.type_talker));
+        List<String> captionList = Arrays.asList(App.getContext().getResources().getStringArray(R.array.type_talker));
         config.typeList.addAll(captionList);
         config.sortByList.addAll(SortBy.getCaptionList());
         config.setEventHandler(this);

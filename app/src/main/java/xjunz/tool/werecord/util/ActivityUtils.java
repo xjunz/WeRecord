@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import org.jetbrains.annotations.NotNull;
 
 import xjunz.tool.werecord.R;
+import xjunz.tool.werecord.ui.customview.MasterToast;
 
 /**
  * @author xjunz 2021/2/17 1:51
@@ -45,7 +46,7 @@ public class ActivityUtils {
         throw new IllegalArgumentException("The context passed in must be an Activity or a ContextWrapper wrapping an Activity! ");
     }
 
-    private static final String feedbackQGroupNum = "561721325";
+    private static final String feedbackQGroupNum = "602611929";
     private static final String feedbackQNum = "3285680362";
 
     public static boolean feedbackTempQChat(Context context) {
@@ -57,13 +58,12 @@ public class ActivityUtils {
         return true;
     }
 
-    public static boolean feedbackJoinQGroup(Context context) {
+    public static void feedbackJoinQGroup(Context context) {
         try {
             context.startActivity(new Intent().setData(Uri.parse("mqqapi://card/show_pslcard?src_type=internal&version=1&uin=" + feedbackQGroupNum + "&card_type=group&source=qrcode")));
         } catch (Exception e) {
-            return false;
+            MasterToast.shortToast(R.string.operation_failed);
         }
-        return true;
     }
 
     public static void openWeChat(@NotNull Context context) {

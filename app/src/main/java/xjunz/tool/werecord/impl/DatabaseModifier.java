@@ -85,7 +85,7 @@ public class DatabaseModifier extends BaseObservable {
         setThereAnyPendingEdition(mPendingEditions.size() != 0);
     }
 
-    public void removeAllPendingEditions() {
+    public void discardAllPendingEditions() {
         mPendingEditions.clear();
         setThereAnyPendingEdition(false);
     }
@@ -111,7 +111,7 @@ public class DatabaseModifier extends BaseObservable {
             }
         }
         apply();
-        removeAllPendingEditions();
+        discardAllPendingEditions();
     }
 
     /**

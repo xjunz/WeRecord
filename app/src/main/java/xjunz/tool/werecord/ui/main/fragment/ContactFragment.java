@@ -6,7 +6,6 @@ package xjunz.tool.werecord.ui.main.fragment;
 
 import android.app.ActivityOptions;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -28,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.data.viewmodel.PageConfig;
 import xjunz.tool.werecord.data.viewmodel.SortBy;
@@ -112,9 +112,7 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
         }
     };
 
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
+    public ContactFragment() {
         mRepository = RepositoryFactory.get(ContactRepository.class);
     }
 
@@ -232,7 +230,7 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
     @Override
     public PageConfig getInitialConfig() {
         PageConfig config = new PageConfig();
-        config.caption = getString(R.string.contact);
+        config.caption = App.getStringOf(R.string.contact);
         config.sortBy.set(SortBy.NAME);
         List<String> captionList = Contact.Type.getCaptionList(getTypeList());
         config.typeList.addAll(captionList);

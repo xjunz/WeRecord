@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2021 xjunz. 保留所有权利
+  -->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="xjunz.tool.werecord.BuildConfig" />
+
+        <import type="android.text.method.LinkMovementMethod" />
+
+        <variable
+            name="host"
+            type="xjunz.tool.werecord.ui.main.fragment.dialog.AboutDialog" />
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginHorizontal="@dimen/dialog_horizontal_spacing"
+            android:background="@drawable/bg_material_dialog"
+            android:elevation="@dimen/z_dialog"
+            android:paddingTop="@dimen/r_fab_normal">
+
+            <TextView
+                android:id="@+id/tv_app_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/app_name"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_version_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@{BuildConfig.VERSION_NAME}"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_app_name"
+                app:layout_constraintStart_toEndOf="@+id/tv_app_name"
+                app:layout_constraintTop_toTopOf="@+id/tv_app_name"
+                app:layout_constraintVertical_bias="0.76"
+                tools:text="1.0.0" />
+
+            <TextView
+                android:id="@+id/tv_copyright"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:gravity="center"
+                android:text="@string/copyright"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_dc" />
+
+            <TextView
+                android:id="@+id/tv_dc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:movementMethod="@{LinkMovementMethod.getInstance()}"
+                android:text="@string/read_and_approved_dc"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_app_name" />
+
+            <Button
+                android:id="@+id/btn_donate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:letterSpacing=".2"
+                android:onClick="@{()->host.gotoDonate()}"
+                android:text="@string/support_me"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider" />
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_copyright" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <ImageView
+            android:id="@+id/iv_app_icon"
+            android:layout_width="@dimen/fab_normal"
+            android:layout_height="@dimen/fab_normal"
+            android:layout_above="@+id/container"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/minus_r_fab_normal"
+            android:background="@drawable/bg_circle"
+            android:elevation="@dimen/z_dialog"
+            android:src="@mipmap/ic_launcher"
+            android:visibility="invisible"
+            tools:ignore="ContentDescription"
+            tools:visibility="visible" />
+    </RelativeLayout>
+
+
+</layout>
