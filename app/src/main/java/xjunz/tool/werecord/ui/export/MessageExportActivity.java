@@ -26,7 +26,6 @@ import xjunz.tool.werecord.impl.model.account.Account;
 import xjunz.tool.werecord.impl.model.export.Exporter;
 import xjunz.tool.werecord.ui.base.ProgressDialog;
 import xjunz.tool.werecord.ui.customview.MasterToast;
-import xjunz.tool.werecord.util.IoUtils;
 import xjunz.tool.werecord.util.UiUtils;
 
 /**
@@ -57,9 +56,13 @@ public class MessageExportActivity extends ExporterActivity {
             MasterToast.shortToast(R.string.no_data);
             return;
         }
+        if (mExporter.getExportFormat() == Exporter.Format.HTML) {
+            UiUtils.createAlert(this, R.string.under_construction).setPositiveButton(android.R.string.ok, null).show();
+            return;
+        }
         try {
             ProgressDialog progress = ProgressDialog.build(this).setTitle(R.string.exporting);
-            mExporter.exportToAsync(createTempOutputFile(), new Exporter.OnProgressListener() {
+            mExporter.exportToAsync(createTempOutputFile("message"), new Exporter.OnProgressListener() {
                 @Override
                 public void onGetTotalProgress(int total) {
                     if (total != 0) {
@@ -84,7 +87,7 @@ public class MessageExportActivity extends ExporterActivity {
 
                 @Override
                 public void onError(@NonNull Throwable e) {
-                    UiUtils.createError(MessageExportActivity.this, IoUtils.readStackTraceFromThrowable(e)).show();
+                    UiUtils.showError(MessageExportActivity.this, e);
                 }
             });
         } catch (IOException e) {

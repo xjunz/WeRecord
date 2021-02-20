@@ -7,18 +7,15 @@ package xjunz.tool.werecord.ui.outer;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Process;
-import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
-import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.Objects;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -32,12 +29,9 @@ import xjunz.tool.werecord.util.IoUtils;
 import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.ShellUtils;
 import xjunz.tool.werecord.util.UiUtils;
-import xjunz.tool.werecord.util.Utils;
 
 public class DebugActivity extends BaseActivity {
-    @Keep
-    public static final String EXTRA_ENV_SERIAL = "xjunz.extra.EnvSerial";
-    private EditText mEtInput, mEtOutput;
+    private EditText mEtOutput;
     private Environment mEnv;
 
     @Override
@@ -45,18 +39,13 @@ public class DebugActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_debug);
         mEnv = Environment.getInstance();
-        String serial = getIntent().getStringExtra(EXTRA_ENV_SERIAL);
-        mEtInput = findViewById(R.id.et_serial);
-        if (serial != null) {
-            mEtInput.setText(serial);
-        }
         mEtOutput = findViewById(R.id.et_output);
 
     }
 
 
     public void parseEnvInfo(View view) {
-        if (mEtInput.getText() != null)
+      /*  if (mEtInput.getText() != null)
             try {
                 String input = mEtInput.getText().toString();
                 if (input.contains("Serial")) {
@@ -66,7 +55,7 @@ public class DebugActivity extends BaseActivity {
                 mEtOutput.setText(Html.fromHtml(Objects.requireNonNull(Environment.deserialize(input), "error parse environment")));
             } catch (Exception e) {
                 mEtOutput.setText(String.format("%s: %s", e.getClass().getName(), e.getMessage()));
-            }
+            }*/
     }
 
     public void deleteBackupTable(View view) {
@@ -86,7 +75,7 @@ public class DebugActivity extends BaseActivity {
     }
 
     public void showEnvInfo(View view) {
-        mEtOutput.setText(Html.fromHtml(mEnv.toString()));
+        mEtOutput.setText(Environment.getBasicEnvInfo());
     }
 
     public void exportDatabase(View view) {
@@ -110,7 +99,7 @@ public class DebugActivity extends BaseActivity {
                     public void onError(@NotNull Throwable e) {
                         super.onError(e);
                         dialog.dismiss();
-                        UiUtils.createError(DebugActivity.this, IoUtils.readStackTraceFromThrowable(e)).show();
+                        mEtOutput.setText(IoUtils.readStackTraceFromThrowable(e));
                     }
                 });
             }
@@ -154,7 +143,7 @@ public class DebugActivity extends BaseActivity {
                     public void onError(@NotNull Throwable e) {
                         super.onError(e);
                         dialog.dismiss();
-                        UiUtils.createError(DebugActivity.this, IoUtils.readStackTraceFromThrowable(e)).show();
+                        mEtOutput.setText(IoUtils.readStackTraceFromThrowable(e));
                     }
                 });
             }
@@ -183,6 +172,10 @@ public class DebugActivity extends BaseActivity {
     public void restoreMsgDatabaseBackup(View view) {
         User currentUser = getEnvironment().getCurrentUser();
         Dialog progress = UiUtils.createProgress(this, R.string.please_wait);
+        if (currentUser.backupDatabaseFilePath == null) {
+            MasterToast.shortToast("备份不存在");
+            return;
+        }
         File backup = new File(currentUser.backupDatabaseFilePath);
         if (!backup.exists()) {
             MasterToast.shortToast("备份不存在");
@@ -212,7 +205,7 @@ public class DebugActivity extends BaseActivity {
             public void onError(@NotNull Throwable e) {
                 super.onError(e);
                 progress.dismiss();
-                UiUtils.createError(DebugActivity.this, IoUtils.readStackTraceFromThrowable(e)).show();
+                mEtOutput.setText(IoUtils.readStackTraceFromThrowable(e));
             }
         });
     }
@@ -233,8 +226,20 @@ public class DebugActivity extends BaseActivity {
                     public void onError(@NotNull Throwable e) {
                         super.onError(e);
                         progress.dismiss();
-                        UiUtils.createError(DebugActivity.this, IoUtils.readStackTraceFromThrowable(e)).show();
+                        mEtOutput.setText(IoUtils.readStackTraceFromThrowable(e));
                     }
                 });
+    }
+
+    public void caughtException(View view) {
+        try {
+            throw new RuntimeException("An exception thrown in codes explicitly.");
+        } catch (Exception e) {
+            UiUtils.showError(this, e);
+        }
+    }
+
+    public void uncaughtException(View view) {
+        throw new RuntimeException("An exception thrown in codes explicitly.");
     }
 }

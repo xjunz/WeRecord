@@ -17,7 +17,6 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.view.OneShotPreDrawListener;
 import androidx.fragment.app.DialogFragment;
 
 import xjunz.tool.werecord.R;
@@ -49,7 +48,7 @@ public class AboutDialog extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         //todo: AdaptiveIconDrawable 实现parallax 效果
-        OneShotPreDrawListener.add(mIcon, () -> {
+        mIcon.postDelayed(() -> {
             mIcon.setVisibility(View.VISIBLE);
             mIcon.setTranslationY(-200);
             Path scalePath = new Path();
@@ -62,7 +61,7 @@ public class AboutDialog extends DialogFragment {
             AnimatorSet set = new AnimatorSet();
             set.playSequentially(scale, transY);
             set.start();
-        });
+        }, 200);
     }
 
     public void gotoDonate() {

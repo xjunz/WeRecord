@@ -39,25 +39,26 @@
     </style>
 
     <style name="Base.AppTheme.Main.Translucent">
+        <item name="android:screenOrientation">behind</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="Base.AppTheme.Main.Translucent.Message">
-        <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowEnterTransition">@transition/message_enter</item>
         <item name="android:windowSharedElementEnterTransition">@transition/message_shared_enter
         </item>
     </style>
 
     <style name="Base.AppTheme.Main.Translucent.Editor">
-        <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowEnterTransition">@transition/editor_enter</item>
     </style>
 
     <style name="Base.AppTheme.Main.Translucent.MessageExport">
-        <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowSharedElementEnterTransition">
             @transition/message_export_shared_enter
         </item>
@@ -66,7 +67,6 @@
     </style>
 
     <style name="Base.AppTheme.Main.Translucent.ContactExport">
-        <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowSharedElementEnterTransition">
             @transition/contact_export_shared_enter
         </item>
@@ -89,7 +89,6 @@
     </style>
 
     <style name="Base.AppTheme.Main.Translucent.Dialog.Detail">
-        <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowEnterTransition">@transition/detail_enter</item>
         <item name="android:windowSharedElementEnterTransition">@transition/detail_shared_enter
         </item>

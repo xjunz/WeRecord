@@ -22,37 +22,7 @@ import xjunz.tool.werecord.util.Utils;
 
 
 public class MessageParser {
-    // private static final String TAG = xjunz.tool.wechat.impl.model.message.MessageParser.class.getName();
-
-    private static final String TEST_XML =
-            "<sysmsg type=\"sysmsgtemplate\">\n" +
-                    "\t<sysmsgtemplate>\n" +
-                    "\t\t<content_template type=\"tmpl_type_profile\">\n" +
-                    "\t\t\t<plain><![CDATA[]]></plain>\n" +
-                    "\t\t\t<template><![CDATA[\"$username$\"邀请\"$names$\"加入了群聊]]></template>\n" +
-                    "\t\t\t<link_list>\n" +
-                    "\t\t\t\t<link name=\"username\" type=\"link_profile\">\n" +
-                    "\t\t\t\t\t<memberlist>\n" +
-                    "\t\t\t\t\t\t<member>\n" +
-                    "\t\t\t\t\t\t\t<username><![CDATA[wxid_wgabh1cqlq9u22]]></username>\n" +
-                    "\t\t\t\t\t\t\t<nickname><![CDATA[张羽]]></nickname>\n" +
-                    "\t\t\t\t\t\t</member>\n" +
-                    "\t\t\t\t\t</memberlist>\n" +
-                    "\t\t\t\t</link>\n" +
-                    "\t\t\t\t<link name=\"names\" type=\"link_profile\">\n" +
-                    "\t\t\t\t\t<memberlist>\n" +
-                    "\t\t\t\t\t\t<member>\n" +
-                    "\t\t\t\t\t\t\t<username><![CDATA[wxid_0zzj702m3xzc21]]></username>\n" +
-                    "\t\t\t\t\t\t\t<nickname><![CDATA[\uD83C\uDF4F]]></nickname>\n" +
-                    "\t\t\t\t\t\t</member>\n" +
-                    "\t\t\t\t\t</memberlist>\n" +
-                    "\t\t\t\t\t<separator><![CDATA[、]]></separator>\n" +
-                    "\t\t\t\t</link>\n" +
-                    "\t\t\t</link_list>\n" +
-                    "\t\t</content_template>\n" +
-                    "\t</sysmsgtemplate>\n" +
-                    "</sysmsg>\n" +
-                    "\n";
+    private static final String TEST_XML = "";
 
     public static void parseJoinGroupMessage(String raw) {
         SAXParserFactory factory = SAXParserFactory.newInstance();

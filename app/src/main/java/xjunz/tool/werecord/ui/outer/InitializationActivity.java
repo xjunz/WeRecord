@@ -130,11 +130,7 @@ public class InitializationActivity extends Activity implements CompletableObser
         App.getSharedPrefsManager().setIsAppIntroDone(false);
         UiUtils.createDialog(this, R.string.init_failed, R.string.msg_init_failed).setPositiveButton(android.R.string.ok, (dialog, which) -> recreate())
                 .setNegativeButton(R.string.exit, (dialog, which) -> finish())
-                .setNeutralButton(R.string.check, (dialog, which) -> {
-                    UiUtils.createError(InitializationActivity.this, e)
-                            .setCancelable(false)
-                            .setNegativeButton(R.string.quit, (dialog1, which1) -> finish()).show();
-                }).setCancelable(false).show();
+                .setCancelable(false).show();
     }
 
     @Override

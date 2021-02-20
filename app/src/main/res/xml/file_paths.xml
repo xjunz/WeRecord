@@ -1,7 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
 <paths>
-    <cache-path name="exported_file" path="/" />
+    <cache-path
+        name="exported_file"
+        path="/" />
 </paths>

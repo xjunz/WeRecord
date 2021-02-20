@@ -19,7 +19,7 @@ class LifecyclePerceptiveRepository implements LifecycleObserver {
 
     protected LifecyclePerceptiveRepository() {
         mEnv = Environment.getInstance();
-        mEnv.getLifecycle().addObserver(this);
+        mEnv.addLifecycleObserver(this);
     }
 
     protected SQLiteDatabase getDatabase() {

@@ -248,7 +248,7 @@
     <string name="alert_apply_changes">您确定要应用所有更改吗？这是一项危险操作，可能导致您的微信数据库损坏</string>
     <string name="alert_restart_after_changes_applied">所有更改已应用，是否启动微信查看更改？</string>
     <string name="applying_changes">正在应用更改…</string>
-    <string name="note_imperfect_preview">*注:此预览内容不代表微信内实际显示内容</string>
+    <string name="note_imperfect_preview">*注:此预览内容不一定代表实际显示内容</string>
     <string name="caption_template_rules">通过在模板中插入替换组可实现<b>自定义替换内容</b>。替换组的格式为<b>${</b><i><b>名称</b></i><b>}</b>。如某模板中包含替换组“${消息内容}”,
     那么当您使用此模板添加消息时，应用会自动检测到名为“消息内容”的替换组，此时您可以自定义该“消息内容”。当您点击确定时，整个替换组会被替换成您自定义的内容。</string>
     <string name="current_reps">当前替换组</string>
@@ -373,7 +373,7 @@
     <string name="verify_owner_title">身份验证</string>
     <string name="verify_owner_des">确认机主身份后才能继续使用微记录</string>
     <string name="warning_edit_mode">开启编辑模式后，将允许您使用需要编辑数据的功能。尽管已经通过大量测试，但是仍然不排除开启此模式后导致数据丢失、损坏的可能。
-    <b>请审慎开启此模式</b>。注：开启后应用会重启以生效。</string>
+    <b>请审慎开启此模式</b>。</string>
     <string name="edit_mode_not_enabled">编辑模式未启用</string>
     <string name="function">功能</string>
     <string name="export_decrypted_database">导出明文数据库</string>
@@ -400,6 +400,16 @@
     <string name="support_me">支持作者</string>
     <string name="app_info">应用信息</string>
     <string name="feedback_via">请选择反馈方式</string>
-    <string name="feeback_via_group">群聊</string>
+    <string name="feedback_via_group">群聊</string>
     <string name="operation_failed">操作失败</string>
+    <string name="under_construction">🚧 👷‍♀️⛏<b>该功能正在实现中…</b>👷🔧️👷🔧 🚧</string>
+    <string name="msg_app_fc">很抱歉，应用崩溃了，正在收集错误信息…</string>
+    <string name="emotion_oops">😅</string>
+    <string name="app_fc">应用崩溃了..</string>
+    <string name="crash_log">错误日志</string>
+    <string name="send">发送</string>
+    <string name="not_found"><i>获取失败</i></string>
+    <string name="join_feedback_group">加入反馈群</string>
+    <string name="copy">复制</string>
+    <string name="other_ways">其他方式</string>
 </resources>

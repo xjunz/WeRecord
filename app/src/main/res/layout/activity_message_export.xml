@@ -10,6 +10,8 @@
         <variable
             name="label"
             type="String" />
+
+        <import type="xjunz.tool.werecord.util.ActivityUtils" />
     </data>
 
     <xjunz.tool.werecord.ui.customview.ExportConfigPanel
@@ -48,45 +50,16 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
-                android:id="@+id/ib_sync"
-                android:layout_width="@dimen/fab_small"
-                android:layout_height="@dimen/fab_small"
-                android:layout_marginEnd="@dimen/spacing_unit"
-                android:background="?android:selectableItemBackgroundBorderless"
-                android:contentDescription="@string/debug"
-                android:tint="?colorButtonNormal"
-                android:tooltip="@{@string/restart}"
-                app:layout_constraintBottom_toBottomOf="@+id/ib_search"
-                app:layout_constraintEnd_toStartOf="@+id/ib_search"
-                app:layout_constraintTop_toTopOf="@+id/ib_search"
-                app:srcCompat="@drawable/ic_baseline_sync_24" />
-
-            <ImageButton
-                android:id="@+id/ib_search"
-                android:layout_width="@dimen/fab_small"
-                android:layout_height="@dimen/fab_small"
-                android:layout_marginEnd="@dimen/spacing_unit"
-                android:background="?android:selectableItemBackgroundBorderless"
-                android:contentDescription="@string/search"
-                android:labelFor="@+id/et_search"
-                android:tint="?colorButtonNormal"
-                android:tooltip="@{@string/search}"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/ib_close"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageButton
                 android:id="@+id/ib_close"
                 android:layout_width="@dimen/fab_small"
                 android:layout_height="@dimen/fab_small"
                 android:layout_marginEnd="@dimen/spacing_normal"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/filter"
+                android:onClick="@{()->ActivityUtils.getHostActivity(context).finishAfterTransition()}"
                 android:src="@drawable/ic_close_24dp"
                 android:tint="?colorButtonNormal"
-                android:tooltip="@{@string/filter}"
-                android:transitionName="@string/tn_filter"
+                android:tooltip="@{@string/close}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

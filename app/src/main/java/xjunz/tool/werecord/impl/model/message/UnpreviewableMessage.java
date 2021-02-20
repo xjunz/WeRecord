@@ -5,9 +5,9 @@ package xjunz.tool.werecord.impl.model.message;
 
 import android.content.ContentValues;
 import android.os.Parcel;
-import android.text.Html;
 
 import androidx.annotation.NonNull;
+import androidx.core.text.HtmlCompat;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +50,7 @@ public class UnpreviewableMessage extends ComplexMessage {
     @NonNull
     @Override
     public CharSequence getSpannedContent() {
-        return Html.fromHtml("<i>&lt;" + getParsedContent() + "&gt;</i>");
+        return HtmlCompat.fromHtml("<i>&lt;" + getParsedContent() + "&gt;</i>", HtmlCompat.FROM_HTML_MODE_LEGACY);
     }
 
     @Override

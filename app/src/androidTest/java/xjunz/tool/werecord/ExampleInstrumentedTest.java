@@ -16,8 +16,6 @@ import org.junit.runner.RunWith;
 import xjunz.tool.werecord.impl.Environment;
 import xjunz.tool.werecord.util.LogUtils;
 
-import static org.junit.Assert.assertEquals;
-
 /**
  * Instrumented test, which will execute on an Android device.
  *
@@ -29,9 +27,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
-
-        assertEquals("xjunz.tool.wechat", appContext.getPackageName());
-
     }
 
     @Test

@@ -17,7 +17,6 @@
         android:resizeableActivity="false"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        tools:replace="android:allowBackup"
         tools:targetApi="n">
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -67,7 +66,6 @@
         </activity>
         <activity
             android:name="xjunz.tool.werecord.ui.main.DetailActivity"
-            android:parentActivityName="xjunz.tool.werecord.ui.main.MainActivity"
             android:theme="@style/Base.AppTheme.Main.Translucent.Dialog.Detail">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -75,23 +73,18 @@
         </activity>
         <activity
             android:name="xjunz.tool.werecord.ui.main.ImageViewerActivity"
-            android:parentActivityName="xjunz.tool.werecord.ui.main.DetailActivity"
             android:theme="@style/Base.AppTheme.Main.Translucent.Dialog.ImageViewer" />
         <activity
             android:name="xjunz.tool.werecord.ui.message.MessageActivity"
-            android:parentActivityName="xjunz.tool.werecord.ui.main.MainActivity"
             android:theme="@style/Base.AppTheme.Main.Translucent.Message" />
         <activity
             android:name="xjunz.tool.werecord.ui.message.EditorActivity"
-            android:parentActivityName="xjunz.tool.werecord.ui.message.MessageActivity"
             android:theme="@style/Base.AppTheme.Main.Translucent.Editor" />
         <activity
             android:name="xjunz.tool.werecord.ui.export.MessageExportActivity"
-            android:parentActivityName="xjunz.tool.werecord.ui.main.MainActivity"
             android:theme="@style/Base.AppTheme.Main.Translucent.MessageExport" />
         <activity
             android:name="xjunz.tool.werecord.ui.export.ContactExportActivity"
-            android:parentActivityName="xjunz.tool.werecord.ui.main.MainActivity"
             android:theme="@style/Base.AppTheme.Main.Translucent.ContactExport" />
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
@@ -100,5 +93,9 @@
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
             android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar" />
+        <activity
+            android:name=".ui.outer.CrashReportActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Base.AppTheme.Main.Translucent" />
     </application>
 </manifest>

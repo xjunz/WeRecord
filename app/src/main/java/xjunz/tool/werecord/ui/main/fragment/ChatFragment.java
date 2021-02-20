@@ -9,7 +9,6 @@ import android.app.ActivityOptions;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +19,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 
 import org.jetbrains.annotations.NotNull;
@@ -46,7 +46,6 @@ import xjunz.tool.werecord.impl.repo.TalkerRepository;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 import xjunz.tool.werecord.ui.export.MessageExportActivity;
 import xjunz.tool.werecord.ui.main.DetailActivity;
-import xjunz.tool.werecord.util.IoUtils;
 import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.UiUtils;
 
@@ -229,7 +228,7 @@ public class ChatFragment extends ListPageFragment<Talker> {
 
                             @Override
                             public void onError(@NotNull Throwable e) {
-                                UiUtils.createError(requireContext(), IoUtils.readStackTraceFromThrowable(e)).show();
+                                UiUtils.showError(requireContext(), e);
                             }
                         });
                     });
@@ -274,7 +273,7 @@ public class ChatFragment extends ListPageFragment<Talker> {
                 //设置格式化后的时间
                 holder.tvTime.setText(talker.formatTimestamp);
                 //设置记录数
-                holder.tvMsgCount.setText(Html.fromHtml(getString(R.string.format_total_records, talker.messageCount)));
+                holder.tvMsgCount.setText(HtmlCompat.fromHtml(getString(R.string.format_total_records, talker.messageCount), HtmlCompat.FROM_HTML_MODE_LEGACY));
                 //是否为隐藏的消息
                 holder.ivHidden.setVisibility(talker.isHidden() ? View.VISIBLE : View.GONE);
                 //未读消息

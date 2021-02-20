@@ -7,6 +7,7 @@ package xjunz.tool.werecord.ui.message;
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,6 +19,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
@@ -110,13 +114,7 @@ public class MessageActivity extends RecycleSensitiveActivity {
     private int mSelectedMsgIndex;
     private Message mSelectedMsg;
     private long mGeneratedMsgId = -1;
-
-    private void startEditorForResult(int editMode, @NotNull Intent intent) {
-        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
-        intent.putExtra(EditorActivity.EXTRA_MESSAGE_ORIGIN, mSelectedMsg);
-        intent.putExtra(EditorActivity.EXTRA_EDIT_MODE, editMode);
-        startActivityForResult(intent, editMode, options.toBundle());
-    }
+    private ActivityResultLauncher<Integer> mEditorLauncher;
 
     @Override
     protected void onCreateNormally(@Nullable Bundle savedInstanceState) {
@@ -136,6 +134,7 @@ public class MessageActivity extends RecycleSensitiveActivity {
         initList();
         initPages();
         initPanel();
+        createEditorLauncher();
     }
 
     public void restore(int index, @NotNull Message target) {
@@ -444,6 +443,103 @@ public class MessageActivity extends RecycleSensitiveActivity {
         }
     }
 
+    private static class EditorResult {
+        private final Message editedMessage;
+        private final int editMode;
+
+        public EditorResult(int editMode, Message editedMessage) {
+            this.editMode = editMode;
+            this.editedMessage = editedMessage;
+        }
+    }
+
+    private final ActivityResultCallback<EditorResult> mMessageEditorCallback = result -> {
+        if (result.editedMessage == null) {
+            return;
+        }
+        Message returned = result.editedMessage;
+        switch (result.editMode) {
+            case EditorActivity.EDIT_MODE_EDIT:
+                Message backup = mModel.getUnconfirmedBackup(mSelectedMsg.getMsgId());
+                //如果发送者不是用户本人，恢复消息状态，否则消息状态可能混乱（比如对方拥有发送失败标志）
+                if (backup != null && returned.getSenderId() != null && !returned.getSenderId().equals(getCurrentUser().id)) {
+                    returned.setStatus(backup.getStatus());
+                }
+                //如果更改后的内容和备份的内容一致，说明此次更改恢复了原来的消息
+                if (backup != null && backup.deepEquals(returned)) {
+                    MasterToast.shortToast(R.string.message_restored);
+                    mModel.removeUnconfirmedBackup(backup);
+                    mModifier.removePendingEdition(mSelectedMsg.getMsgId());
+                    notifyItemChangedConsideringTimestamp(backup, mSelectedMsgIndex);
+                    mModel.notifyMessageRestored(mSelectedMsg.getEditionFlag(), EditionFragment.EDITION_SET_INDEX_UNCONFIRMED);
+                    return;
+                }
+                //备份...
+                mModel.addUnconfirmedBackupIfNotExists(mSelectedMsg);
+                //添加...
+                mModifier.putPendingEdition(Edition.replace(mSelectedMsg, returned));
+                //设置...
+                if (mSelectedMsg.getEditionFlag() != Edition.FLAG_INSERTION) {
+                    returned.setEditionFlag(Edition.FLAG_REPLACEMENT);
+                }
+                notifyItemChangedConsideringTimestamp(returned, mSelectedMsgIndex);
+                mModel.notifyMessageChanged();
+                break;
+            case EditorActivity.EDIT_MODE_ADD_AFTER:
+            case EditorActivity.EDIT_MODE_ADD_BEFORE:
+                if (mGeneratedMsgId == -1) {
+                    mGeneratedMsgId = mMessageRepo.getMaxMsgId();
+                }
+                //为它设置一个独一无二的ID
+                returned.getValues().put(Message.KEY_MSG_ID, ++mGeneratedMsgId);
+                returned.setEditionFlag(Edition.FLAG_INSERTION);
+                mModifier.putPendingEdition(Edition.insert(returned));
+                int insertion = result.editMode == EditorActivity.EDIT_MODE_ADD_AFTER ? mSelectedMsgIndex : mSelectedMsgIndex + 1;
+                mMessageList.add(insertion, returned);
+                mAdapter.notifyItemInserted(insertion);
+                mModel.notifyMessageInserted();
+                break;
+        }
+    };
+
+    private void createEditorLauncher() {
+        mEditorLauncher = registerForActivityResult(new ActivityResultContract<Integer, EditorResult>() {
+            private int mEditMode;
+
+            @NonNull
+            @Override
+            public Intent createIntent(@NonNull Context context, Integer editMode) {
+                this.mEditMode = editMode;
+                Intent intent = new Intent(MessageActivity.this, EditorActivity.class);
+                intent.putExtra(EditorActivity.EXTRA_EDIT_MODE, editMode);
+                intent.putExtra(EditorActivity.EXTRA_MESSAGE_ORIGIN, mSelectedMsg);
+                switch (editMode) {
+                    case EditorActivity.EDIT_MODE_ADD_BEFORE:
+                        if (mSelectedMsgIndex < mMessageList.size() - 1) {
+                            Message before = mMessageList.get(mSelectedMsgIndex + 1);
+                            intent.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_START, before.getCreateTimeStamp());
+                        }
+                        intent.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_STOP, mSelectedMsg.getCreateTimeStamp());
+                        break;
+                    case EditorActivity.EDIT_MODE_ADD_AFTER:
+                        if (mSelectedMsgIndex > 0) {
+                            Message after = mMessageList.get(mSelectedMsgIndex - 1);
+                            intent.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_STOP, after.getCreateTimeStamp());
+                        }
+                        intent.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_START, mSelectedMsg.getCreateTimeStamp());
+                        break;
+                    case EditorActivity.EDIT_MODE_EDIT:
+                        break;
+                }
+                return intent;
+            }
+
+            @Override
+            public EditorResult parseResult(int resultCode, @Nullable Intent intent) {
+                return new EditorResult(mEditMode, intent == null ? null : intent.getParcelableExtra(EditorActivity.EXTRA_MESSAGE_ORIGIN));
+            }
+        }, mMessageEditorCallback);
+    }
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -461,34 +557,21 @@ public class MessageActivity extends RecycleSensitiveActivity {
                     MasterToast.shortToast(R.string.edit_mode_not_enabled);
                     return super.onContextItemSelected(item);
                 }
-                Intent intentAddBefore = new Intent(this, EditorActivity.class);
-                if (mSelectedMsgIndex < mMessageList.size() - 1) {
-                    Message before = mMessageList.get(mSelectedMsgIndex + 1);
-                    intentAddBefore.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_START, before.getCreateTimeStamp());
-                }
-                intentAddBefore.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_STOP, mSelectedMsg.getCreateTimeStamp());
-                startEditorForResult(EditorActivity.EDIT_MODE_ADD_BEFORE, intentAddBefore);
+                mEditorLauncher.launch(EditorActivity.EDIT_MODE_ADD_BEFORE);
                 break;
             case R.id.item_add_after:
                 if (!App.config().isEditModeEnabled()) {
                     MasterToast.shortToast(R.string.edit_mode_not_enabled);
                     return super.onContextItemSelected(item);
                 }
-                Intent intentAddAfter = new Intent(this, EditorActivity.class);
-                if (mSelectedMsgIndex > 0) {
-                    Message after = mMessageList.get(mSelectedMsgIndex - 1);
-                    intentAddAfter.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_STOP, after.getCreateTimeStamp());
-                }
-                intentAddAfter.putExtra(EditorActivity.EXTRA_SEND_TIMESTAMP_START, mSelectedMsg.getCreateTimeStamp());
-                startEditorForResult(EditorActivity.EDIT_MODE_ADD_AFTER, intentAddAfter);
+                mEditorLauncher.launch(EditorActivity.EDIT_MODE_ADD_AFTER);
                 break;
             case R.id.item_edit:
                 if (!App.config().isEditModeEnabled()) {
                     MasterToast.shortToast(R.string.edit_mode_not_enabled);
                     return super.onContextItemSelected(item);
                 }
-                Intent intentEdit = new Intent(this, EditorActivity.class);
-                startEditorForResult(EditorActivity.EDIT_MODE_EDIT, intentEdit);
+                mEditorLauncher.launch(EditorActivity.EDIT_MODE_EDIT);
                 break;
             case R.id.item_delete:
                 if (!App.config().isEditModeEnabled()) {
@@ -546,57 +629,6 @@ public class MessageActivity extends RecycleSensitiveActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (data == null) {
-            return;
-        }
-        Message returned = data.getParcelableExtra(EditorActivity.EXTRA_MESSAGE_ORIGIN);
-        switch (requestCode) {
-            case EditorActivity.EDIT_MODE_EDIT:
-                Message backup = mModel.getUnconfirmedBackup(mSelectedMsg.getMsgId());
-                //如果发送者不是用户本人，恢复消息状态，否则消息状态可能混乱（比如对方拥有发送失败标志）
-                if (backup != null && returned.getSenderId() != null && !returned.getSenderId().equals(getCurrentUser().id)) {
-                    returned.setStatus(backup.getStatus());
-                }
-                //如果更改后的内容和备份的内容一致，说明此次更改恢复了原来的消息
-                if (backup != null && backup.deepEquals(returned)) {
-                    MasterToast.shortToast(R.string.message_restored);
-                    mModel.removeUnconfirmedBackup(backup);
-                    mModifier.removePendingEdition(mSelectedMsg.getMsgId());
-                    notifyItemChangedConsideringTimestamp(backup, mSelectedMsgIndex);
-                    mModel.notifyMessageRestored(mSelectedMsg.getEditionFlag(), EditionFragment.EDITION_SET_INDEX_UNCONFIRMED);
-                    return;
-                }
-                //备份...
-                mModel.addUnconfirmedBackupIfNotExists(mSelectedMsg);
-                //添加...
-                mModifier.putPendingEdition(Edition.replace(mSelectedMsg, returned));
-                //设置...
-                if (mSelectedMsg.getEditionFlag() != Edition.FLAG_INSERTION) {
-                    returned.setEditionFlag(Edition.FLAG_REPLACEMENT);
-                }
-                notifyItemChangedConsideringTimestamp(returned, mSelectedMsgIndex);
-                mModel.notifyMessageChanged();
-                break;
-            case EditorActivity.EDIT_MODE_ADD_AFTER:
-            case EditorActivity.EDIT_MODE_ADD_BEFORE:
-                if (mGeneratedMsgId == -1) {
-                    mGeneratedMsgId = mMessageRepo.getMaxMsgId();
-                }
-                //为它设置一个独一无二的ID
-                returned.getValues().put(Message.KEY_MSG_ID, ++mGeneratedMsgId);
-                returned.setEditionFlag(Edition.FLAG_INSERTION);
-                mModifier.putPendingEdition(Edition.insert(returned));
-                int insertion = requestCode == EditorActivity.EDIT_MODE_ADD_AFTER ? mSelectedMsgIndex : mSelectedMsgIndex + 1;
-                mMessageList.add(insertion, returned);
-                mAdapter.notifyItemInserted(insertion);
-                mModel.notifyMessageInserted();
-                break;
-        }
-    }
-
     public void checkParseFailedMessages(Runnable ok) {
         ArrayMap<Long, Edition> all = mModifier.getAllPendingEditions();
         for (int i = 0; i < all.size(); i++) {
@@ -642,7 +674,7 @@ public class MessageActivity extends RecycleSensitiveActivity {
 
                             @Override
                             public void onError(@NotNull Throwable e) {
-                                UiUtils.createError(MessageActivity.this, e).show();
+                                UiUtils.showError(MessageActivity.this, e);
                             }
                         });
                     }
@@ -650,7 +682,7 @@ public class MessageActivity extends RecycleSensitiveActivity {
                     @Override
                     public void onError(@NotNull Throwable e) {
                         progress.dismiss();
-                        UiUtils.createError(MessageActivity.this, e).show();
+                        UiUtils.showError(MessageActivity.this, e);
                     }
                 })).setNegativeButton(android.R.string.cancel, null).show());
 

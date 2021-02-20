@@ -32,7 +32,6 @@ import xjunz.tool.werecord.ui.customview.MasterToast;
 import xjunz.tool.werecord.ui.export.MessageExportActivity;
 import xjunz.tool.werecord.ui.message.MessageActivity;
 import xjunz.tool.werecord.ui.message.fragment.dialog.LvBufferEditorDialog;
-import xjunz.tool.werecord.util.IoUtils;
 import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.UiUtils;
 
@@ -75,12 +74,16 @@ public class DetailActivity extends RecycleSensitiveActivity implements PopupMen
 
     //todo
     private void initPopupMenu(View anchor, boolean talker) {
-        mPopupMenu = new PopupMenu(this, anchor);
-        mPopupMenu.getMenuInflater().inflate(R.menu.contact_detail, mPopupMenu.getMenu());
-        mPopupMenu.getMenu().findItem(R.id.item_mark_as_unread).setVisible(talker);
-        mPopupMenu.getMenu().findItem(R.id.item_lv_buffer).setVisible(BuildConfig.DEBUG);
-        anchor.setOnTouchListener(mPopupMenu.getDragToOpenListener());
-        mPopupMenu.setOnMenuItemClickListener(this);
+        if (BuildConfig.DEBUG) {
+            mPopupMenu = new PopupMenu(this, anchor);
+            mPopupMenu.getMenuInflater().inflate(R.menu.contact_detail, mPopupMenu.getMenu());
+            mPopupMenu.getMenu().findItem(R.id.item_mark_as_unread).setVisible(talker);
+            mPopupMenu.getMenu().findItem(R.id.item_lv_buffer).setVisible(BuildConfig.DEBUG);
+            anchor.setOnTouchListener(mPopupMenu.getDragToOpenListener());
+            mPopupMenu.setOnMenuItemClickListener(this);
+        } else {
+            UiUtils.gone(anchor);
+        }
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -104,7 +107,7 @@ public class DetailActivity extends RecycleSensitiveActivity implements PopupMen
                     @Override
                     public void onError(@NotNull Throwable e) {
                         super.onError(e);
-                        UiUtils.createError(DetailActivity.this, IoUtils.readStackTraceFromThrowable(e)).show();
+                        UiUtils.showError(DetailActivity.this, e);
                     }
                 });
                 break;

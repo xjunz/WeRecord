@@ -126,7 +126,7 @@ public class UniversalBindingAdapter {
             view.setVisibility(View.GONE);
         } else {
             setTooltip(view, view.getContext().getString(R.string.help));
-            view.setOnClickListener(v -> UiUtils.htmlAutoLinkify(UiUtils.createHelp(view.getContext(), helpText).show()));
+            view.setOnClickListener(v -> UiUtils.createHelp(view.getContext(), helpText).show());
         }
     }
 
@@ -136,7 +136,7 @@ public class UniversalBindingAdapter {
             view.setVisibility(View.GONE);
         } else {
             setTooltip(view, view.getContext().getString(R.string.help));
-            view.setOnClickListener(v -> UiUtils.htmlAutoLinkify(UiUtils.createHelp(view.getContext(), view.getContext().getText(helpTextRes)).show()));
+            view.setOnClickListener(v -> UiUtils.createHelp(view.getContext(), view.getContext().getText(helpTextRes)).show());
         }
     }
 

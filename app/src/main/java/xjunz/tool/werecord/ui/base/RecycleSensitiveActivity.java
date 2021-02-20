@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import xjunz.tool.werecord.impl.Environment;
 import xjunz.tool.werecord.ui.outer.InitializationActivity;
+import xjunz.tool.werecord.util.LogUtils;
 
 /**
  * 一个抽象{@link android.app.Activity}用于处理应用进入后台后意外被系统回收导致{@link Environment#getInstance()}为null的情况。
@@ -45,6 +46,7 @@ public abstract class RecycleSensitiveActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         //如果应用被系统回收了，重启我们的APP，且标志为“恢复”
         if (Environment.getInstance() == null) {
+            LogUtils.debug(savedInstanceState.get(TAG_RECYCLED));
             if (!sIsLaunchingRecovery.getAndSet(true)) {
                 Intent launch = getPackageManager().getLaunchIntentForPackage(getPackageName());
                 launch.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

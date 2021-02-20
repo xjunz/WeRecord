@@ -18,6 +18,7 @@
         android:layout_height="match_parent"
         android:padding="@dimen/spacing_normal">
 
+
         <TextView
             android:id="@+id/tv_title_0"
             android:layout_width="wrap_content"
@@ -27,125 +28,126 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/button3"
-            style="@style/Widget.AppCompat.Button.Normal.Flat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="deleteBackupTable"
-            android:text="删除备份表"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_title_0" />
-
-        <Button
-            android:id="@+id/button4"
-            style="@style/Widget.AppCompat.Button.Normal.Flat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="showEnvInfo"
-            android:text="显示环境信息"
-            app:layout_constraintBottom_toBottomOf="@+id/button3"
-            app:layout_constraintStart_toEndOf="@+id/button3"
-            app:layout_constraintTop_toTopOf="@+id/button3" />
-
-        <Button
-            android:id="@+id/button5"
-            style="@style/Widget.AppCompat.Button.Normal.Flat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="exportDatabase"
-            android:text="导出消息数据库"
-            app:layout_constraintBottom_toBottomOf="@+id/button4"
-            app:layout_constraintStart_toEndOf="@+id/button4"
-            app:layout_constraintTop_toTopOf="@+id/button4" />
-
-        <Button
-            android:id="@+id/button6"
-            style="@style/Widget.AppCompat.Button.Normal.Flat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="simulateSysRecycle"
-            android:text="模拟系统回收"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button3" />
-
-        <Button
-            android:id="@+id/button7"
-            style="@style/Widget.AppCompat.Button.Normal.Flat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="exportTemplateDb"
-            android:text="导出模板数据库"
-            app:layout_constraintStart_toEndOf="@+id/button6"
-            app:layout_constraintTop_toBottomOf="@+id/button3" />
-
-        <Button
-            android:id="@+id/button8"
-            style="@style/Widget.AppCompat.Button.Normal.Flat"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:onClick="deleteTemplateDb"
-            android:text="删除模板数据库"
-            app:layout_constraintStart_toEndOf="@+id/button7"
-            app:layout_constraintTop_toBottomOf="@+id/button3" />
-
-        <Button
-            android:id="@+id/button9"
-            style="@style/Widget.AppCompat.Button.Normal.Flat"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:onClick="restoreMsgDatabaseBackup"
-            android:text="还原消息数据库备份"
-            app:layout_constraintStart_toEndOf="@+id/button10"
-            app:layout_constraintTop_toBottomOf="@+id/button6" />
-
-        <TextView
-            android:id="@+id/tv_title_1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/input_environment_serial"
-            android:textColor="?colorAccent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button9" />
-
-
-        <xjunz.tool.werecord.ui.customview.NestedEditText
-            android:id="@+id/et_serial"
+        <HorizontalScrollView
+            android:id="@+id/function_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_unit"
-            android:background="@drawable/bg_edit_box"
-            android:gravity="top"
-            android:inputType="textMultiLine"
-            android:lines="8"
-            android:padding="@dimen/spacing_unit"
-            android:scrollbars="vertical"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            app:layout_constraintTop_toBottomOf="@id/tv_title_1"
-            tools:ignore="Autofill,LabelFor" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_title_0">
 
-        <Button
-            style="@style/Widget.AppCompat.Button.Normal.Flat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="parseEnvInfo"
-            android:text="@string/parse"
-            app:layout_constraintBottom_toBottomOf="@+id/et_serial"
-            app:layout_constraintEnd_toEndOf="@+id/et_serial" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <Button
+                    android:id="@+id/button3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="deleteBackupTable"
+                    android:text="删除备份表"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/button4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="showEnvInfo"
+                    android:text="显示环境信息"
+                    app:layout_constraintBottom_toBottomOf="@+id/button3"
+                    app:layout_constraintStart_toEndOf="@+id/button3"
+                    app:layout_constraintTop_toTopOf="@+id/button3" />
+
+                <Button
+                    android:id="@+id/button5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="exportDatabase"
+                    android:text="导出消息数据库"
+                    app:layout_constraintBottom_toBottomOf="@+id/button4"
+                    app:layout_constraintStart_toEndOf="@+id/button4"
+                    app:layout_constraintTop_toTopOf="@+id/button4" />
+
+                <Button
+                    android:id="@+id/button6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="simulateSysRecycle"
+                    android:text="模拟系统回收"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/button3" />
+
+                <Button
+                    android:id="@+id/button7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="exportTemplateDb"
+                    android:text="导出模板数据库"
+                    app:layout_constraintStart_toEndOf="@+id/button6"
+                    app:layout_constraintTop_toBottomOf="@+id/button3" />
+
+                <Button
+                    android:id="@+id/button8"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:onClick="deleteTemplateDb"
+                    android:text="删除模板数据库"
+                    app:layout_constraintStart_toEndOf="@+id/button7"
+                    app:layout_constraintTop_toBottomOf="@+id/button3" />
+
+                <Button
+                    android:id="@+id/button9"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:onClick="restoreMsgDatabaseBackup"
+                    android:text="还原消息数据库备份"
+                    app:layout_constraintStart_toEndOf="@+id/button10"
+                    app:layout_constraintTop_toBottomOf="@+id/button6" />
+
+                <Button
+                    android:id="@+id/button10"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="backupMsgDatabase"
+                    android:text="备份消息数据库"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/button6" />
+
+                <Button
+                    android:id="@+id/button11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="caughtException"
+                    android:text="模拟捕获异常"
+                    app:layout_constraintStart_toEndOf="@+id/button9"
+                    app:layout_constraintTop_toTopOf="@+id/button9" />
+
+                <Button
+                    android:id="@+id/button12"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="模拟未捕获异常"
+                    android:onClick="uncaughtException"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/button10" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </HorizontalScrollView>
+
 
         <TextView
             android:id="@+id/tv_title_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginTop="8dp"
             android:gravity="top"
             android:text="@string/environment_info_output"
             android:textColor="?colorAccent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/et_serial" />
+            app:layout_constraintTop_toBottomOf="@+id/function_container" />
 
-        <xjunz.tool.werecord.ui.customview.NestedEditText
+        <EditText
             android:id="@+id/et_output"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -157,17 +159,12 @@
             android:padding="@dimen/spacing_unit"
             android:scrollbars="vertical"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_title_2"
             tools:ignore="Autofill,LabelFor" />
 
-        <Button
-            android:id="@+id/button10"
-            android:onClick="backupMsgDatabase"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="备份消息数据库"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button6" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

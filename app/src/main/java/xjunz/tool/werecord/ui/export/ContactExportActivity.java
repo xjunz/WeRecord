@@ -49,7 +49,7 @@ public class ContactExportActivity extends ExporterActivity {
     public void confirmExport(View view) {
         try {
             ProgressDialog progress = ProgressDialog.build(this).setTitle(R.string.exporting);
-            mExporter.exportToAsync(createTempOutputFile(), null)
+            mExporter.exportToAsync(createTempOutputFile("contact"), null)
                     .doOnDispose(this::clearCacheIfExists)
                     .doOnError(e -> clearCacheIfExists())
                     .doFinally(progress::dismiss)
@@ -66,7 +66,7 @@ public class ContactExportActivity extends ExporterActivity {
 
                         @Override
                         public void onError(@NonNull Throwable e) {
-                            UiUtils.createError(ContactExportActivity.this, e).show();
+                            UiUtils.showError(ContactExportActivity.this, e);
                         }
                     });
         } catch (IOException e) {

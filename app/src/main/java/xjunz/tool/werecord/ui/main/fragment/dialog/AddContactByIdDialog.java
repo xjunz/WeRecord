@@ -28,7 +28,6 @@ import xjunz.tool.werecord.impl.model.account.Contact;
 import xjunz.tool.werecord.impl.repo.ContactRepository;
 import xjunz.tool.werecord.impl.repo.RepositoryFactory;
 import xjunz.tool.werecord.ui.customview.MasterToast;
-import xjunz.tool.werecord.util.IoUtils;
 import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.UiUtils;
 
@@ -105,7 +104,7 @@ public class AddContactByIdDialog extends DialogFragment {
                     @Override
                     public void onError(@NotNull Throwable e) {
                         postConfirm(false);
-                        UiUtils.createError(requireContext(), IoUtils.readStackTraceFromThrowable(e)).show();
+                        UiUtils.showError(requireContext(), e);
                     }
                 });
             }

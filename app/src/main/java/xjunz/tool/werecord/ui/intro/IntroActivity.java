@@ -6,7 +6,6 @@ package xjunz.tool.werecord.ui.intro;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -15,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
@@ -137,7 +137,7 @@ public class IntroActivity extends BaseActivity implements IntroFragment.OnStepD
         if (mViewPager.getCurrentItem() == mPages.length - 1) {
             try {
                 new AlertDialog.Builder(this, R.style.Theme_AppCompat_Light_DialogWhenLarge_Material).setTitle(R.string.declaration)
-                        .setMessage(Html.fromHtml(IoUtils.readAssetAsString("declaration.html")))
+                        .setMessage(HtmlCompat.fromHtml(IoUtils.readAssetAsString("declaration.html"), HtmlCompat.FROM_HTML_MODE_LEGACY))
                         .setPositiveButton(R.string.read_and_approved, (dialog, which) -> {
                             App.getSharedPrefsManager().setIsAppIntroDone(true);
                             Intent i = new Intent(this, InitializationActivity.class);

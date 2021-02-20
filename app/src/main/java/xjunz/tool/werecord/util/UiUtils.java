@@ -11,6 +11,7 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -51,6 +52,7 @@ import java.lang.reflect.Field;
 import java.util.Objects;
 
 import xjunz.tool.werecord.App;
+import xjunz.tool.werecord.BuildConfig;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.databinding.DialogProgressBinding;
 import xjunz.tool.werecord.ui.customview.MasterToast;
@@ -74,7 +76,7 @@ public class UiUtils {
         return UiUtils.createAlert(context, context.getString(R.string.alert_restart_after_changes_applied))
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(android.R.string.ok, (dialog1, which1) -> {
-                    ActivityUtils.openWeChat(context);
+                    ActivityUtils.launchVictim(context);
                 });
     }
 
@@ -88,17 +90,19 @@ public class UiUtils {
         return createDialog(context, R.string.help, msg).setPositiveButton(android.R.string.ok, null);
     }
 
-    @CheckResult
-    public static AlertDialog.Builder createError(Context context, Object msg) {
-        return createDialog(context, R.string.error_occurred, msg).setPositiveButton(R.string.feedback, (dialog, which) -> {
-            //TODO:反馈方式
-            // Utils.feedbackJoinQGroup(context);
-        }).setNegativeButton(android.R.string.ok, null);
+    public static void showError(Context context, Object msg) {
+        AlertDialog alert = createDialog(context, R.string.error_occurred, msg)
+                .setNeutralButton(R.string.copy, null)
+                .setPositiveButton(R.string.feedback, null).setNegativeButton(android.R.string.ok, null).show();
+        alert.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> ActivityUtils.feedbackJoinQGroup(context));
+        alert.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(v -> Utils.copyPlainText("WR-ERROR-LOG", Objects.toString(msg)));
     }
 
-    @CheckResult
-    public static AlertDialog.Builder createError(Context context, Throwable msg) {
-        return createError(context, IoUtils.readStackTraceFromThrowable(msg));
+    public static void showError(Context context, Throwable msg) {
+        if (BuildConfig.DEBUG) {
+            msg.printStackTrace();
+        }
+        showError(context, IoUtils.readStackTraceFromThrowable(msg));
     }
 
     /**

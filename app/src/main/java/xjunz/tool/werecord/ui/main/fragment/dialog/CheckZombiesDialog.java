@@ -39,7 +39,6 @@ import xjunz.tool.werecord.impl.repo.RepositoryFactory;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 import xjunz.tool.werecord.ui.main.DetailActivity;
 import xjunz.tool.werecord.util.ActivityUtils;
-import xjunz.tool.werecord.util.IoUtils;
 import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.UiUtils;
 
@@ -96,7 +95,7 @@ public class CheckZombiesDialog extends DialogFragment {
                     modifier.attachLabelToContact(contact.id, labelName);
                 }
                 modifier.apply();
-                ActivityUtils.openWeChat(requireActivity());
+                ActivityUtils.launchVictim(requireActivity());
             }).subscribe(new RxJavaUtils.CompletableObservableAdapter() {
                 @Override
                 public void onComplete() {
@@ -156,7 +155,7 @@ public class CheckZombiesDialog extends DialogFragment {
 
                     @Override
                     public void onError(@NotNull Throwable e) {
-                        UiUtils.createError(requireContext(), IoUtils.readStackTraceFromThrowable(e)).show();
+                        UiUtils.showError(requireContext(), e);
                         postSearch();
                     }
                 });

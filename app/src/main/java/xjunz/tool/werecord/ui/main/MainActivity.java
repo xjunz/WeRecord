@@ -6,7 +6,6 @@ package xjunz.tool.werecord.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +13,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.text.HtmlCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ObservableInt;
 import androidx.fragment.app.Fragment;
@@ -167,7 +167,7 @@ public class MainActivity extends RecycleSensitiveActivity {
         super.onNewIntent(intent);
         try {
             new AlertDialog.Builder(this, R.style.Theme_AppCompat_Light_DialogWhenLarge_Material).setTitle(R.string.declaration)
-                    .setMessage(Html.fromHtml(IoUtils.readAssetAsString("declaration.html")))
+                    .setMessage(HtmlCompat.fromHtml(IoUtils.readAssetAsString("declaration.html"), HtmlCompat.FROM_HTML_MODE_LEGACY))
                     .setNegativeButton(R.string.close, null)
                     .show();
         } catch (IOException e) {

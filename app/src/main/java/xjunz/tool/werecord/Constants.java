@@ -7,5 +7,5 @@ package xjunz.tool.werecord;
  * @author xjunz 2021/2/16 23:24
  */
 public class Constants {
-    public static final String URL_APP_DOWNLOAD_PAGE = "https://www.fir.com/";
+    public static final String URL_APP_DOWNLOAD_PAGE = "https://www.fir.im/";
 }

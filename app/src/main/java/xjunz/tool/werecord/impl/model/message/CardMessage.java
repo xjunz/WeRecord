@@ -6,9 +6,9 @@ package xjunz.tool.werecord.impl.model.message;
 
 import android.content.ContentValues;
 import android.os.Parcel;
-import android.text.Html;
 
 import androidx.annotation.Nullable;
+import androidx.core.text.HtmlCompat;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +26,8 @@ public class CardMessage extends ComplexMessage {
     public CardMessage(ContentValues values) {
         super(values, MessageFactory.Type.CARD);
         //escape character entity reference (&#x)
-        nickname = Html.fromHtml(Utils.extractFirst(getContent(), "nickname=\"(.+?)\"")).toString();
+        String extracted = Utils.extractFirst(getContent(), "nickname=\"(.+?)\"");
+        nickname = extracted == null ? null : HtmlCompat.fromHtml(extracted, HtmlCompat.FROM_HTML_MODE_LEGACY).toString();
         username = Utils.extractFirst(getContent(), "username=\"(.+?)\"");
     }
 

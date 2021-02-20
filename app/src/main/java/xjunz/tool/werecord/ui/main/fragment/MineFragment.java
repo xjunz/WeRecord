@@ -4,7 +4,6 @@
 package xjunz.tool.werecord.ui.main.fragment;
 
 import android.app.Activity;
-import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -53,6 +53,14 @@ import xjunz.tool.werecord.util.UiUtils;
 public class MineFragment extends PageFragment {
     private FragmentMineBinding mBinding;
     private Settings mSettings;
+    private ActivityResultLauncher<Void> mDeviceCredentialConfirmationLauncher;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mDeviceCredentialConfirmationLauncher = ActivityUtils.registerDeviceCredentialConfirmationLauncher(this, R.string.verify_owner_title, -1,
+                () -> mSettings.verifyDeviceCredential.toggleValue(), () -> MasterToast.shortToast(R.string.unable_to_verify_device_credential));
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -118,17 +126,15 @@ public class MineFragment extends PageFragment {
             MasterToast.shortToast(R.string.no_candidate_account);
             return;
         }
-        new SwitchAccountDialog().show(requireFragmentManager(), "switch_account");
+        new SwitchAccountDialog().show(getParentFragmentManager(), "switch_account");
     }
 
     private static final int REQ_CODE_VERIFY = 3;
 
     public void toggleEnableVerifyDeviceCredential() {
         if (mSettings.isVerifyDeviceCredentialEnabled()) {
-            KeyguardManager manager = (KeyguardManager) requireActivity().getSystemService(Context.KEYGUARD_SERVICE);
-            if (manager != null) {
-                startActivityForResult(manager.createConfirmDeviceCredentialIntent(getString(R.string.verify_owner_title), null)
-                        , REQ_CODE_VERIFY);
+            if (mDeviceCredentialConfirmationLauncher != null) {
+                mDeviceCredentialConfirmationLauncher.launch(null);
             }
         } else {
             mSettings.verifyDeviceCredential.toggleValue();
@@ -165,7 +171,7 @@ public class MineFragment extends PageFragment {
                     .subscribe(new RxJavaUtils.CompletableObservableAdapter() {
                         @Override
                         public void onError(@NotNull Throwable e) {
-                            UiUtils.createError(requireContext(), e).show();
+                            UiUtils.showError(requireContext(), e);
                         }
 
                         @Override

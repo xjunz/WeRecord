@@ -50,7 +50,7 @@ public class SystemMessage extends Message {
     }
 
     private Spanned getHtml() {
-        return html = html == null ? HtmlCompat.fromHtml(escapeTag().replace("\n", "<br>"),HtmlCompat.FROM_HTML_MODE_COMPACT) : html;
+        return html = html == null ? HtmlCompat.fromHtml(escapeTag().replace("\n", "<br>"), HtmlCompat.FROM_HTML_MODE_LEGACY) : html;
     }
 
     /**

@@ -7,6 +7,7 @@ package xjunz.tool.werecord.util;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.os.Build;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -30,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -116,7 +118,7 @@ public class Utils {
      * @return 匹配到的捕获组集合
      */
     @NotNull
-    public static List<String> extract(String src,@RegExp String regex) {
+    public static List<String> extract(String src, @RegExp String regex) {
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(src);
         ArrayList<String> strs = new ArrayList<>();
@@ -131,7 +133,7 @@ public class Utils {
      */
     @Nullable
     public static String extractFirst(String src, @RegExp String regex) {
-        Pattern p = Pattern.compile(regex, Pattern.DOTALL);
+        Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(src);
         if (m.find()) {
             return m.group(1);
@@ -197,13 +199,22 @@ public class Utils {
         return format.format(date);
     }
 
+    @SuppressWarnings("deprecation")
+    public static Locale getCurrentLocale() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return App.getContext().getResources().getConfiguration().getLocales().get(0);
+        } else {
+            return App.getContext().getResources().getConfiguration().locale;
+        }
+    }
+
     @NotNull
     public static String formatDateLocally(long timestamp) {
         if (timestamp < 0) {
             return "-";
         }
         Date date = new Date(timestamp);
-        SimpleDateFormat format = (SimpleDateFormat) SimpleDateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, App.getContext().getResources().getConfiguration().locale);
+        SimpleDateFormat format = (SimpleDateFormat) SimpleDateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, getCurrentLocale());
         return format.format(date);
     }
 

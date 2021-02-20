@@ -45,7 +45,6 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             android:textColor="?android:textColorPrimary"
             android:transitionName="@string/tn_name"
-            app:layout_constraintEnd_toStartOf="@+id/ib_delete"
             app:layout_constraintStart_toEndOf="@+id/iv_avatar"
             app:layout_constraintTop_toTopOf="@+id/iv_avatar"
             tools:text="@tools:sample/full_names" />

@@ -62,9 +62,9 @@ public class ExporterActivity extends RecycleSensitiveActivity {
         }
     }
 
-    protected File createTempOutputFile() throws IOException {
+    protected File createTempOutputFile(String prefix) throws IOException {
         clearCacheIfExists();
-        return mLatestOutputFile = File.createTempFile(mExporter.getClass().getSimpleName(), null);
+        return mLatestOutputFile = File.createTempFile(prefix, null);
     }
 
     protected class ConfigItemAdapter extends RecyclerView.Adapter<ConfigItemAdapter.ConfigItemViewHolder> {

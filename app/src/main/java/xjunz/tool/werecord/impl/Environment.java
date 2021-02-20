@@ -11,7 +11,6 @@ import android.os.Build;
 import android.os.Process;
 import android.text.TextUtils;
 
-import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
@@ -20,23 +19,17 @@ import androidx.lifecycle.LifecycleRegistry;
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SQLiteDatabaseHook;
 
-import org.apaches.commons.codec.binary.Base64;
 import org.apaches.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -44,9 +37,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -76,18 +66,16 @@ import xjunz.tool.werecord.util.Utils;
 public class Environment implements Serializable, LifecycleOwner {
     private final LifecycleRegistry mLifecycle;
     private static Environment sEnvironment;
-    private transient String mWechatDataPath;
-    private transient String mWechatSharedPrefsPath;
-    private transient String mWechatMicroMsgPath;
-    private transient final String separator = File.separator;
-    private String mDatabaseBackupDirPath;
+    private String mVictimDataPath;
+    private String mVictimSharedPrefsPath;
+    private String mVictimMicroMsgPath;
+    private final String separator = File.separator;
+    private String mWorkerDatabaseDirPath;
     private String mImei;
     private List<User> mUserList;
     private String mAvatarBackupPath;
     private String mLastUsedUin;
     private String mLastLoginUin;
-    @Keep
-    private String mBasicEnvironmentInfo;
     private String mAppFilesDir;
     private List<String> mUinList;
     private SQLiteDatabase mDatabaseOfCurUser;
@@ -113,8 +101,8 @@ public class Environment implements Serializable, LifecycleOwner {
         return mCurrentUser;
     }
 
-    public String getWechatMicroMsgPath() {
-        return mWechatMicroMsgPath;
+    public String getVictimMicroMsgPath() {
+        return mVictimMicroMsgPath;
     }
 
     public String getAvatarBackupPath() {
@@ -135,11 +123,10 @@ public class Environment implements Serializable, LifecycleOwner {
     public void init(CompletableObserver observer) {
         RxJavaUtils.complete(() -> {
             mLastUsedUin = App.config().lastUsedUin.getValue();
-            mBasicEnvironmentInfo = "<br/>[<br/>" + getBasicHardwareInfo() + "<br/>" + getVersionInfo();
             //create backup dirs
             mAppFilesDir = App.getContext().getFilesDir().getPath();
-            mDatabaseBackupDirPath = mAppFilesDir + separator + DigestUtils.md5Hex("database_backup");
-            File dbBackupDir = new File(mDatabaseBackupDirPath);
+            mWorkerDatabaseDirPath = mAppFilesDir + separator + DigestUtils.md5Hex("database_backup");
+            File dbBackupDir = new File(mWorkerDatabaseDirPath);
             if (!dbBackupDir.exists() && !dbBackupDir.mkdir())
                 throw new RuntimeException("Failed to create db backup dir");
             mAvatarBackupPath = mAppFilesDir + separator + DigestUtils.md5Hex("avatar_backup");
@@ -148,10 +135,9 @@ public class Environment implements Serializable, LifecycleOwner {
                 throw new RuntimeException("Failed to create avatar backup dir");
             PackageManager packageManager = App.getContext().getPackageManager();
             PackageInfo packageInfo = packageManager.getPackageInfo("com.tencent.mm", 0);
-            mBasicEnvironmentInfo += "<br/><b>wechat_version_code</b>: " + packageInfo.versionCode + "<br/><b>wechat_version_name</b>: " + packageInfo.versionName + "<br/>]";
-            mWechatDataPath = packageInfo.applicationInfo.dataDir;
-            mWechatMicroMsgPath = mWechatDataPath + separator + "MicroMsg";
-            mWechatSharedPrefsPath = mWechatDataPath + separator + "shared_prefs";
+            mVictimDataPath = packageInfo.applicationInfo.dataDir;
+            mVictimMicroMsgPath = mVictimDataPath + separator + "MicroMsg";
+            mVictimSharedPrefsPath = mVictimDataPath + separator + "shared_prefs";
             readImei();
             loadUins();
             initUsers();
@@ -232,7 +218,7 @@ public class Environment implements Serializable, LifecycleOwner {
     }
 
     private void copyWorkerDatabase(@NotNull User user) throws IOException, ShellUtils.ShellException {
-        user.workerDatabaseFilePath = mDatabaseBackupDirPath + File.separator + DigestUtils.md5Hex(user.uin);
+        user.workerDatabaseFilePath = mWorkerDatabaseDirPath + File.separator + DigestUtils.md5Hex(user.uin);
         ShellUtils.cp2data(user.originalDatabaseFilePath, user.workerDatabaseFilePath, true);
     }
 
@@ -240,28 +226,28 @@ public class Environment implements Serializable, LifecycleOwner {
      * 备份原数据库
      */
     public void backupOriginDatabaseOf(@NotNull User user) throws IOException, ShellUtils.ShellException {
-        user.backupDatabaseFilePath = mDatabaseBackupDirPath + File.separator + DigestUtils.md5Hex("backup");
+        user.backupDatabaseFilePath = mWorkerDatabaseDirPath + File.separator + DigestUtils.md5Hex("backup");
         ShellUtils.cp2data(user.originalDatabaseFilePath, user.backupDatabaseFilePath, true);
     }
 
 
     private void loadUins() throws ShellUtils.ShellException {
-        String out = ShellUtils.cat(mWechatSharedPrefsPath + separator + "app_brand_global_sp.xml");
+        String out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "app_brand_global_sp.xml");
         // /data/user/0/com.tencent.mm/shared_prefs/app_brand_global_sp.xml
         mUinList = Utils.extract(out, ">(\\d+)<");
         if (mUinList.isEmpty()) {
             throw new RuntimeException("No uin set found");
         }
-        out = ShellUtils.cat(mWechatSharedPrefsPath + separator + "com.tencent.mm_preferences.xml");
+        out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "com.tencent.mm_preferences.xml");
         mLastLoginUin = Utils.extractFirst(out, "last_login_uin\">(\\d+)<");
-        //out = ShellUtils.cat(mWechatSharedPrefsPath + separator + "system_config_prefs.xml", "initUins,2");
+        //out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "system_config_prefs.xml", "initUins,2");
         if (TextUtils.isEmpty(mLastLoginUin)) {
             throw new RuntimeException("No last login uin found");
         }
     }
 
     private void loadUserIds() throws ShellUtils.ShellException {
-        String out = ShellUtils.cat(mWechatSharedPrefsPath + separator + "com.tencent.mm_preferences_account_switch.xml");
+        String out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "com.tencent.mm_preferences_account_switch.xml");
         // /data/user/0/com.tencent.mm/shared_prefs/com.tencent.mm_preferences_account_switch.xml
         List<String> ids = Utils.extract(out, "string>(.+?)<");
         if (ids.size() == mUinList.size()) {
@@ -289,7 +275,7 @@ public class Environment implements Serializable, LifecycleOwner {
         String temp = mAppFilesDir + separator + "temp.cfg";
         File tempFile = new File(temp);
         try {
-            ShellUtils.cp2data(mWechatMicroMsgPath + File.separator + "CompatibleInfo.cfg", temp, false);
+            ShellUtils.cp2data(mVictimMicroMsgPath + File.separator + "CompatibleInfo.cfg", temp, false);
             FileInputStream fis = new FileInputStream(tempFile);
             ObjectInputStream ois = new ObjectInputStream(fis);
             HashMap<Integer, String> map = (HashMap<Integer, String>) ois.readObject();
@@ -317,8 +303,8 @@ public class Environment implements Serializable, LifecycleOwner {
             return;
         }
         //否则从文件读取
-        String keyInfoPath = mWechatDataPath + separator + "files" + separator + "KeyInfo.bin";
-        SecretKeySpec secretKeySpec = new SecretKeySpec(/*"_wEcHAT_"*/new byte[]{95, 119, 69, 99, 72, 65, 84, 95}, "RC4");
+        String keyInfoPath = mVictimDataPath + separator + "files" + separator + "KeyInfo.bin";
+        SecretKeySpec secretKeySpec = new SecretKeySpec(new byte[]{95, 119, 69, 99, 72, 65, 84, 95}, "RC4");
         Cipher cipher = Cipher.getInstance("RC4");
         cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
         File tempFile = File.createTempFile("KeyInfo", ".bin");
@@ -367,35 +353,6 @@ public class Environment implements Serializable, LifecycleOwner {
         mDatabaseOfCurUser = SQLiteDatabase.openDatabase(mCurrentUser.workerDatabaseFilePath, mCurrentUser.databasePassword, null, mode, COMPATIBILITY_HOOK);
     }
 
-    public String serialize() {
-        ByteArrayInputStream in = new ByteArrayInputStream(toString().getBytes());
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ZipOutputStream outputStream = new ZipOutputStream(out);
-        try {
-            outputStream.setLevel(9);
-            outputStream.putNextEntry(new ZipEntry(""));
-            IoUtils.transferStream(in, outputStream);
-            return Base64.encodeBase64String(out.toByteArray());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Nullable
-    public static String deserialize(String serial) {
-        try {
-            ZipInputStream in = new ZipInputStream(new ByteArrayInputStream(Base64.decodeBase64(serial)));
-            in.getNextEntry();
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            IoUtils.transferStream(in, out);
-            return out.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     public void purge() {
         if (mDatabaseOfCurUser != null) {
             mDatabaseOfCurUser.close();
@@ -407,46 +364,56 @@ public class Environment implements Serializable, LifecycleOwner {
         sEnvironment = null;
     }
 
+    @NotNull
+    public static String getBasicEnvInfo() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Env status: ").append(sEnvironment == null ? "NOT CREATED" : sEnvironment.getLifecycle().getCurrentState()).append("\n");
+        sb.append(infoBlockHeader("B")).append("\n").append(getBasicHardwareInfo()).append("\n")
+                .append(infoBlockHeader("A")).append("\n").append(getAppVersionInfo()).append("\n")
+                .append(infoBlockHeader("V")).append("\n").append(getVictimVersionInfo());
+        if (sEnvironment != null && sEnvironment.getCurrentUser() != null) {
+            sb.append("\n").append(infoBlockHeader("U")).append("\n").append(sEnvironment.getBasicUserInfo());
+        }
+        return sb.toString();
+    }
+
+    @NotNull
+    @Contract(pure = true)
+    public static String infoBlockHeader(String infoName) {
+        return String.format("=====%s=====", infoName);
+    }
 
     @NotNull
     private static String getBasicHardwareInfo() {
-        return "<b>release</b>: " + Build.VERSION.RELEASE + "<br/>" +
-                "<b>SDK</b>: " + Build.VERSION.SDK_INT + "<br/>" +
-                "<b>brand</b>: " + Build.BRAND + "<br/>" +
-                "<b>model</b>: " + Build.MODEL + "<br/>" +
-                "<b>CPU_ABI</b>: " + Arrays.toString(Build.SUPPORTED_ABIS);
+        return "release: " + Build.VERSION.RELEASE + "\nSDK: " + Build.VERSION.SDK_INT
+                + "\nbrand: " + Build.BRAND + "\nmodel: " + Build.MODEL + "\nCPU_ABI: " + Arrays.toString(Build.SUPPORTED_ABIS);
     }
 
     @NonNull
     @Contract(pure = true)
-    private static String getVersionInfo() {
-        return "<b>version_name</b>: " + BuildConfig.VERSION_NAME + "<br/>" +
-                "<b>version_code</b>: " + BuildConfig.VERSION_CODE + "<br/>" + "<b>pid:</>" + Process.myPid()
-                + "<br/>" + "<b>uid:</b>" + Process.myUid();
+    private static String getAppVersionInfo() {
+        return "app_version_name: " + BuildConfig.VERSION_NAME + "\napp_version_code: " + BuildConfig.VERSION_CODE;
     }
 
+    public String getBasicUserInfo() {
+        return "pragmaKeyed: " + (mCurrentUser.databasePassword != null)
+                + "\ndirPath: " + mCurrentUser.dirPath + "\nworkerDbPath: " + mCurrentUser.workerDatabaseFilePath;
+    }
 
-    @NonNull
-    @Override
-    public String toString() {
-        StringBuilder output = new StringBuilder();
-        Field[] fields = getClass().getDeclaredFields();
+    @NotNull
+    private static String getVictimVersionInfo() {
         try {
-            for (Field field : fields) {
-                if (!Modifier.isTransient(field.getModifiers())) {
-                    if (field.getGenericType() == String.class) {
-                        output.append("<b>").append(field.getName()).append("</b>").append(": ").append(field.get(this)).append("<br/>");
-                    } else if (field.getGenericType() == User.class) {
-                        User user = (User) field.get(this);
-                        output.append("<b>").append(field.getName()).append("</b>").append(": <br/>[<br/>").append(user == null ? "null" : user.toString()).append("<br/>]<br/>");
-                    }
-                }
-            }
-        } catch (IllegalAccessException e) {
+            PackageInfo packageInfo = App.getContext().getPackageManager().getPackageInfo("com.tencent.mm", 0);
+            return "victim_version_code: " + packageInfo.versionCode + "\nvictim_version_name: " + packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-        return output.toString();
+        return "victim_version_code: <error> \nvictim_version_name: <error>";
     }
 
-
+    @NotNull
+    private static String getProcessInfo() {
+        return "pid:" + Process.myPid()
+                + "\n" + "uid:" + Process.myUid();
+    }
 }

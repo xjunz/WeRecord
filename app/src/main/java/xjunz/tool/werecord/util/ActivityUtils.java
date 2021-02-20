@@ -66,7 +66,7 @@ public class ActivityUtils {
         }
     }
 
-    public static void openWeChat(@NotNull Context context) {
+    public static void launchVictim(@NotNull Context context) {
         context.startActivity(context.getPackageManager().getLaunchIntentForPackage("com.tencent.mm"));
     }
 }
