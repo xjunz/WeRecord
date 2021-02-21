@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import io.reactivex.CompletableObserver;
 import io.reactivex.disposables.Disposable;
 import xjunz.tool.werecord.App;
+import xjunz.tool.werecord.Constants;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.impl.Environment;
 import xjunz.tool.werecord.impl.model.message.util.TemplateManager;
@@ -138,13 +139,17 @@ public class InitializationActivity extends AppCompatActivity implements Complet
     public void onError(@NotNull Throwable e) {
         App.getSharedPrefsManager().setIsAppIntroDone(false);
         String stacktrace = IoUtils.readStackTraceFromThrowable(e);
+        if (Constants.USER_DEBUGGABLE) {
+            stacktrace = Environment.getBasicEnvInfo() + "\n\n" + stacktrace;
+        }
+        String finalStacktrace = stacktrace;
         AlertDialog alert = UiUtils.createDialog(this, R.string.init_failed, stacktrace)
                 .setNeutralButton(R.string.copy, null)
                 .setPositiveButton(R.string.feedback, null).setNegativeButton(R.string.quit, (a, b) -> finish())
                 .setCancelable(false).show();
-        alert.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> ActivityUtils.feedbackJoinQGroup(InitializationActivity.this));
+        alert.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> ActivityUtils.feedbackAutoFallback(InitializationActivity.this, finalStacktrace));
         alert.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(v -> {
-            Utils.copyPlainText("WR-ERROR-LOG", stacktrace);
+            Utils.copyPlainText("WR-ERROR-LOG", finalStacktrace);
             MasterToast.shortToast(R.string.has_copied_to_clipboard);
         });
     }

@@ -107,6 +107,8 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <ImageView
+            android:clickable="true"
+            android:onClick="@{()->host.switchUserDebuggable()}"
             android:id="@+id/iv_app_icon"
             android:layout_width="@dimen/fab_normal"
             android:layout_height="@dimen/fab_normal"
@@ -117,7 +119,7 @@
             android:elevation="@dimen/z_dialog"
             android:src="@mipmap/ic_launcher"
             android:visibility="invisible"
-            tools:ignore="ContentDescription"
+            tools:ignore="ContentDescription,KeyboardInaccessibleWidget"
             tools:visibility="visible" />
     </RelativeLayout>
 

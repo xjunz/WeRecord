@@ -53,6 +53,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
                 Utils.copyPlainText("WR-ERROR-LOG", IoUtils.readStackTraceFromThrowable(e));
             }
             Intent launchCrashReport = new Intent(App.getContext(), CrashReportActivity.class);
+            launchCrashReport.putExtra(CrashReportActivity.EXTRA_USER_DEBUGGABLE, Constants.USER_DEBUGGABLE);
             launchCrashReport.putExtra(CrashReportActivity.EXTRA_LOG_FILE_PATH, logFile == null ? null : logFile.getPath())
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             App.getContext().startActivity(launchCrashReport);

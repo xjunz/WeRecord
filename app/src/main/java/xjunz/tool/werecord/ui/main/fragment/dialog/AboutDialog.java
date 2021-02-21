@@ -19,9 +19,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import xjunz.tool.werecord.Constants;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.databinding.DialogAboutBinding;
+import xjunz.tool.werecord.ui.customview.MasterToast;
 import xjunz.tool.werecord.util.ActivityUtils;
+import xjunz.tool.werecord.util.UiUtils;
 
 /**
  * @author xjunz 2021/2/20 0:20
@@ -65,6 +68,26 @@ public class AboutDialog extends DialogFragment {
     }
 
     public void gotoDonate() {
-        ActivityUtils.viewUri(requireContext(), "alipayqr://platformapi/startapp?saId=10000007&qrcode=https://qr.alipay.com/fkx154567xmljmwmkmchc65?t=1606376518084");
+        ActivityUtils.safeViewUri(requireContext(), Constants.URI_DONATE_ALIPAY);
+    }
+
+    private long lastTapTimestamp;
+    private int legalTapTimes;
+
+    public void switchUserDebuggable() {
+        if (legalTapTimes == 4) {
+            UiUtils.swing(mIcon);
+            Constants.USER_DEBUGGABLE = !Constants.USER_DEBUGGABLE;
+            MasterToast.shortToast("USER_DEBUGGABLE = " + Constants.USER_DEBUGGABLE);
+            legalTapTimes = 0;
+        } else {
+            long cur = System.currentTimeMillis();
+            if (cur - lastTapTimestamp <= 300) {
+                legalTapTimes++;
+            } else {
+                legalTapTimes = 1;
+            }
+            lastTapTimestamp = cur;
+        }
     }
 }

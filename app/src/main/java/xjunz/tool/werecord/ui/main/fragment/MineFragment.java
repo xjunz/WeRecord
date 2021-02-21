@@ -185,7 +185,7 @@ public class MineFragment extends PageFragment {
 
     public void getLatestVersion() {
         MasterToast.longToast(getString(R.string.format_current_app_version, BuildConfig.VERSION_NAME));
-        ActivityUtils.viewUri(requireContext(), Constants.URL_APP_DOWNLOAD_PAGE);
+        ActivityUtils.safeViewUri(requireContext(), Constants.URL_APP_DOWNLOAD_PAGE);
     }
 
     public void showAppInfo() {
@@ -193,7 +193,6 @@ public class MineFragment extends PageFragment {
     }
 
     public void gotoFeedback(View view) {
-        //todo:debug模式允许私人临时聊天
-        ActivityUtils.feedbackJoinQGroup(requireContext());
+        ActivityUtils.feedbackAutoFallback(requireContext(), Environment.getBasicEnvInfo());
     }
 }

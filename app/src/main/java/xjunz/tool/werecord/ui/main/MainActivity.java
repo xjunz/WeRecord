@@ -24,6 +24,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import java.io.IOException;
 
 import xjunz.tool.werecord.App;
+import xjunz.tool.werecord.BuildConfig;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.data.viewmodel.PageViewModel;
 import xjunz.tool.werecord.databinding.ActivityMainBinding;
@@ -65,9 +66,9 @@ public class MainActivity extends RecycleSensitiveActivity {
             mBinding.mainPanel.closePanel();
         }
     };
+
     @Override
     protected void onCreateNormally(@Nullable Bundle savedInstanceState) {
-        //todo:新增消息定位问题（msgId）
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         mBinding.setActivity(this);
         initPages();
@@ -90,6 +91,12 @@ public class MainActivity extends RecycleSensitiveActivity {
             }
             return false;
         });
+        if (BuildConfig.DEBUG) {
+            mBinding.ibSync.setOnLongClickListener(v -> {
+                startActivity(new Intent(this, DebugActivity.class));
+                return true;
+            });
+        }
     }
 
     private void initPages() {
@@ -173,11 +180,6 @@ public class MainActivity extends RecycleSensitiveActivity {
         } catch (IOException e) {
             MasterToast.shortToast(R.string.error_occurred);
         }
-    }
-
-    public boolean gotoDebugActivity(View view) {
-        startActivity(new Intent(this, DebugActivity.class));
-        return true;
     }
 
     public void restartWithoutVerification() {

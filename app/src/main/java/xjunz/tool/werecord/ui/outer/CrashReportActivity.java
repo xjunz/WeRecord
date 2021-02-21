@@ -16,24 +16,30 @@ import androidx.databinding.DataBindingUtil;
 
 import java.io.File;
 
+import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.BuildConfig;
+import xjunz.tool.werecord.Constants;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.databinding.ActivityCrashReportBinding;
 import xjunz.tool.werecord.util.ActivityUtils;
 import xjunz.tool.werecord.util.IoUtils;
+import xjunz.tool.werecord.util.Utils;
 
 /**
  * @author xjunz 2021/2/20 19:44
  */
 public class CrashReportActivity extends AppCompatActivity {
     public static final String EXTRA_LOG_FILE_PATH = "CrashReportActivity.extra.LogFilePath";
+    public static final String EXTRA_USER_DEBUGGABLE = "CrashReportActivity.extra.UserDebuggable";
     private File mLogFile;
+    private boolean mUserDebuggable;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityCrashReportBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_crash_report);
         String logPath = getIntent().getStringExtra(EXTRA_LOG_FILE_PATH);
+        mUserDebuggable = getIntent().getBooleanExtra(Intent.EXTRA_USER, false);
         if (logPath == null) {
             binding.setFileSize(getText(R.string.not_found));
         } else {
@@ -68,9 +74,16 @@ public class CrashReportActivity extends AppCompatActivity {
         Uri uri = FileProvider.getUriForFile(this, "xjunz.tool.werecord.fileprovider", mLogFile);
         Intent intent;
         if (!BuildConfig.DEBUG) {
-            intent = new Intent(Intent.ACTION_SEND, uri)
-                    .putExtra(Intent.EXTRA_STREAM, uri)
-                    .setType("text/plain");
+            if (mUserDebuggable) {
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.URI_FEEDBACK_EMAIL))
+                        .putExtra(Intent.EXTRA_SUBJECT, Utils.formatDateLocally(System.currentTimeMillis()))
+                        .putExtra(Intent.EXTRA_STREAM, uri);
+                startActivity(Intent.createChooser(intent, App.getContext().getString(R.string.open_via)));
+            } else {
+                intent = new Intent(Intent.ACTION_SEND, uri)
+                        .putExtra(Intent.EXTRA_STREAM, uri)
+                        .setType("text/plain");
+            }
         } else {
             intent = new Intent(Intent.ACTION_VIEW, uri);
         }

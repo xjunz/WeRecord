@@ -47,6 +47,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.BR;
+import xjunz.tool.werecord.Constants;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.data.viewmodel.MessageViewModel;
 import xjunz.tool.werecord.databinding.ActivityMessageBinding;
@@ -424,6 +425,7 @@ public class MessageActivity extends RecycleSensitiveActivity {
         super.onCreateContextMenu(menu, v, menuInfo);
         getMenuInflater().inflate(R.menu.message, menu);
         menu.setHeaderTitle(R.string.operation);
+        menu.findItem(R.id.item_check).setVisible(Constants.USER_DEBUGGABLE);
         //如果消息未编辑
         if (!mSelectedMsg.isEdited()) {
             //禁用还原

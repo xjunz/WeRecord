@@ -21,6 +21,7 @@ import androidx.annotation.StringRes;
 import org.jetbrains.annotations.NotNull;
 
 import xjunz.tool.werecord.App;
+import xjunz.tool.werecord.Constants;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 
@@ -28,8 +29,17 @@ import xjunz.tool.werecord.ui.customview.MasterToast;
  * @author xjunz 2021/2/17 1:51
  */
 public class ActivityUtils {
-    public static void viewUri(@NotNull Context context, String uriString) {
+    public static void safeViewUri(@NotNull Context context, String uriString) {
         startActivityCreateChooser(context, new Intent(Intent.ACTION_VIEW, Uri.parse(uriString)));
+    }
+
+    private static boolean viewUri(@NotNull Context context, String uriString) {
+        try {
+            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(uriString)));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static void startActivityCreateChooser(@NotNull Context context, Intent intent) {
@@ -54,21 +64,28 @@ public class ActivityUtils {
         throw new IllegalArgumentException("The context passed in must be an Activity or a ContextWrapper wrapping an Activity! ");
     }
 
-    private static final String feedbackQGroupNum = "602611929";
-    private static final String feedbackQNum = "3285680362";
+    public static void feedbackEmail(@NotNull Context context, String msg) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.URI_FEEDBACK_EMAIL));
+        intent.putExtra(Intent.EXTRA_SUBJECT, "WR-CRASH-REPORT: " + Utils.formatDateLocally(System.currentTimeMillis()));
+        intent.putExtra(Intent.EXTRA_TEXT, msg);
+        context.startActivity(Intent.createChooser(intent, App.getContext().getString(R.string.open_via)));
+    }
 
-    public static boolean feedbackTempQChat(Context context) {
-        try {
-            context.startActivity(new Intent().setData(Uri.parse("mqqwpa://im/chat?chat_type=wpa&uin=" + feedbackQNum)));
-        } catch (Exception e) {
-            return false;
+    public static void feedbackAutoFallback(Context context, String errorLog) {
+        if (Constants.USER_DEBUGGABLE) {
+            if (!viewUri(context, Constants.URI_LAUNCH_QQ_TEMP_CHAT)) {
+                feedbackEmail(context, errorLog);
+            }
+        } else {
+            if (!viewUri(context, Constants.URI_JOIN_QQ_FEEDBACK_QQ_GROUP)) {
+                feedbackEmail(context, errorLog);
+            }
         }
-        return true;
     }
 
     public static void feedbackJoinQGroup(Context context) {
         try {
-            context.startActivity(new Intent().setData(Uri.parse("mqqapi://card/show_pslcard?src_type=internal&version=1&uin=" + feedbackQGroupNum + "&card_type=group&source=qrcode")));
+            context.startActivity(new Intent().setData(Uri.parse(Constants.URI_JOIN_QQ_FEEDBACK_QQ_GROUP)));
         } catch (Exception e) {
             MasterToast.shortToast(R.string.operation_failed);
         }

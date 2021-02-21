@@ -21,6 +21,8 @@ import java.util.List;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.databinding.ItemMessageViewerBinding;
 import xjunz.tool.werecord.impl.model.message.Message;
+import xjunz.tool.werecord.impl.repo.MessageRepository;
+import xjunz.tool.werecord.impl.repo.RepositoryFactory;
 
 public class MessageViewerDialog extends DialogFragment {
     private Message mVictim;
@@ -52,10 +54,12 @@ public class MessageViewerDialog extends DialogFragment {
     private class MessageViewAdapter extends RecyclerView.Adapter<MessageViewerViewHolder> {
         private final List<String> keyList;
         private final ContentValues values;
+        private final MessageRepository repository;
 
         MessageViewAdapter() {
             values = mVictim.getValues();
             keyList = new ArrayList<>(values.keySet());
+            repository = RepositoryFactory.get(MessageRepository.class);
         }
 
         @NonNull
@@ -74,7 +78,7 @@ public class MessageViewerDialog extends DialogFragment {
             } else {
                 holder.binding.setValue(value == null ? null : value.toString());
             }
-            holder.binding.setTag(value != null ? value.getClass().getSimpleName() : null);
+            holder.binding.setTag(repository.getType(key));
             holder.binding.executePendingBindings();
         }
 

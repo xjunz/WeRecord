@@ -22,7 +22,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.Editable;
-import android.text.method.LinkMovementMethod;
 import android.transition.Transition;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -48,13 +47,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
 import java.util.Objects;
 
 import xjunz.tool.werecord.App;
-import xjunz.tool.werecord.BuildConfig;
+import xjunz.tool.werecord.Constants;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.databinding.DialogProgressBinding;
+import xjunz.tool.werecord.impl.Environment;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
@@ -91,23 +90,25 @@ public class UiUtils {
     }
 
     @NotNull
-    public static AlertDialog showError(Context context, Object msg) {
+    public static AlertDialog showError(Context context, String msg) {
+        if (Constants.USER_DEBUGGABLE) {
+            msg = Environment.getBasicEnvInfo() + "\n\n" + msg;
+        }
         AlertDialog alert = createDialog(context, R.string.error_occurred, msg)
                 .setNeutralButton(R.string.copy, null)
                 .setPositiveButton(R.string.feedback, null).setNegativeButton(android.R.string.ok, null).show();
-        alert.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> ActivityUtils.feedbackJoinQGroup(context));
+        String finalMsg = msg;
+        alert.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> ActivityUtils.feedbackAutoFallback(context, finalMsg));
         alert.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(v -> {
-            Utils.copyPlainText("WR-ERROR-LOG", Objects.toString(msg));
+            Utils.copyPlainText("WR-ERROR-LOG", finalMsg);
             MasterToast.shortToast(R.string.has_copied_to_clipboard);
         });
         return alert;
     }
 
     @NotNull
-    public static AlertDialog showError(Context context, Throwable msg) {
-        if (BuildConfig.DEBUG) {
-            msg.printStackTrace();
-        }
+    public static AlertDialog showError(Context context, @NotNull Throwable msg) {
+        msg.printStackTrace();
         return showError(context, IoUtils.readStackTraceFromThrowable(msg));
     }
 
@@ -135,20 +136,6 @@ public class UiUtils {
             tvMsg.setText(msg);
             builder.setView(view);
             builder.show();
-        }
-    }
-
-    public static void htmlAutoLinkify(AlertDialog dialog) {
-        try {
-            Field alertControllerField = AlertDialog.class.getDeclaredField("mAlert");
-            alertControllerField.setAccessible(true);
-            Object alertController = alertControllerField.get(dialog);
-            Field messageViewField = alertController.getClass().getDeclaredField("mMessageView");
-            messageViewField.setAccessible(true);
-            TextView messageView = (TextView) messageViewField.get(alertController);
-            messageView.setMovementMethod(LinkMovementMethod.getInstance());
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
         }
     }
 
