@@ -97,6 +97,9 @@ public class RectangularContainerTransform extends Transition {
         Rect endRect = (Rect) endValues.values.get(PROP_NAME_RECT);
         int[] startPosition = (int[]) startValues.values.get(PROP_NAME_POSITION_IN_SCREEN);
         int[] endPosition = (int[]) endValues.values.get(PROP_NAME_POSITION_IN_SCREEN);
+        if (startRect == null || endRect == null || startPosition == null || endPosition == null) {
+            return null;
+        }
         RectEvaluator evaluator = new RectEvaluator(new Rect());
         Animator clipBounds, fadeOverlay;
         Animator fadeBackground = null;
@@ -143,7 +146,7 @@ public class RectangularContainerTransform extends Transition {
         public void onSharedElementStart(List<String> sharedElementNames, List<View> sharedElements, List<View> sharedElementSnapshots) {
             super.onSharedElementStart(sharedElementNames, sharedElements, sharedElementSnapshots);
             if (!sharedElements.isEmpty() && !sharedElementSnapshots.isEmpty()) {
-                //Expect there is only one Shared Element Transition, which only targets one View.
+                //Expect there is only one Shared Element View.
                 mSnapshotView = sharedElementSnapshots.get(0);
             }
         }

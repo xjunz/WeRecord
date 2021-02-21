@@ -89,7 +89,7 @@ public class TemplateShowcaseDialog extends DialogFragment {
 
     public void editTemplate(Template template) {
         new TemplateSetupDialog().setSourceTemplate(template)
-                .setCallback(() -> mCustomAdapter.notifyDataSetChanged()).show(requireFragmentManager(), "template_setup");
+                .setCallback(() -> mCustomAdapter.notifyDataSetChanged()).show(getParentFragmentManager(), "template_setup");
     }
 
     private class TemplateShowcaseAdapter extends RecyclerView.Adapter<TemplateShowcaseAdapter.CustomTemplateViewHolder> {

@@ -3,7 +3,6 @@
  */
 package xjunz.tool.werecord.ui.main.fragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -129,8 +128,6 @@ public class MineFragment extends PageFragment {
         new SwitchAccountDialog().show(getParentFragmentManager(), "switch_account");
     }
 
-    private static final int REQ_CODE_VERIFY = 3;
-
     public void toggleEnableVerifyDeviceCredential() {
         if (mSettings.isVerifyDeviceCredentialEnabled()) {
             if (mDeviceCredentialConfirmationLauncher != null) {
@@ -178,7 +175,7 @@ public class MineFragment extends PageFragment {
                         public void onComplete() {
                             new ExportShowcaseDialog().setFile(mDatabaseExportTempFile)
                                     .setFilename(exporter.getExportFileName())
-                                    .show(requireFragmentManager(), "decrypted_db_export_showcase");
+                                    .show(getParentFragmentManager(), "decrypted_db_export_showcase");
                         }
                     });
         } catch (IOException e) {
@@ -192,23 +189,11 @@ public class MineFragment extends PageFragment {
     }
 
     public void showAppInfo() {
-        new AboutDialog().show(requireFragmentManager(), "about");
+        new AboutDialog().show(getParentFragmentManager(), "about");
     }
 
     public void gotoFeedback(View view) {
         //todo:debug模式允许私人临时聊天
         ActivityUtils.feedbackJoinQGroup(requireContext());
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_CODE_VERIFY) {
-            if (resultCode == Activity.RESULT_OK) {
-                mSettings.verifyDeviceCredential.toggleValue();
-            } else {
-                MasterToast.shortToast(R.string.unable_to_verify_device_credential);
-            }
-        }
     }
 }

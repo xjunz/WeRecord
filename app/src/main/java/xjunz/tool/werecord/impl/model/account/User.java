@@ -27,6 +27,7 @@ public class User extends Account {
      */
     public String workerDatabaseFilePath;
     /**
+     * //todo
      * 备份数据库: 备份的微信源数据库，用于出现意外时的还原
      */
     public String backupDatabaseFilePath;
@@ -47,10 +48,6 @@ public class User extends Account {
                 + File.separator + "MicroMsg" + File.separator + pathIdentifier + File.separator + "image2";
         this.videoCachePath = android.os.Environment.getExternalStorageDirectory().getPath() + File.separator + "tencent"
                 + File.separator + "MicroMsg" + File.separator + pathIdentifier + File.separator + "video";
-    }
-
-    public String getMsgDatabasePath() {
-        return originalDatabaseFilePath;
     }
 
     public void deleteWorkerDatabase() {

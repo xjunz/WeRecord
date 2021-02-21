@@ -79,7 +79,7 @@
             android:theme="@style/Base.AppTheme.Main.Translucent.Message" />
         <activity
             android:name="xjunz.tool.werecord.ui.message.EditorActivity"
-            android:theme="@style/Base.AppTheme.Main.Translucent.Editor" />
+            android:theme="@style/Base.AppTheme.Main" />
         <activity
             android:name="xjunz.tool.werecord.ui.export.MessageExportActivity"
             android:theme="@style/Base.AppTheme.Main.Translucent.MessageExport" />

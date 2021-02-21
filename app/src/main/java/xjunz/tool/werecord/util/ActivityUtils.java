@@ -4,15 +4,23 @@
 package xjunz.tool.werecord.util;
 
 import android.app.Activity;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.net.Uri;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCaller;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 
 import org.jetbrains.annotations.NotNull;
 
+import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 
@@ -68,5 +76,31 @@ public class ActivityUtils {
 
     public static void launchVictim(@NotNull Context context) {
         context.startActivity(context.getPackageManager().getLaunchIntentForPackage("com.tencent.mm"));
+    }
+
+    @Nullable
+    public static ActivityResultLauncher<Void> registerDeviceCredentialConfirmationLauncher(@NonNull ActivityResultCaller caller, @StringRes int title, @StringRes int des, @NonNull Runnable onSucceed, @NonNull Runnable onFail) {
+        KeyguardManager manager = (KeyguardManager) App.getContext().getSystemService(Context.KEYGUARD_SERVICE);
+        if (manager != null && manager.isDeviceSecure()) {
+            return caller.registerForActivityResult(new ActivityResultContract<Void, ActivityResult>() {
+                @NonNull
+                @Override
+                public Intent createIntent(@NonNull Context context, Void input) {
+                    return manager.createConfirmDeviceCredentialIntent(context.getText(title), des == -1 ? null : context.getText(des));
+                }
+
+                @Override
+                public ActivityResult parseResult(int resultCode, @Nullable Intent intent) {
+                    return new ActivityResult(resultCode, intent);
+                }
+            }, result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    onSucceed.run();
+                } else {
+                    onFail.run();
+                }
+            });
+        }
+        return null;
     }
 }

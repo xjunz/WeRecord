@@ -181,11 +181,11 @@ public class ContactFragment extends ListPageFragment<Contact> implements PageCo
     }
 
     public void showCheckZombiesDialog() {
-        new CheckZombiesDialog().show(requireFragmentManager(), "check_out_zombies");
+        new CheckZombiesDialog().show(getParentFragmentManager(), "check_out_zombies");
     }
 
     public void showAddContactByIdDialog() {
-        new AddContactByIdDialog().show(requireFragmentManager(), "add_contact_by_id");
+        new AddContactByIdDialog().show(getParentFragmentManager(), "add_contact_by_id");
     }
 
     public void gotoExport(View view) {

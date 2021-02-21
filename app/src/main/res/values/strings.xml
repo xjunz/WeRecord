@@ -1,11 +1,10 @@
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2021 xjunz. 保留所有权利
   -->
-
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ExtraTranslation">
     <!--application-->
-    <string name="copyright">Copyright © 2021 <b>WeRecord</b></string>
-    <string name="app_name">WeRecord</string>
+    <string name="copyright" translatable="false">Copyright © 2021 <b>WeRecord</b></string>
+    <string name="app_name">微记录</string>
     <!--intro-->
     <string name="intro">引导</string>
     <string name="welcome">欢迎</string>

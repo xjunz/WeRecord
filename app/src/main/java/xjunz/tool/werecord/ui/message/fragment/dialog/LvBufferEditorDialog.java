@@ -180,7 +180,7 @@ public class LvBufferEditorDialog extends ConfirmationDialog<Object[]> {
                         et.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
                         break;
                     case TYPE_BUFFER:
-                        et.setFilters(new InputFilter[]{new DigitsKeyListener(getResources().getConfiguration().locale) {
+                        et.setFilters(new InputFilter[]{new DigitsKeyListener(Utils.getCurrentLocale()) {
                             @Override
                             protected char[] getAcceptedChars() {
                                 return new char[]{'-', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '[', ',', ']', ' '};
@@ -230,7 +230,7 @@ public class LvBufferEditorDialog extends ConfirmationDialog<Object[]> {
                         break;
                 }
                 return false;
-            }).show(requireFragmentManager(), "lvbuffer:" + pos);
+            }).show(getParentFragmentManager(), "lvbuffer:" + pos);
         }
     }
 }

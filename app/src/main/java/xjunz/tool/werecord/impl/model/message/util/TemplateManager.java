@@ -50,7 +50,7 @@ public class TemplateManager implements LifecycleObserver {
 
     private TemplateManager(SQLiteDatabase db) {
         mDb = db;
-        Environment.getInstance().getLifecycle().addObserver(this);
+        Environment.getInstance().addLifecycleObserver(this);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

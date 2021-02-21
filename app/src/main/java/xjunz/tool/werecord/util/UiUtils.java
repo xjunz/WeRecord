@@ -90,19 +90,25 @@ public class UiUtils {
         return createDialog(context, R.string.help, msg).setPositiveButton(android.R.string.ok, null);
     }
 
-    public static void showError(Context context, Object msg) {
+    @NotNull
+    public static AlertDialog showError(Context context, Object msg) {
         AlertDialog alert = createDialog(context, R.string.error_occurred, msg)
                 .setNeutralButton(R.string.copy, null)
                 .setPositiveButton(R.string.feedback, null).setNegativeButton(android.R.string.ok, null).show();
         alert.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> ActivityUtils.feedbackJoinQGroup(context));
-        alert.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(v -> Utils.copyPlainText("WR-ERROR-LOG", Objects.toString(msg)));
+        alert.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(v -> {
+            Utils.copyPlainText("WR-ERROR-LOG", Objects.toString(msg));
+            MasterToast.shortToast(R.string.has_copied_to_clipboard);
+        });
+        return alert;
     }
 
-    public static void showError(Context context, Throwable msg) {
+    @NotNull
+    public static AlertDialog showError(Context context, Throwable msg) {
         if (BuildConfig.DEBUG) {
             msg.printStackTrace();
         }
-        showError(context, IoUtils.readStackTraceFromThrowable(msg));
+        return showError(context, IoUtils.readStackTraceFromThrowable(msg));
     }
 
     /**

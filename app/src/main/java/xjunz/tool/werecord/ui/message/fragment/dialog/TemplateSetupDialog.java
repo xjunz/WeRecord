@@ -101,6 +101,6 @@ public class TemplateSetupDialog extends DialogFragment {
                     }
                     dismiss();
                     return true;
-                }).show(requireFragmentManager(), "template_name");
+                }).show(getParentFragmentManager(), "template_name");
     }
 }

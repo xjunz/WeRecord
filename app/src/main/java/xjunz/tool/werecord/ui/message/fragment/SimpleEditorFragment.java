@@ -385,7 +385,7 @@ public class SimpleEditorFragment extends EditorFragment {
                 case CallMessage.ABSTRACT_KEY_CALL_CONTENT:
                     new ContentEditorDialog().setLabel(item.caption)
                             .setDefault(mVictim.get(item.key))
-                            .setPassableCallback(item::setValue).show(requireFragmentManager(), item.key);
+                            .setPassableCallback(item::setValue).show(getParentFragmentManager(), item.key);
                     break;
                 case Message.KEY_STATUS:
                     item.setValue(mVictim.sendFailed() ? Message.STATUS_SEND_SUC : Message.STATUS_SEND_FAILED);
@@ -403,13 +403,13 @@ public class SimpleEditorFragment extends EditorFragment {
                             .setDefault(mVictim.getSenderAccount())
                             .setPassableCallback(result -> {
                                 changeSenderConsideringStatus(item, result.id);
-                            }).show(requireFragmentManager(), item.key);
+                            }).show(getParentFragmentManager(), item.key);
                     break;
                 case Message.KEY_CREATE_TIME:
-                    new TimestampEditorDialog().setHelpTextRes(R.string.help_send_timestamp).setLabelRes(R.string.send_time).setDefault(mVictim.getCreateTimeStamp()).setPassableCallback(item::setValue).show(requireFragmentManager(), item.key);
+                    new TimestampEditorDialog().setHelpTextRes(R.string.help_send_timestamp).setLabelRes(R.string.send_time).setDefault(mVictim.getCreateTimeStamp()).setPassableCallback(item::setValue).show(getParentFragmentManager(), item.key);
                     break;
                 case EditorItem.KEY_TEMPLATE:
-                    new TemplateShowcaseDialog().setCallback(SimpleEditorFragment.this::setTemplate).show(requireFragmentManager(), "template_showcase");
+                    new TemplateShowcaseDialog().setCallback(SimpleEditorFragment.this::setTemplate).show(getParentFragmentManager(), "template_showcase");
                     break;
                 case EditorItem.KEY_REP_GROUP:
                     Template.RepGroup repGroup = mTemplate.getRepGroups().get(getAdapterPosition() - mRepGroupItemStartIndex);
@@ -418,7 +418,7 @@ public class SimpleEditorFragment extends EditorFragment {
                     switch (type) {
                         case Template.RepGroup.TYPE_STRING:
                             new ContentEditorDialog().setLabel(repGroup.name).setDefault(Utils.stringValueOf(value))
-                                    .setPassableCallback(item::setValue).show(requireFragmentManager(), item.caption);
+                                    .setPassableCallback(item::setValue).show(getParentFragmentManager(), item.caption);
                             break;
                         case Template.RepGroup.TYPE_DECIMAL:
                             new SingleLineEditorDialog().setLabel(item.caption).setEditorTag(type).setConfig(et -> {
@@ -431,7 +431,7 @@ public class SimpleEditorFragment extends EditorFragment {
                                     return false;
                                 }
                                 return true;
-                            }).show(requireFragmentManager(), item.caption);
+                            }).show(getParentFragmentManager(), item.caption);
                         case Template.RepGroup.TYPE_LONG:
                             new SingleLineEditorDialog().setLabel(item.caption).setEditorTag(type).setConfig(et -> {
                                 et.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
@@ -443,16 +443,16 @@ public class SimpleEditorFragment extends EditorFragment {
                                     return false;
                                 }
                                 return true;
-                            }).show(requireFragmentManager(), item.caption);
+                            }).show(getParentFragmentManager(), item.caption);
                             break;
                         case Template.RepGroup.TYPE_TIMESTAMP:
                             new TimestampEditorDialog().setLabel(item.caption).setDefault(mVictim.getCreateTimeStamp()).setAllowUnchanged(true)
-                                    .setPassableCallback(item::setValue).show(requireFragmentManager(), item.caption);
+                                    .setPassableCallback(item::setValue).show(getParentFragmentManager(), item.caption);
                             break;
                         case Template.RepGroup.TYPE_ACCOUNT_ID:
                         case Template.RepGroup.TYPE_ACCOUNT_NAME:
                             new SenderChooserDialog().setSenderIds(getOptionalSenderIds()).setDefault((Account) value)
-                                    .setPassableCallback(item::setValue).show(requireFragmentManager(), item.caption);
+                                    .setPassableCallback(item::setValue).show(getParentFragmentManager(), item.caption);
                             break;
                         case Template.RepGroup.TYPE_APP_ID:
                             PopupMenu menu = new PopupMenu(requireContext(), itemView);

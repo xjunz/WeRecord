@@ -249,7 +249,7 @@ public class AdvancedEditorFragment extends EditorFragment {
                 return;
             }
             if (Message.KEY_LV_BUFFER.equals(item.key)) {
-                new LvBufferEditorDialog().setTypeSerial(Message.LV_BUFFER_READ_SERIAL).setDefault(mVictim.getParsedLvBuffer()).setPassableCallback(item::setValue).show(requireFragmentManager(), item.key);
+                new LvBufferEditorDialog().setTypeSerial(Message.LV_BUFFER_READ_SERIAL).setDefault(mVictim.getParsedLvBuffer()).setPassableCallback(item::setValue).show(getParentFragmentManager(), item.key);
                 return;
             }
             int contentType = ContentType.getTypeFromRaw(item.getType());
@@ -273,11 +273,11 @@ public class AdvancedEditorFragment extends EditorFragment {
                                 }
                             }
                             return true;
-                        }).show(requireFragmentManager(), item.key);
+                        }).show(getParentFragmentManager(), item.key);
             } else {
                 new ContentEditorDialog().configEditText(passed -> {
                     if (contentType == ContentType.BLOB) {
-                        passed.setFilters(new InputFilter[]{new DigitsKeyListener(getResources().getConfiguration().locale) {
+                        passed.setFilters(new InputFilter[]{new DigitsKeyListener(Utils.getCurrentLocale()) {
                             @Override
                             protected char[] getAcceptedChars() {
                                 return new char[]{'-', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '[', ',', ']', ' '};
@@ -310,7 +310,7 @@ public class AdvancedEditorFragment extends EditorFragment {
                         item.setValue(result);
                     }
                     return true;
-                }).show(requireFragmentManager(), item.getKey());
+                }).show(getParentFragmentManager(), item.getKey());
             }
         }
     }

@@ -4,12 +4,13 @@
 
 package xjunz.tool.werecord.ui.outer;
 
-import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -32,16 +33,16 @@ import xjunz.tool.werecord.impl.repo.WxAppRepository;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 import xjunz.tool.werecord.ui.intro.IntroActivity;
 import xjunz.tool.werecord.ui.main.MainActivity;
+import xjunz.tool.werecord.util.ActivityUtils;
 import xjunz.tool.werecord.util.LogUtils;
 import xjunz.tool.werecord.util.UiUtils;
 
 /**
  * 启动活动，主要执行初始化工作
  */
-public class InitializationActivity extends Activity implements CompletableObserver {
+public class InitializationActivity extends AppCompatActivity implements CompletableObserver {
 
     private Disposable mQueryDisposable;
-    private static final int REQUEST_CODE_VERIFY = 3;
     public static final String EXTRA_RECOVERY_LAUNCH = "InitializationActivity.extra.RecoveryLaunch";
     private static final AtomicBoolean sNoVerificationLaunch = new AtomicBoolean(false);
     private boolean mIsRecoveryLaunch;
@@ -69,29 +70,25 @@ public class InitializationActivity extends Activity implements CompletableObser
                 MasterToast.shortToast(R.string.unable_to_verify_device_credential);
                 finish();
             } else {
-                startActivityForResult(manager.createConfirmDeviceCredentialIntent(getText(R.string.verify_owner_title), getText(R.string.verify_owner_des))
-                        , REQUEST_CODE_VERIFY);
+                ActivityResultLauncher<Void> launcher = ActivityUtils.registerDeviceCredentialConfirmationLauncher(this, R.string.verify_owner_title, R.string.verify_owner_des, () -> {
+                    setContentView(R.layout.activity_splash);
+                    Environment.create().init(this);
+                }, () -> {
+                    MasterToast.shortToast(R.string.unable_to_verify_device_credential);
+                    finish();
+                });
+                if (launcher == null) {
+                    MasterToast.shortToast(R.string.unable_to_verify_device_credential);
+                    finish();
+                } else {
+                    launcher.launch(null);
+                }
             }
         } else {
             setContentView(R.layout.activity_splash);
             //初始化环境
-            Environment env = Environment.newInstance();
+            Environment env = Environment.create();
             env.init(this);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_VERIFY) {
-            if (resultCode == RESULT_OK) {
-                setContentView(R.layout.activity_splash);
-                //初始化环境
-                Environment.newInstance().init(this);
-            } else {
-                MasterToast.shortToast(R.string.unable_to_verify_device_credential);
-                finish();
-            }
         }
     }
 
@@ -128,7 +125,9 @@ public class InitializationActivity extends Activity implements CompletableObser
     @Override
     public void onError(@NotNull Throwable e) {
         App.getSharedPrefsManager().setIsAppIntroDone(false);
-        UiUtils.createDialog(this, R.string.init_failed, R.string.msg_init_failed).setPositiveButton(android.R.string.ok, (dialog, which) -> recreate())
+        e.printStackTrace();
+        UiUtils.createDialog(this, R.string.init_failed, R.string.msg_init_failed)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> recreate())
                 .setNegativeButton(R.string.exit, (dialog, which) -> finish())
                 .setCancelable(false).show();
     }

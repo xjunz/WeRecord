@@ -36,7 +36,6 @@ import xjunz.tool.werecord.util.IoUtils;
  * @author xjunz 2021/2/8 13:56
  */
 public class ExporterActivity extends RecycleSensitiveActivity {
-    protected static final int REQUEST_CODE_SAVE_EXPORT_FILE = 1;
     private File mLatestOutputFile;
     protected Exporter mExporter;
 

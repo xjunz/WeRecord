@@ -13,6 +13,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 
@@ -44,6 +45,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
 import io.reactivex.CompletableObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.BuildConfig;
 import xjunz.tool.werecord.impl.model.account.User;
@@ -145,7 +147,7 @@ public class Environment implements Serializable, LifecycleOwner {
             tryOpenDatabaseOf(mCurrentUser, mImei);
             fulfillCurrentUser();
             loadUserIds();
-            mLifecycle.setCurrentState(Lifecycle.State.STARTED);
+            setCurrentStateInMainThread(Lifecycle.State.STARTED);
         }).subscribe(observer);
     }
 
@@ -203,12 +205,20 @@ public class Environment implements Serializable, LifecycleOwner {
         return mLifecycle.getCurrentState().isAtLeast(Lifecycle.State.STARTED);
     }
 
-    private Environment() {
-        mLifecycle = new LifecycleRegistry(this);
-        mLifecycle.setCurrentState(Lifecycle.State.CREATED);
+    private void setCurrentStateInMainThread(Lifecycle.State state) {
+        AndroidSchedulers.mainThread().scheduleDirect(() -> mLifecycle.setCurrentState(state));
     }
 
-    public static Environment newInstance() {
+    public void addLifecycleObserver(LifecycleObserver observer) {
+        AndroidSchedulers.mainThread().scheduleDirect(() -> mLifecycle.addObserver(observer));
+    }
+
+    private Environment() {
+        mLifecycle = new LifecycleRegistry(this);
+        setCurrentStateInMainThread(Lifecycle.State.CREATED);
+    }
+
+    public static Environment create() {
         sEnvironment = new Environment();
         return sEnvironment;
     }
@@ -307,7 +317,7 @@ public class Environment implements Serializable, LifecycleOwner {
         SecretKeySpec secretKeySpec = new SecretKeySpec(new byte[]{95, 119, 69, 99, 72, 65, 84, 95}, "RC4");
         Cipher cipher = Cipher.getInstance("RC4");
         cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
-        File tempFile = File.createTempFile("KeyInfo", ".bin");
+        File tempFile = File.createTempFile("init_info", null);
         ShellUtils.cp(keyInfoPath, tempFile.getPath());
         BufferedReader reader = new BufferedReader(new InputStreamReader(new CipherInputStream(new FileInputStream(tempFile), cipher)));
         mImei = reader.readLine();
@@ -360,7 +370,7 @@ public class Environment implements Serializable, LifecycleOwner {
         if (mCurrentUser != null) {
             mCurrentUser.deleteWorkerDatabase();
         }
-        mLifecycle.setCurrentState(LifecycleRegistry.State.DESTROYED);
+        setCurrentStateInMainThread(Lifecycle.State.DESTROYED);
         sEnvironment = null;
     }
 
@@ -371,7 +381,7 @@ public class Environment implements Serializable, LifecycleOwner {
         sb.append(infoBlockHeader("B")).append("\n").append(getBasicHardwareInfo()).append("\n")
                 .append(infoBlockHeader("A")).append("\n").append(getAppVersionInfo()).append("\n")
                 .append(infoBlockHeader("V")).append("\n").append(getVictimVersionInfo());
-        if (sEnvironment != null && sEnvironment.getCurrentUser() != null) {
+        if (sEnvironment != null && sEnvironment.initialized()) {
             sb.append("\n").append(infoBlockHeader("U")).append("\n").append(sEnvironment.getBasicUserInfo());
         }
         return sb.toString();

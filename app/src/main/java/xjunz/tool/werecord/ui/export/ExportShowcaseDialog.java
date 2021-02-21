@@ -5,6 +5,7 @@ package xjunz.tool.werecord.ui.export;
 
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +15,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
@@ -36,20 +40,32 @@ import xjunz.tool.werecord.util.IoUtils;
 import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.UiUtils;
 
-import static xjunz.tool.werecord.ui.export.ExporterActivity.REQUEST_CODE_SAVE_EXPORT_FILE;
-
 /**
  * @author xjunz 2021/2/18 18:33
  */
-public class ExportShowcaseDialog extends DialogFragment {
+public class ExportShowcaseDialog extends DialogFragment implements ActivityResultCallback<Uri> {
     private DialogExportShowcaseBinding mBinding;
     private File mFile;
     private final ObservableField<String> mFilename = new ObservableField<>();
+    private ActivityResultLauncher<String> mFileExportLauncher;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(STYLE_NO_FRAME, R.style.Base_Dialog_Normal);
+        mFileExportLauncher = registerForActivityResult(new ActivityResultContract<String, Uri>() {
+            @NonNull
+            @Override
+            public Intent createIntent(@NonNull Context context, String input) {
+                return new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*").putExtra(Intent.EXTRA_TITLE, requireFilename());
+            }
+
+            @Override
+            public Uri parseResult(int resultCode, @Nullable Intent intent) {
+                if (intent != null) if (intent.getData() != null) return intent.getData();
+                return null;
+            }
+        }, this);
     }
 
     public ExportShowcaseDialog setFile(File file) {
@@ -77,15 +93,15 @@ public class ExportShowcaseDialog extends DialogFragment {
     }
 
     public void editFilename() {
-        new SingleLineEditorDialog().setLabel(getString(R.string.filename)).setDefault(mFilename.get())
+        new SingleLineEditorDialog().setLabel(getString(R.string.filename)).setDefault(requireFilename())
                 .setAllowUnchanged(true)
                 .setPassableCallback(mFilename::set)
-                .show(requireFragmentManager(), "edit_file_name");
+                .show(getParentFragmentManager(), "edit_file_name");
     }
 
     private void rename() {
-        if (!Objects.equals(mFile.getName(), mFilename.get())) {
-            File renamed = new File(mFile.getParent() + File.separator + mFilename.get());
+        if (!Objects.equals(mFile.getName(), requireFilename())) {
+            File renamed = new File(mFile.getParent() + File.separator + requireFilename());
             if (mFile.renameTo(renamed)) {
                 mFile = renamed;
             } else {
@@ -95,10 +111,15 @@ public class ExportShowcaseDialog extends DialogFragment {
         }
     }
 
+    @NonNull
+    private String requireFilename() {
+        return Objects.requireNonNull(mFilename.get());
+    }
+
     public void share() {
         rename();
-        if (!Objects.equals(mFile.getName(), mFilename.get())) {
-            File renamed = new File(mFile.getParent() + File.separator + mFilename.get());
+        if (!Objects.equals(mFile.getName(), requireFilename())) {
+            File renamed = new File(mFile.getParent() + File.separator + requireFilename());
             if (mFile.renameTo(renamed)) {
                 mFile = renamed;
             } else {
@@ -110,7 +131,7 @@ public class ExportShowcaseDialog extends DialogFragment {
         Uri uri = FileProvider.getUriForFile(requireContext(), "xjunz.tool.werecord.fileprovider", mFile);
         Intent intent = new Intent(Intent.ACTION_SEND, uri)
                 .putExtra(Intent.EXTRA_STREAM, uri)
-                .setType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(mFilename.get().substring(mFilename.get().lastIndexOf('.') + 1)))
+                .setType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(requireFilename().substring(requireFilename().lastIndexOf('.') + 1)))
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         ActivityUtils.startActivityCreateChooser(requireContext(), intent);
     }
@@ -127,42 +148,9 @@ public class ExportShowcaseDialog extends DialogFragment {
     public void saveTo() {
         MasterToast.shortToast(R.string.pls_select_save_dir);
         try {
-            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("*/*");
-            intent.putExtra(Intent.EXTRA_TITLE, mFilename.get());
-            startActivityForResult(intent, REQUEST_CODE_SAVE_EXPORT_FILE);
+            mFileExportLauncher.launch(requireFilename());
         } catch (ActivityNotFoundException e) {
             MasterToast.shortToast(R.string.unable_to_open);
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_SAVE_EXPORT_FILE) {
-            if (data != null) {
-                Uri uri = data.getData();
-                Dialog progress = UiUtils.createProgress(requireContext(), R.string.saving);
-                RxJavaUtils.complete(() -> IoUtils.transferFileViaChannel(new FileInputStream(mFile), (FileOutputStream) requireActivity().getContentResolver().openOutputStream(uri))).doFinally(progress::dismiss).subscribe(new CompletableObserver() {
-                    @Override
-                    public void onSubscribe(@io.reactivex.annotations.NonNull Disposable d) {
-                        progress.show();
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        MasterToast.shortToast(R.string.export_successfully);
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        UiUtils.createError(requireContext(), e).show();
-                    }
-                });
-            } else {
-                MasterToast.shortToast(R.string.operation_cancelled);
-            }
         }
     }
 
@@ -179,5 +167,31 @@ public class ExportShowcaseDialog extends DialogFragment {
     public void onDestroy() {
         super.onDestroy();
         clearCacheIfExists();
+    }
+
+    @Override
+    public void onActivityResult(@Nullable Uri data) {
+        if (data != null) {
+            Dialog progress = UiUtils.createProgress(requireContext(), R.string.saving);
+            RxJavaUtils.complete(() -> IoUtils.transferFileViaChannel(new FileInputStream(mFile),
+                    (FileOutputStream) requireContext().getContentResolver().openOutputStream(data))).doFinally(progress::dismiss).subscribe(new CompletableObserver() {
+                @Override
+                public void onSubscribe(@NonNull Disposable d) {
+                    progress.show();
+                }
+
+                @Override
+                public void onComplete() {
+                    MasterToast.shortToast(R.string.export_successfully);
+                }
+
+                @Override
+                public void onError(@NonNull Throwable e) {
+                    UiUtils.showError(requireContext(), e);
+                }
+            });
+        } else {
+            MasterToast.shortToast(R.string.operation_cancelled);
+        }
     }
 }
