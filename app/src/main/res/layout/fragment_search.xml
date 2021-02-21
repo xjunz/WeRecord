@@ -49,13 +49,14 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-
+        <!--//todo-->
         <ImageButton
             android:id="@+id/ib_filter"
             android:layout_width="@dimen/fab_normal"
             android:layout_height="@dimen/fab_normal"
             android:background="@drawable/bg_fab"
             android:elevation="@dimen/z_fab"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.9"

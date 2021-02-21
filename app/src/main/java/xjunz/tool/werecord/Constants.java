@@ -7,7 +7,7 @@ package xjunz.tool.werecord;
  * @author xjunz 2021/2/16 23:24
  */
 public class Constants {
-    public static final String URL_APP_DOWNLOAD_PAGE = "https://www.fir.im/";
+    public static final String URL_APP_DOWNLOAD_PAGE = "http://d.firim.top/werecord/";
     public static boolean USER_DEBUGGABLE = BuildConfig.DEBUG;
     private static final String FEEDBACK_QQ_GROUP_NUMBER = "602611929";
     private static final String FEEDBACK_TEMP_QQ_CHAT_NUMBER = "3285680362";
