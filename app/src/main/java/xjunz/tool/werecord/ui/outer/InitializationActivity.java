@@ -5,22 +5,21 @@
 package xjunz.tool.werecord.ui.outer;
 
 import android.app.KeyguardManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.impl.Environment;
@@ -34,15 +33,16 @@ import xjunz.tool.werecord.ui.customview.MasterToast;
 import xjunz.tool.werecord.ui.intro.IntroActivity;
 import xjunz.tool.werecord.ui.main.MainActivity;
 import xjunz.tool.werecord.util.ActivityUtils;
+import xjunz.tool.werecord.util.IoUtils;
 import xjunz.tool.werecord.util.LogUtils;
+import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.UiUtils;
+import xjunz.tool.werecord.util.Utils;
 
 /**
  * 启动活动，主要执行初始化工作
  */
 public class InitializationActivity extends AppCompatActivity implements CompletableObserver {
-
-    private Disposable mQueryDisposable;
     public static final String EXTRA_RECOVERY_LAUNCH = "InitializationActivity.extra.RecoveryLaunch";
     private static final AtomicBoolean sNoVerificationLaunch = new AtomicBoolean(false);
     private boolean mIsRecoveryLaunch;
@@ -70,10 +70,7 @@ public class InitializationActivity extends AppCompatActivity implements Complet
                 MasterToast.shortToast(R.string.unable_to_verify_device_credential);
                 finish();
             } else {
-                ActivityResultLauncher<Void> launcher = ActivityUtils.registerDeviceCredentialConfirmationLauncher(this, R.string.verify_owner_title, R.string.verify_owner_des, () -> {
-                    setContentView(R.layout.activity_splash);
-                    Environment.create().init(this);
-                }, () -> {
+                ActivityResultLauncher<Void> launcher = ActivityUtils.registerDeviceCredentialConfirmationLauncher(this, R.string.verify_owner_title, R.string.verify_owner_des, this::initIfNecessary, () -> {
                     MasterToast.shortToast(R.string.unable_to_verify_device_credential);
                     finish();
                 });
@@ -85,10 +82,18 @@ public class InitializationActivity extends AppCompatActivity implements Complet
                 }
             }
         } else {
-            setContentView(R.layout.activity_splash);
-            //初始化环境
-            Environment env = Environment.create();
-            env.init(this);
+            initIfNecessary();
+        }
+    }
+
+    private void initIfNecessary() {
+        setContentView(R.layout.activity_splash);
+        //初始化环境
+        Environment env = Environment.getInstance();
+        if (env != null && env.initialized()) {
+            onComplete();
+        } else {
+            Environment.create().init(this);
         }
     }
 
@@ -102,7 +107,7 @@ public class InitializationActivity extends AppCompatActivity implements Complet
 
     @Override
     public void onComplete() {
-        mQueryDisposable = Completable.create(emitter -> {
+        RxJavaUtils.complete(() -> {
             //查询所有聊天对象
             RepositoryFactory.get(TalkerRepository.class).queryAll();
             //查询所有联系人信息
@@ -113,31 +118,35 @@ public class InitializationActivity extends AppCompatActivity implements Complet
             RepositoryFactory.get(MessageRepository.class).initTypeMap();
             //初始化模板
             TemplateManager.init(this);
-            emitter.onComplete();
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(() -> {
-            Intent i = new Intent(InitializationActivity.this, MainActivity.class);
-            //清除当前任务
-            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
-        }, this::onError);
+        }).subscribe(new RxJavaUtils.CompletableObservableAdapter() {
+            @Override
+            public void onComplete() {
+                Intent i = new Intent(InitializationActivity.this, MainActivity.class);
+                //清除当前任务
+                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
+            }
+
+            @Override
+            public void onError(@NotNull Throwable e) {
+                InitializationActivity.this.onError(e);
+            }
+        });
     }
 
     @Override
     public void onError(@NotNull Throwable e) {
         App.getSharedPrefsManager().setIsAppIntroDone(false);
-        e.printStackTrace();
-        UiUtils.createDialog(this, R.string.init_failed, R.string.msg_init_failed)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> recreate())
-                .setNegativeButton(R.string.exit, (dialog, which) -> finish())
+        String stacktrace = IoUtils.readStackTraceFromThrowable(e);
+        AlertDialog alert = UiUtils.createDialog(this, R.string.init_failed, stacktrace)
+                .setNeutralButton(R.string.copy, null)
+                .setPositiveButton(R.string.feedback, null).setNegativeButton(R.string.quit, (a, b) -> finish())
                 .setCancelable(false).show();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mQueryDisposable != null && !mQueryDisposable.isDisposed()) {
-            mQueryDisposable.dispose();
-        }
+        alert.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> ActivityUtils.feedbackJoinQGroup(InitializationActivity.this));
+        alert.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(v -> {
+            Utils.copyPlainText("WR-ERROR-LOG", stacktrace);
+            MasterToast.shortToast(R.string.has_copied_to_clipboard);
+        });
     }
 
     @Override
