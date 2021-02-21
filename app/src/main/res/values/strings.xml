@@ -10,7 +10,7 @@
     <string name="welcome">欢迎</string>
     <string name="super_user">ROOT</string>
     <string name="caption_welcome">欢迎使用 <b>微记录</b> 。本应用支持将您的微信<b>聊天记录，联系人</b>等信息保存为<i>TXT,HTML</i>等可随时查看、永久保存的格式。
-        此外，本应用为您提供了本地记录的增删改查，统计等操作。\n不过，在使用之前，您需要<b>完成设置向导</b>以确保应用能正常工作。
+        此外，本应用为您提供了一些额外的功能。\n不过，在使用之前，您需要<b>完成设置向导</b>以确保应用能正常工作。
     </string>
     <string name="caption_su">为了访问微信的<b>私有文件</b>，我们需要使用<b>ROOT权限</b>。请放心，<b>此权限用于且仅用于使应用能正常发挥功能</b>。
         \n请点击下方的“<b>开始检查</b>”</string>
@@ -30,13 +30,9 @@
     <string name="permission">权限</string>
     <string name="approved">已同意</string>
     <string name="rationale">说明</string>
-    <string name="rationale_imei_permission">根据微信的数据库加密算法，我们需要该设备的IMEI以<b>解密数据库</b>从而提取您所需要的记录。从安卓10(Q)开始，我们获取的IMEI
-    不再是设备真正的IMEI，而是系统随机生成的串号。</string>
     <string name="caption_availability">应用已成功获取到了ROOT权限，现在检测此应用能否在您的设备上正常工作。\n请点击下方的“<b>开始检查</b>”</string>
     <string name="checking">正在检查…</string>
     <string name="availability">可用性</string>
-    <string name="permission_access_wx_sandbox">访问微信的私有文件</string>
-    <string name="caption_permission_wx_sandbox">如数据库、图片等</string>
     <string name="declaration">隐私政策及免责声明</string>
     <string name="read_and_approved">我已阅读并同意</string>
     <!--debug-->
