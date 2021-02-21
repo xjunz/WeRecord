@@ -7,14 +7,18 @@ package xjunz.tool.werecord.util;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 
 import com.jaredrummler.android.shell.CommandResult;
 import com.jaredrummler.android.shell.Shell;
+import com.jaredrummler.android.shell.ShellExitCode;
+import com.jaredrummler.android.shell.ShellNotFoundException;
 
 import org.apaches.commons.codec.binary.Hex;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 
 import xjunz.tool.werecord.BuildConfig;
 
@@ -120,6 +124,46 @@ public class ShellUtils {
         sudo("am", "start", activityName);
     }
 
+    public static class SU_MM {
+        private static volatile Shell.Console console;
+
+        @WorkerThread
+        public static Shell.Console getConsole() throws ShellNotFoundException {
+            if (console == null || console.isClosed()) {
+                synchronized (Shell.SH.class) {
+                    if (console == null || console.isClosed()) {
+                        console = new Shell.Console.Builder().setShell(Shell.SU.shellMountMaster()).setWatchdogTimeout(30).build();
+                    }
+                }
+            }
+            return console;
+        }
+
+        /**
+         * Closes the console if open
+         */
+        public static void closeConsole() {
+            if (console != null) {
+                synchronized (Shell.SU.class) {
+                    if (console != null) {
+                        console.close();
+                        console = null;
+                    }
+                }
+            }
+        }
+
+        @WorkerThread
+        public static CommandResult run(@NonNull String... commands) {
+            try {
+                return getConsole().run(commands);
+            } catch (ShellNotFoundException e) {
+                return new CommandResult(
+                        Collections.<String>emptyList(), Collections.<String>emptyList(), ShellExitCode.SHELL_NOT_FOUND);
+            }
+        }
+    }
+
     /**
      * 以root用户身份运行一段{@code shell}指令
      *
@@ -135,7 +179,7 @@ public class ShellUtils {
         }
         //在android q 以上，需使用挂载全局命名空间的su
         CommandResult result = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
-                Shell.run("su -mm", command.toString()) : Shell.run("su", command.toString());
+                SU_MM.run(command.toString()) : Shell.SU.run(command.toString());
         if (!result.isSuccessful()) {
             throw new ShellException(result.getStderr());
         }
