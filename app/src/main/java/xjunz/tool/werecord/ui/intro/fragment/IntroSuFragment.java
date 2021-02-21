@@ -15,7 +15,10 @@ import androidx.annotation.Nullable;
 
 import com.jaredrummler.android.shell.Shell;
 
+import org.jetbrains.annotations.NotNull;
+
 import xjunz.tool.werecord.R;
+import xjunz.tool.werecord.util.RxJavaUtils;
 
 public class IntroSuFragment extends IntroFragment implements View.OnClickListener {
     private static final String TAG_SU_UNKNOWN = "SU";
@@ -48,7 +51,7 @@ public class IntroSuFragment extends IntroFragment implements View.OnClickListen
 
 
     @Override
-    public void onClick(View v) {
+    public void onClick(@NotNull View v) {
         if (v.getId() == R.id.btn_check) {
             Button btn = (Button) v;
             String tag = (String) btn.getTag();
@@ -59,16 +62,30 @@ public class IntroSuFragment extends IntroFragment implements View.OnClickListen
                 case TAG_SU_FAIL:
                     //just fall through
                 case TAG_SU_UNKNOWN:
-                    if (Shell.SU.available()) {
-                        btn.setText(R.string.check_succeeded);
-                        v.setEnabled(false);
-                        v.setTag(TAG_SU_SUCCESS);
-                        notifyStepDone();
-                    } else {
-                        btn.setText(R.string.fail_and_click_to_retry);
-                        v.setEnabled(true);
-                        v.setTag(TAG_SU_FAIL);
-                    }
+                    btn.setEnabled(false);
+                    btn.setText(R.string.checking);
+                    RxJavaUtils.single(Shell.SU::available).subscribe(new RxJavaUtils.SingleObserverAdapter<Boolean>() {
+                        @Override
+                        public void onSuccess(@NotNull Boolean ok) {
+                            if (ok) {
+                                btn.setText(R.string.check_succeeded);
+                                v.setEnabled(false);
+                                v.setTag(TAG_SU_SUCCESS);
+                                notifyStepDone();
+                            } else {
+                                btn.setText(R.string.fail_and_click_to_retry);
+                                v.setEnabled(true);
+                                v.setTag(TAG_SU_FAIL);
+                            }
+                        }
+
+                        @Override
+                        public void onError(@NotNull Throwable e) {
+                            btn.setText(R.string.fail_and_click_to_retry);
+                            v.setEnabled(true);
+                            v.setTag(TAG_SU_FAIL);
+                        }
+                    });
                     break;
             }
         }
