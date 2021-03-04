@@ -76,7 +76,6 @@ public class Environment implements Serializable, LifecycleOwner {
     private String mImei;
     private List<User> mUserList;
     private String mAvatarBackupPath;
-    private String mLastUsedUin;
     private String mLastLoginUin;
     private String mAppFilesDir;
     private List<String> mUinList;
@@ -124,7 +123,6 @@ public class Environment implements Serializable, LifecycleOwner {
      */
     public void init(CompletableObserver observer) {
         RxJavaUtils.complete(() -> {
-            mLastUsedUin = App.config().lastUsedUin.getValue();
             //create backup dirs
             mAppFilesDir = App.getContext().getFilesDir().getPath();
             mWorkerDatabaseDirPath = mAppFilesDir + separator + DigestUtils.md5Hex("database_backup");
@@ -142,11 +140,10 @@ public class Environment implements Serializable, LifecycleOwner {
             mVictimSharedPrefsPath = mVictimDataPath + separator + "shared_prefs";
             readImei();
             loadUins();
-            initUsers();
+            //initUsers();
             copyWorkerDatabase(mCurrentUser);
             tryOpenDatabaseOf(mCurrentUser, mImei);
             fulfillCurrentUser();
-            loadUserIds();
             setCurrentStateInMainThread(Lifecycle.State.STARTED);
         }).subscribe(observer);
     }
@@ -156,25 +153,51 @@ public class Environment implements Serializable, LifecycleOwner {
     }
 
     private void initUsers() {
+        String lastUsedUin = App.config().lastUsedUin.getValue();
         mUserList = new ArrayList<>();
         for (String uin : mUinList) {
             User user = new User(uin);
+            //如果是上次登录
             if (Objects.equals(mLastLoginUin, uin)) {
                 user.isLastLogin = true;
-                if (mLastUsedUin == null) {
+                //并且没有上次使用记录
+                if (lastUsedUin == null) {
+                    //默认使用上次登录UIN初始化应用
                     mCurrentUser = user;
                     mCurrentUser.isCurrentUsed = true;
                     App.config().lastUsedUin.setValue(uin);
                 }
             }
-            if (mLastUsedUin != null) {
-                if (Objects.equals(mLastUsedUin, uin)) {
+            if (lastUsedUin != null) {
+                if (Objects.equals(lastUsedUin, uin)) {
                     mCurrentUser = user;
                     mCurrentUser.isCurrentUsed = true;
-                    App.config().lastUsedUin.setValue(uin);
                 }
             }
             mUserList.add(user);
+        }
+        //no uin in set matches last login uin
+        if (mCurrentUser == null) {
+            //invalidate user list
+            mUinList.clear();
+            mUserList.clear();
+            mCurrentUser = new User(mLastLoginUin);
+        } else {
+            try {
+                String out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "com.tencent.mm_preferences_account_switch.xml");
+                // /data/user/0/com.tencent.mm/shared_prefs/com.tencent.mm_preferences_account_switch.xml
+                List<String> ids = Utils.extract(out, "string>(.+?)<");
+                if (ids.size() == mUinList.size()) {
+                    for (int i = 0; i < ids.size(); i++) {
+                        User user = mUserList.get(i);
+                        if (user.id == null) {
+                            user.id = ids.get(i);
+                        }
+                    }
+                }
+            } catch (ShellUtils.ShellException e) {
+                //no such file, don't throw exception
+            }
         }
     }
 
@@ -242,32 +265,20 @@ public class Environment implements Serializable, LifecycleOwner {
 
 
     private void loadUins() throws ShellUtils.ShellException {
-        String out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "app_brand_global_sp.xml");
+        //String out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "app_brand_global_sp.xml");
         // /data/user/0/com.tencent.mm/shared_prefs/app_brand_global_sp.xml
-        mUinList = Utils.extract(out, ">(\\d+)<");
-        if (mUinList.isEmpty()) {
-            throw new RuntimeException("No uin set found");
-        }
-        out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "com.tencent.mm_preferences.xml");
-        mLastLoginUin = Utils.extractFirst(out, "last_login_uin\">(\\d+)<");
+        //mUinList = Utils.extract(out, ">(.+?)<");
+      /*  if (mUinList.isEmpty()) {
+            LogUtils.debug("No uin set found");
+        }*/
+        // /data/user/0/com.tencent.mm/shared_prefs/com.tencent.mm_preferences.xml
+        String out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "com.tencent.mm_preferences.xml");
+        mLastLoginUin = Utils.extractFirst(out, "last_login_uin\">(.+?)<");
         //out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "system_config_prefs.xml", "initUins,2");
         if (TextUtils.isEmpty(mLastLoginUin)) {
             throw new RuntimeException("No last login uin found");
         }
-    }
-
-    private void loadUserIds() throws ShellUtils.ShellException {
-        String out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "com.tencent.mm_preferences_account_switch.xml");
-        // /data/user/0/com.tencent.mm/shared_prefs/com.tencent.mm_preferences_account_switch.xml
-        List<String> ids = Utils.extract(out, "string>(.+?)<");
-        if (ids.size() == mUinList.size()) {
-            for (int i = 0; i < ids.size(); i++) {
-                User user = mUserList.get(i);
-                if (user.id == null) {
-                    user.id = ids.get(i);
-                }
-            }
-        }
+        mCurrentUser = new User(mLastLoginUin);
     }
 
     /**

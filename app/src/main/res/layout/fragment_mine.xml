@@ -65,10 +65,11 @@
 
             <ImageButton
                 android:id="@+id/ib_switch_account"
-                android:layout_width="42dp"
-                android:layout_height="35dp"
+                android:layout_width="@dimen/fab_small"
+                android:layout_height="@dimen/fab_small"
                 android:layout_marginEnd="16dp"
                 android:background="?selectableItemBackgroundBorderless"
+                android:enabled="@{false}"
                 android:onClick="@{()->host.showSwitchAccountDialog()}"
                 android:padding="@dimen/dp_4"
                 android:scaleType="fitCenter"

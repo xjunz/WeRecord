@@ -3,6 +3,8 @@
  */
 package xjunz.tool.werecord;
 
+import org.apaches.commons.codec.DecoderException;
+import org.apaches.commons.codec.binary.Hex;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -12,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import xjunz.tool.werecord.util.ShellUtils;
+import xjunz.tool.werecord.util.Utils;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -21,9 +24,22 @@ import xjunz.tool.werecord.util.ShellUtils;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
-        String ok_computer = "ok computer";
-        ok_computer.replace("ok", "a");
-        System.out.println(ok_computer);
+        String pref = "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n" +
+                "<map>\n" +
+                "    <set name=\"uin_set\">\n" +
+                "        <string>-11249</string>\n" +
+                "    </set>\n" +
+                "</map>";
+        Utils.extract(pref, ">([-]?\\d+)<");
+    }
+
+    @Test
+    public void deHex() {
+        try {
+            System.out.println(new String(Hex.decodeHex("6361743a202f646174612f757365722f302f636f6d2e74656e63656e742e6d6d2f7368617265645f70726566732f636f6d2e74656e63656e742e6d6d5f707265666572656e6365735f6163636f756e745f7377697463682e786d6c3a204e6f20737563682066696c65206f72206469726563746f7279")));
+        } catch (DecoderException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

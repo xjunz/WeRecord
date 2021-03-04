@@ -14,19 +14,15 @@ import com.jaredrummler.android.shell.Shell;
 import com.jaredrummler.android.shell.ShellExitCode;
 import com.jaredrummler.android.shell.ShellNotFoundException;
 
-import org.apaches.commons.codec.binary.Hex;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-
-import xjunz.tool.werecord.BuildConfig;
 
 public class ShellUtils {
 
     public static class ShellException extends Exception {
         ShellException(String message) {
-            super(BuildConfig.DEBUG ? message : Hex.encodeHexString(message.getBytes()));
+            super(message);
         }
     }
 
