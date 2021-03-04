@@ -6,7 +6,11 @@ AKA **微记录**，是一款本地微信辅助安卓应用程序。支持安卓
 >+ 聊天记录简单数据统计
 >+ 增删改查聊天记录
 >+ 查询单向好友（仅供参考）
->+ 根据WXID添加好友以及等功能
+>+ 根据WXID添加好友以及
+>+ 批量标记已读、未读
+>+ 批量隐藏、显示聊天
+>+ 批量删除聊天记录
+>+ 更多功能开发中...
 ## 应用截图
 ![截图1](https://github.com/xjunz/WeRecord/blob/data-binding/app/art/screenshots/Screenshot_20210222-055259.png)
 ![截图2](https://github.com/xjunz/WeRecord/blob/data-binding/app/art/screenshots/Screenshot_20210222-055535.png)
