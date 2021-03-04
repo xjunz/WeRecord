@@ -15,7 +15,7 @@
 
         <variable
             name="model"
-            type="xjunz.tool.werecord.data.viewmodel.MessageViewModel" />
+            type="xjunz.tool.werecord.ui.viewmodel.MessageViewModel" />
 
         <variable
             name="modifier"
