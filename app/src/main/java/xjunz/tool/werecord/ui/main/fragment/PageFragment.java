@@ -7,7 +7,7 @@ import android.content.Context;
 
 import androidx.fragment.app.Fragment;
 
-import xjunz.tool.werecord.data.viewmodel.PageConfig;
+import xjunz.tool.werecord.ui.viewmodel.PageConfig;
 
 /**
  * @author xjunz 2021/2/11 13:47

@@ -32,8 +32,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import io.reactivex.FlowableEmitter;
 import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.R;
-import xjunz.tool.werecord.data.viewmodel.PageConfig;
-import xjunz.tool.werecord.data.viewmodel.SortBy;
 import xjunz.tool.werecord.databinding.FragmentChatBinding;
 import xjunz.tool.werecord.impl.DatabaseModifier;
 import xjunz.tool.werecord.impl.Environment;
@@ -46,6 +44,8 @@ import xjunz.tool.werecord.impl.repo.TalkerRepository;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 import xjunz.tool.werecord.ui.export.MessageExportActivity;
 import xjunz.tool.werecord.ui.main.DetailActivity;
+import xjunz.tool.werecord.ui.viewmodel.PageConfig;
+import xjunz.tool.werecord.ui.viewmodel.SortBy;
 import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.UiUtils;
 

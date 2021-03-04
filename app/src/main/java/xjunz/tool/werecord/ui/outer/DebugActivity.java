@@ -124,7 +124,8 @@ public class DebugActivity extends BaseActivity {
 
     public void exportTemplateDb(View view) {
         Dialog dialog = UiUtils.createProgress(this, R.string.please_wait);
-        if (mEnv.initialized() && mEnv.getCurrentUser() != null) {
+        if (mEnv.initialized()) {
+            mEnv.getCurrentUser();
             File src = getDatabasePath(TemplateManager.TEMPLATE_DB_NAME);
             String tar = android.os.Environment.getExternalStorageDirectory() + File.separator + TemplateManager.TEMPLATE_DB_PWD + ".db";
             if (src.exists()) {

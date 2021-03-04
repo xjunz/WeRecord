@@ -49,7 +49,6 @@ import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.BR;
 import xjunz.tool.werecord.Constants;
 import xjunz.tool.werecord.R;
-import xjunz.tool.werecord.data.viewmodel.MessageViewModel;
 import xjunz.tool.werecord.databinding.ActivityMessageBinding;
 import xjunz.tool.werecord.impl.DatabaseModifier;
 import xjunz.tool.werecord.impl.Environment;
@@ -61,7 +60,7 @@ import xjunz.tool.werecord.impl.model.message.util.Edition;
 import xjunz.tool.werecord.impl.model.message.util.Template;
 import xjunz.tool.werecord.impl.repo.MessageRepository;
 import xjunz.tool.werecord.impl.repo.RepositoryFactory;
-import xjunz.tool.werecord.ui.base.RecycleSensitiveActivity;
+import xjunz.tool.werecord.ui.base.RecycleAwareActivity;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 import xjunz.tool.werecord.ui.customview.MessagePanel;
 import xjunz.tool.werecord.ui.main.DetailActivity;
@@ -70,10 +69,11 @@ import xjunz.tool.werecord.ui.message.fragment.SearchFragment;
 import xjunz.tool.werecord.ui.message.fragment.StatisticsFragment;
 import xjunz.tool.werecord.ui.message.fragment.dialog.MessageViewerDialog;
 import xjunz.tool.werecord.ui.message.fragment.dialog.TemplateSetupDialog;
+import xjunz.tool.werecord.ui.viewmodel.MessageViewModel;
 import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.UiUtils;
 
-public class MessageActivity extends RecycleSensitiveActivity {
+public class MessageActivity extends RecycleAwareActivity {
     public static final String EXTRA_TALKER = "MessageActivity.extra.talker";
     /**
      * 初始加载的消息数，不宜也没必要过大，否则可能造成卡顿和内存的浪费

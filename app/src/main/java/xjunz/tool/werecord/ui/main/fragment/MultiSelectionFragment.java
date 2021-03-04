@@ -19,10 +19,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import xjunz.tool.werecord.R;
-import xjunz.tool.werecord.data.viewmodel.PageViewModel;
 import xjunz.tool.werecord.databinding.FragmentMultiSelectionBinding;
 import xjunz.tool.werecord.databinding.ItemChatOptionMenuBinding;
 import xjunz.tool.werecord.ui.main.MainActivity;
+import xjunz.tool.werecord.ui.viewmodel.PageViewModel;
 import xjunz.tool.werecord.util.UiUtils;
 import xjunz.tool.werecord.util.Utils;
 

@@ -29,15 +29,15 @@ import java.util.List;
 
 import io.reactivex.disposables.Disposable;
 import xjunz.tool.werecord.R;
-import xjunz.tool.werecord.data.databinding.UniversalBindingAdapter;
-import xjunz.tool.werecord.data.viewmodel.MessageViewModel;
 import xjunz.tool.werecord.databinding.FragmentEditionBinding;
 import xjunz.tool.werecord.databinding.ItemEditionBinding;
 import xjunz.tool.werecord.impl.DatabaseModifier;
 import xjunz.tool.werecord.impl.Environment;
 import xjunz.tool.werecord.impl.model.message.Message;
 import xjunz.tool.werecord.impl.model.message.util.Edition;
+import xjunz.tool.werecord.ui.databinding.UniversalBindingAdapter;
 import xjunz.tool.werecord.ui.message.MessageActivity;
+import xjunz.tool.werecord.ui.viewmodel.MessageViewModel;
 import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.UiUtils;
 import xjunz.tool.werecord.util.Utils;

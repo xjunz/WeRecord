@@ -27,7 +27,6 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -49,14 +48,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.Constants;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.databinding.DialogProgressBinding;
 import xjunz.tool.werecord.impl.Environment;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 
-import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 import static xjunz.tool.werecord.App.getContext;
 
 public class UiUtils {
@@ -110,33 +107,6 @@ public class UiUtils {
     public static AlertDialog showError(Context context, @NotNull Throwable msg) {
         msg.printStackTrace();
         return showError(context, IoUtils.readStackTraceFromThrowable(msg));
-    }
-
-    /**
-     * 显示一个可以[不再显示]的对话框
-     *
-     * @param context       上下文对象
-     * @param title         标题
-     * @param msg           信息
-     * @param prefKey       从{@link xjunz.tool.werecord.App.SharedPrefsManager}中获取/保存是否显示的此对话框的键值
-     * @param defNoMore     默认是否不再显示
-     * @param runWhenNoMore 确认按钮点击事件，如果不再显示，直接执行此事件
-     * @see R.layout#dialog_preference
-     */
-    public static void showPrefDialog(Context context, int title, int msg, String prefKey, boolean defNoMore, Runnable runWhenNoMore) {
-        String finalPrefKey = "nms_" + prefKey;
-        if (App.getSharedPrefsManager().noMore(finalPrefKey)) {
-            runWhenNoMore.run();
-        } else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(context).setTitle(title);
-            @SuppressLint("InflateParams") ViewGroup view = (ViewGroup) ((LayoutInflater) Objects.requireNonNull(context.getSystemService(LAYOUT_INFLATER_SERVICE))).inflate(R.layout.dialog_preference, null);
-            TextView tvMsg = view.findViewById(R.id.fl_container);
-            CheckBox cbNoMore = view.findViewById(R.id.cb_no_more);
-            cbNoMore.setChecked(defNoMore);
-            tvMsg.setText(msg);
-            builder.setView(view);
-            builder.show();
-        }
     }
 
     @NotNull

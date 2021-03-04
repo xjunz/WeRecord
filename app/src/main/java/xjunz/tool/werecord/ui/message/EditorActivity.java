@@ -18,13 +18,13 @@ import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.databinding.ActivityEditorBinding;
 import xjunz.tool.werecord.impl.model.message.Message;
 import xjunz.tool.werecord.ui.base.EditorFragment;
-import xjunz.tool.werecord.ui.base.RecycleSensitiveActivity;
+import xjunz.tool.werecord.ui.base.RecycleAwareActivity;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 import xjunz.tool.werecord.ui.message.fragment.AdvancedEditorFragment;
 import xjunz.tool.werecord.ui.message.fragment.SimpleEditorFragment;
 import xjunz.tool.werecord.util.UiUtils;
 
-public class EditorActivity extends RecycleSensitiveActivity {
+public class EditorActivity extends RecycleAwareActivity {
     public static final String EXTRA_EDIT_MODE = "EditorActivity.extra.EditMode";
     /**
      * 发送时间的起始时限，添加模式传入

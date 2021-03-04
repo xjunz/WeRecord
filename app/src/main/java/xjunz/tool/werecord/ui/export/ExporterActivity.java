@@ -26,7 +26,7 @@ import xjunz.tool.werecord.impl.model.export.Exporter.EnumConfig;
 import xjunz.tool.werecord.impl.model.export.Exporter.PasswordConfig;
 import xjunz.tool.werecord.impl.model.export.Exporter.SwitchConfig;
 import xjunz.tool.werecord.impl.model.export.ExporterRegistry;
-import xjunz.tool.werecord.ui.base.RecycleSensitiveActivity;
+import xjunz.tool.werecord.ui.base.RecycleAwareActivity;
 import xjunz.tool.werecord.ui.base.SingleLineEditorDialog;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 import xjunz.tool.werecord.ui.message.fragment.dialog.TimestampEditorDialog;
@@ -35,7 +35,7 @@ import xjunz.tool.werecord.util.IoUtils;
 /**
  * @author xjunz 2021/2/8 13:56
  */
-public class ExporterActivity extends RecycleSensitiveActivity {
+public class ExporterActivity extends RecycleAwareActivity {
     private File mLatestOutputFile;
     protected Exporter mExporter;
 

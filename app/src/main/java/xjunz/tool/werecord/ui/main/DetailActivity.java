@@ -27,7 +27,7 @@ import xjunz.tool.werecord.impl.model.export.ExporterRegistry;
 import xjunz.tool.werecord.impl.model.export.MessageExporter;
 import xjunz.tool.werecord.impl.repo.ContactRepository;
 import xjunz.tool.werecord.impl.repo.RepositoryFactory;
-import xjunz.tool.werecord.ui.base.RecycleSensitiveActivity;
+import xjunz.tool.werecord.ui.base.RecycleAwareActivity;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 import xjunz.tool.werecord.ui.export.MessageExportActivity;
 import xjunz.tool.werecord.ui.message.MessageActivity;
@@ -35,7 +35,7 @@ import xjunz.tool.werecord.ui.message.fragment.dialog.LvBufferEditorDialog;
 import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.UiUtils;
 
-public class DetailActivity extends RecycleSensitiveActivity implements PopupMenu.OnMenuItemClickListener {
+public class DetailActivity extends RecycleAwareActivity implements PopupMenu.OnMenuItemClickListener {
     public static final String EXTRA_CONTACT = "DetailActivity.extra.contact";
     public static final String EXTRA_CONTACT_ID = "DetailActivity.extra.ContactId";
     private Contact mData;

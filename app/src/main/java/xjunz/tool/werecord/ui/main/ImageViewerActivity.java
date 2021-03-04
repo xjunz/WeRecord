@@ -16,10 +16,10 @@ import java.util.Objects;
 
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.impl.model.account.Account;
-import xjunz.tool.werecord.ui.base.RecycleSensitiveActivity;
+import xjunz.tool.werecord.ui.base.RecycleAwareActivity;
 import xjunz.tool.werecord.util.UiUtils;
 
-public class ImageViewerActivity extends RecycleSensitiveActivity {
+public class ImageViewerActivity extends RecycleAwareActivity {
     public static final String EXTRA_ACCOUNT = "ImageViewerActivity.extra.account";
     ImageView mIvAvatar;
 

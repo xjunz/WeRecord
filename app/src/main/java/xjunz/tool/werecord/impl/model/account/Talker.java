@@ -16,7 +16,7 @@ import java.util.Date;
 
 import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.R;
-import xjunz.tool.werecord.data.viewmodel.SortBy;
+import xjunz.tool.werecord.ui.viewmodel.SortBy;
 import xjunz.tool.werecord.util.Utils;
 
 import static xjunz.tool.werecord.util.Utils.arabicDigit2HanDigit;

@@ -29,11 +29,11 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import xjunz.tool.werecord.R;
-import xjunz.tool.werecord.data.viewmodel.MessageViewModel;
 import xjunz.tool.werecord.databinding.FragmentSearchBinding;
 import xjunz.tool.werecord.databinding.ItemMessageSearchResultBinding;
 import xjunz.tool.werecord.impl.model.message.Message;
 import xjunz.tool.werecord.ui.message.MessageActivity;
+import xjunz.tool.werecord.ui.viewmodel.MessageViewModel;
 import xjunz.tool.werecord.util.UiUtils;
 
 /**

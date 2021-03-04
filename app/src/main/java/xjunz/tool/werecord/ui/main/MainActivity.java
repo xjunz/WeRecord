@@ -26,9 +26,8 @@ import java.io.IOException;
 import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.BuildConfig;
 import xjunz.tool.werecord.R;
-import xjunz.tool.werecord.data.viewmodel.PageViewModel;
 import xjunz.tool.werecord.databinding.ActivityMainBinding;
-import xjunz.tool.werecord.ui.base.RecycleSensitiveActivity;
+import xjunz.tool.werecord.ui.base.RecycleAwareActivity;
 import xjunz.tool.werecord.ui.customview.MasterToast;
 import xjunz.tool.werecord.ui.main.fragment.ChatFragment;
 import xjunz.tool.werecord.ui.main.fragment.ContactFragment;
@@ -38,10 +37,11 @@ import xjunz.tool.werecord.ui.main.fragment.MultiSelectionFragment;
 import xjunz.tool.werecord.ui.main.fragment.PageFragment;
 import xjunz.tool.werecord.ui.outer.DebugActivity;
 import xjunz.tool.werecord.ui.outer.InitializationActivity;
+import xjunz.tool.werecord.ui.viewmodel.PageViewModel;
 import xjunz.tool.werecord.util.IoUtils;
 import xjunz.tool.werecord.util.UiUtils;
 
-public class MainActivity extends RecycleSensitiveActivity {
+public class MainActivity extends RecycleAwareActivity {
     /**
      * 当前{@link androidx.viewpager2.widget.ViewPager2}的选中项，支持数据绑定<br/>
      * <b>注意：</b>默认值不能为空或为0，否则不会触发数据绑定初始化

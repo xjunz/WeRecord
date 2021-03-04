@@ -29,8 +29,6 @@ import java.util.Objects;
 
 import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.R;
-import xjunz.tool.werecord.data.viewmodel.PageConfig;
-import xjunz.tool.werecord.data.viewmodel.SortBy;
 import xjunz.tool.werecord.databinding.FragmentContactBinding;
 import xjunz.tool.werecord.impl.model.account.Contact;
 import xjunz.tool.werecord.impl.model.export.ContactExporter;
@@ -43,6 +41,8 @@ import xjunz.tool.werecord.ui.main.DetailActivity;
 import xjunz.tool.werecord.ui.main.MainActivity;
 import xjunz.tool.werecord.ui.main.fragment.dialog.AddContactByIdDialog;
 import xjunz.tool.werecord.ui.main.fragment.dialog.CheckZombiesDialog;
+import xjunz.tool.werecord.ui.viewmodel.PageConfig;
+import xjunz.tool.werecord.ui.viewmodel.SortBy;
 import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.UiUtils;
 

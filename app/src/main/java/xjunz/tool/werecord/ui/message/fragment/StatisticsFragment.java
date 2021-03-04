@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Objects;
 
 import xjunz.tool.werecord.R;
-import xjunz.tool.werecord.data.viewmodel.MessageViewModel;
 import xjunz.tool.werecord.databinding.FragmentStatsBinding;
 import xjunz.tool.werecord.databinding.ItemChartMsgCountBinding;
 import xjunz.tool.werecord.databinding.ItemChartMsgCountCollapsedBinding;
@@ -42,6 +41,7 @@ import xjunz.tool.werecord.impl.repo.GroupRepository;
 import xjunz.tool.werecord.impl.repo.RepositoryFactory;
 import xjunz.tool.werecord.ui.main.DetailActivity;
 import xjunz.tool.werecord.ui.message.MessageActivity;
+import xjunz.tool.werecord.ui.viewmodel.MessageViewModel;
 import xjunz.tool.werecord.util.RxJavaUtils;
 import xjunz.tool.werecord.util.UiUtils;
 import xjunz.tool.werecord.util.Utils;

@@ -42,7 +42,7 @@ public class LogUtils {
         return consumed;
     }
 
-    @NotNull
+    @Nullable
     public static <T> T logTroughCalculateExecutionTime(@NotNull Callable<T> callable, String taskName) {
         long start = System.currentTimeMillis();
         T t = null;

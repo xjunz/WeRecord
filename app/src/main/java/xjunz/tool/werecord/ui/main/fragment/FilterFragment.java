@@ -27,8 +27,8 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import xjunz.tool.werecord.R;
-import xjunz.tool.werecord.data.viewmodel.PageViewModel;
 import xjunz.tool.werecord.databinding.FragmentFilterBinding;
+import xjunz.tool.werecord.ui.viewmodel.PageViewModel;
 import xjunz.tool.werecord.util.RxJavaUtils;
 
 public class FilterFragment extends Fragment {

@@ -19,10 +19,10 @@ import java.util.List;
 
 import xjunz.tool.werecord.App;
 import xjunz.tool.werecord.R;
-import xjunz.tool.werecord.data.viewmodel.SortBy;
 import xjunz.tool.werecord.impl.model.export.TableExportable;
 import xjunz.tool.werecord.impl.model.message.util.LvBufferUtils;
 import xjunz.tool.werecord.impl.repo.ContactRepository;
+import xjunz.tool.werecord.ui.viewmodel.SortBy;
 import xjunz.tool.werecord.util.LogUtils;
 import xjunz.tool.werecord.util.Utils;
 
