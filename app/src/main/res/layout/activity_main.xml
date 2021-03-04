@@ -11,7 +11,7 @@
 
         <variable
             name="model"
-            type="xjunz.tool.werecord.data.viewmodel.PageViewModel" />
+            type="xjunz.tool.werecord.ui.viewmodel.PageViewModel" />
 
         <variable
             name="activity"

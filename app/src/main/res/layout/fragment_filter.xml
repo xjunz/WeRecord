@@ -9,11 +9,11 @@
 
         <import type="android.text.Html" />
 
-        <import type="xjunz.tool.werecord.data.viewmodel.SortBy" />
+        <import type="xjunz.tool.werecord.ui.viewmodel.SortBy" />
 
         <variable
             name="model"
-            type="xjunz.tool.werecord.data.viewmodel.PageViewModel" />
+            type="xjunz.tool.werecord.ui.viewmodel.PageViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
