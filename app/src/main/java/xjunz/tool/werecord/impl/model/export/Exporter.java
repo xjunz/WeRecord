@@ -95,12 +95,15 @@ public abstract class Exporter {
     };
 
     @NotNull
-    public String getDbExportReadme() throws IOException {
+    public String getDbExportReadme(@Nullable String appendage) throws IOException {
+        if (appendage == null) {
+            appendage = "";
+        }
         if (sDbExportReadme == null) {
             sDbExportReadme = IoUtils.readAssetAsString("template_db_export_readme.html");
         }
         String password = TextUtils.isEmpty(getExportDbPassword()) ? String.format("<i>%s</i>", App.getStringOf(R.string.none)) : getExportDbPassword();
-        return String.format(sDbExportReadme, getExportableName(), Utils.formatDate(System.currentTimeMillis()), password);
+        return String.format(sDbExportReadme, getExportableName(), Utils.formatDate(System.currentTimeMillis()), password, appendage);
     }
 
     /**

@@ -37,6 +37,17 @@ public class ShellUtils {
         sudo("cp", srcPath, tarPath);
     }
 
+    public static boolean isFileExists(String filePath) throws ShellException {
+        CommandResult result = sudo(String.format("if [ -e %s ];then\n echo '1'\nelse\necho '0'\nfi", filePath));
+        String out = result.getStdout();
+        if ("1".equals(out)) {
+            return true;
+        } else if ("0".equals(out)) {
+            return false;
+        }
+        throw new IllegalArgumentException("Unknown result: " + out);
+    }
+
     /**
      * 使用{@code cp}指令复制某一文件到应用的数据文件夹内，此方法会先判断原文件是否存在，
      * 如果原文件不存在，不会抛出异常
@@ -155,7 +166,7 @@ public class ShellUtils {
                 return getConsole().run(commands);
             } catch (ShellNotFoundException e) {
                 return new CommandResult(
-                        Collections.<String>emptyList(), Collections.<String>emptyList(), ShellExitCode.SHELL_NOT_FOUND);
+                        Collections.emptyList(), Collections.emptyList(), ShellExitCode.SHELL_NOT_FOUND);
             }
         }
     }
@@ -177,7 +188,7 @@ public class ShellUtils {
         CommandResult result = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
                 SU_MM.run(command.toString()) : Shell.SU.run(command.toString());
         if (!result.isSuccessful()) {
-            throw new ShellException(result.getStderr());
+            throw new ShellException("\"" + result.getStderr() + "\"");
         }
         return result;
     }

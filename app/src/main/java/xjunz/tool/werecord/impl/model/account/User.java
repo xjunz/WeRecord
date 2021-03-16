@@ -6,7 +6,6 @@ package xjunz.tool.werecord.impl.model.account;
 
 import android.os.Parcel;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -17,6 +16,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 
 import xjunz.tool.werecord.impl.Environment;
+import xjunz.tool.werecord.util.IoUtils;
 
 
 public class User extends Account {
@@ -53,11 +53,7 @@ public class User extends Account {
     public void deleteWorkerDatabase() {
         final File backup = new File(workerDatabaseFilePath);
         if (backup.exists()) {
-            new Thread(() -> {
-                if (!backup.delete()) {
-                    Log.wtf("?o?", "Failed to delete backup file: " + workerDatabaseFilePath);
-                }
-            }).start();
+            IoUtils.deleteFileSync(backup);
         }
     }
 

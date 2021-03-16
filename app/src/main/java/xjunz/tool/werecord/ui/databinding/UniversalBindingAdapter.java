@@ -211,12 +211,19 @@ public class UniversalBindingAdapter {
         view.addOnLayoutChangeListener(newValue);
     }
 
-    @InverseBindingAdapter(attribute = "android:width")
+    @InverseBindingAdapter(attribute = "android:width", event = "android:widthAttrChanged")
     public static int getWidth(@NotNull View view) {
         return view.getWidth();
     }
 
-    @BindingAdapter("android:widthAttrChanged")
+    @BindingAdapter("android:width")
+    public static void setWidth(@NotNull View view, int width) {
+        ViewGroup.LayoutParams lp = view.getLayoutParams();
+        lp.width = width;
+        view.setLayoutParams(lp);
+    }
+
+    @BindingAdapter({"android:widthAttrChanged"})
     public static void setWidthWatcher(View view, final InverseBindingListener listener) {
         View.OnLayoutChangeListener newValue = (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
             boolean isChanged = left != oldLeft || right != oldRight || top != oldTop || bottom != oldBottom;

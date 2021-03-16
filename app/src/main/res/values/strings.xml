@@ -323,6 +323,7 @@
     <string name="message">消息</string>
     <string name="chat_records">聊天记录</string>
     <string name="exporting">导出中…</string>
+    <string name="back_up_ing">备份中…</string>
     <string name="format_export_name">[%s]导出的%s(%s)</string>
     <string name="format_export_db_name">导出的数据库(%s)</string>
     <string name="export_successfully">导出成功</string>
@@ -373,6 +374,10 @@
     <string name="function">功能</string>
     <string name="export_decrypted_database">导出明文数据库</string>
     <string name="des_export_decrypted_database">导出解密后的原数据库</string>
+    <string name="backup_database">备份数据库</string>
+    <string name="des_backup_database">备份当前原数据库</string>
+    <string name="restore_database">还原数据库</string>
+    <string name="des_restore_database">将指定备份文件还原</string>
     <string name="open_source_licenses">开源项目许可证</string>
     <string name="about">关于</string>
     <string name="get_latest_version">获取最新版</string>

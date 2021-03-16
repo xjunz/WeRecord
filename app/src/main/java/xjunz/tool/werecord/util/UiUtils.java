@@ -48,7 +48,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-import xjunz.tool.werecord.Constants;
 import xjunz.tool.werecord.R;
 import xjunz.tool.werecord.databinding.DialogProgressBinding;
 import xjunz.tool.werecord.impl.Environment;
@@ -88,9 +87,7 @@ public class UiUtils {
 
     @NotNull
     public static AlertDialog showError(Context context, String msg) {
-        if (Constants.USER_DEBUGGABLE) {
-            msg = Environment.getBasicEnvInfo() + "\n\n" + msg;
-        }
+        msg = Environment.getBasicEnvInfo() + "\n\n" + msg;
         AlertDialog alert = createDialog(context, R.string.error_occurred, msg)
                 .setNeutralButton(R.string.copy, null)
                 .setPositiveButton(R.string.feedback, null).setNegativeButton(android.R.string.ok, null).show();

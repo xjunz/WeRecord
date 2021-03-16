@@ -3,7 +3,8 @@
   -->
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -84,7 +85,8 @@
                 class="xjunz.tool.werecord.ui.main.fragment.FilterFragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?android:colorBackground" />
+                android:background="?android:colorBackground"
+                tools:ignore="FragmentTagUsage" />
 
 
             <androidx.constraintlayout.widget.ConstraintLayout

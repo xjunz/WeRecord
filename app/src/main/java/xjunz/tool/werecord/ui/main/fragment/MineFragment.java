@@ -142,11 +142,37 @@ public class MineFragment extends PageFragment {
         startActivity(new Intent(requireContext(), OssLicensesMenuActivity.class));
     }
 
-    private File mDatabaseExportTempFile;
+    private void clearExportCacheIfExists(File cache) {
+        if (cache != null && cache.exists()) {
+            IoUtils.deleteFileSync(cache);
+        }
+    }
 
-    private void clearExportCacheIfExists() {
-        if (mDatabaseExportTempFile != null && mDatabaseExportTempFile.exists()) {
-            IoUtils.deleteFileSync(mDatabaseExportTempFile);
+    public void backupOriginalDatabase() {
+        ProgressDialog dialog = ProgressDialog.build(requireContext()).setTitle(R.string.exporting);
+        try {
+            File tempFile = File.createTempFile("backup", null);
+            DatabaseExporter exporter = new DatabaseExporter(DatabaseExporter.MODE_KEEP);
+            exporter.exportToAsync(tempFile, null)
+                    .doOnSubscribe(d -> dialog.setCancelableAction(d::dispose).show())
+                    .doFinally(dialog::dismiss)
+                    .doOnError(e -> clearExportCacheIfExists(tempFile))
+                    .doOnDispose(() -> clearExportCacheIfExists(tempFile))
+                    .subscribe(new RxJavaUtils.CompletableObservableAdapter() {
+                        @Override
+                        public void onError(@NotNull Throwable e) {
+                            UiUtils.showError(requireContext(), e);
+                        }
+
+                        @Override
+                        public void onComplete() {
+                            new ExportShowcaseDialog().setFile(tempFile)
+                                    .setFilename(exporter.getExportFileName())
+                                    .show(getParentFragmentManager(), "backupOriginalDatabase");
+                        }
+                    });
+        } catch (IOException e) {
+            MasterToast.shortToast(e.getMessage());
         }
     }
 
@@ -157,14 +183,14 @@ public class MineFragment extends PageFragment {
         }
         ProgressDialog dialog = ProgressDialog.build(requireContext()).setTitle(R.string.exporting);
         try {
-            mDatabaseExportTempFile = File.createTempFile("database", null);
-            DatabaseExporter exporter = new DatabaseExporter();
+            File tempFile = File.createTempFile("database", null);
+            DatabaseExporter exporter = new DatabaseExporter(DatabaseExporter.MODE_DECRYPT);
             exporter.getPasswordConfig().setValue(null);
-            exporter.exportToAsync(mDatabaseExportTempFile, null)
+            exporter.exportToAsync(tempFile, null)
                     .doOnSubscribe(d -> dialog.setCancelableAction(d::dispose).show())
                     .doFinally(dialog::dismiss)
-                    .doOnError(e -> clearExportCacheIfExists())
-                    .doOnDispose(this::clearExportCacheIfExists)
+                    .doOnError(e -> clearExportCacheIfExists(tempFile))
+                    .doOnDispose(() -> clearExportCacheIfExists(tempFile))
                     .subscribe(new RxJavaUtils.CompletableObservableAdapter() {
                         @Override
                         public void onError(@NotNull Throwable e) {
@@ -173,9 +199,9 @@ public class MineFragment extends PageFragment {
 
                         @Override
                         public void onComplete() {
-                            new ExportShowcaseDialog().setFile(mDatabaseExportTempFile)
+                            new ExportShowcaseDialog().setFile(tempFile)
                                     .setFilename(exporter.getExportFileName())
-                                    .show(getParentFragmentManager(), "decrypted_db_export_showcase");
+                                    .show(getParentFragmentManager(), "exportDecryptedDatabase");
                         }
                     });
         } catch (IOException e) {

@@ -24,6 +24,8 @@ import androidx.core.content.FileProvider;
 import androidx.databinding.ObservableField;
 import androidx.fragment.app.DialogFragment;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -48,6 +50,7 @@ public class ExportShowcaseDialog extends DialogFragment implements ActivityResu
     private File mFile;
     private final ObservableField<String> mFilename = new ObservableField<>();
     private ActivityResultLauncher<String> mFileExportLauncher;
+    private boolean mRetainFile;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,6 +69,11 @@ public class ExportShowcaseDialog extends DialogFragment implements ActivityResu
                 return null;
             }
         }, this);
+    }
+
+    public ExportShowcaseDialog setRetainFile(boolean retain) {
+        mRetainFile = retain;
+        return this;
     }
 
     public ExportShowcaseDialog setFile(File file) {
@@ -116,6 +124,12 @@ public class ExportShowcaseDialog extends DialogFragment implements ActivityResu
         return Objects.requireNonNull(mFilename.get());
     }
 
+    @NotNull
+    private String getMimeType(String suffix) {
+        String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
+        return mime == null ? "*/*" : mime;
+    }
+
     public void share() {
         rename();
         if (!Objects.equals(mFile.getName(), requireFilename())) {
@@ -131,7 +145,7 @@ public class ExportShowcaseDialog extends DialogFragment implements ActivityResu
         Uri uri = FileProvider.getUriForFile(requireContext(), "xjunz.tool.werecord.fileprovider", mFile);
         Intent intent = new Intent(Intent.ACTION_SEND, uri)
                 .putExtra(Intent.EXTRA_STREAM, uri)
-                .setType(MimeTypeMap.getSingleton().getMimeTypeFromExtension(requireFilename().substring(requireFilename().lastIndexOf('.') + 1)))
+                .setType(getMimeType(requireFilename().substring(requireFilename().lastIndexOf('.') + 1)))
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         ActivityUtils.startActivityCreateChooser(requireContext(), intent);
     }
@@ -158,7 +172,7 @@ public class ExportShowcaseDialog extends DialogFragment implements ActivityResu
      * 清理上次导出的文件缓存
      */
     protected synchronized void clearCacheIfExists() {
-        if (mFile != null && mFile.exists()) {
+        if (!mRetainFile && mFile != null && mFile.exists()) {
             IoUtils.deleteFileSync(mFile);
         }
     }

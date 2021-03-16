@@ -129,7 +129,7 @@ public class Utils {
     }
 
     /**
-     * 提取出符合正则的第一个捕获组
+     * 提取出符合正则的第一个捕获组，如果不存在返回null
      */
     @Nullable
     public static String extractFirst(String src, @RegExp String regex) {

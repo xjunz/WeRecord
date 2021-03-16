@@ -156,6 +156,15 @@
                     app:optionIcon="@drawable/ic_export_24dp"
                     app:optionTitle="@string/export_decrypted_database" />
 
+                <xjunz.tool.werecord.ui.customview.OptionItemView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:elevation="@dimen/z_item"
+                    android:onClick="@{()->host.backupOriginalDatabase()}"
+                    app:optionDes="@string/des_backup_database"
+                    app:optionIcon="@drawable/ic_baseline_backup_table_24"
+                    app:optionTitle="@string/backup_database" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

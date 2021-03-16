@@ -135,7 +135,7 @@ public class ContactExporter extends Exporter {
                         //打包readme和数据库
                         ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(outputFile, true));
                         zipOutputStream.putNextEntry(new ZipEntry("readme.html"));
-                        zipOutputStream.write(getDbExportReadme().getBytes());
+                        zipOutputStream.write(getDbExportReadme(null).getBytes());
                         zipOutputStream.closeEntry();
                         zipOutputStream.putNextEntry(new ZipEntry("contacts.db"));
                         IoUtils.transferStreamNoCloseOutStream(new FileInputStream(dbFile), zipOutputStream);

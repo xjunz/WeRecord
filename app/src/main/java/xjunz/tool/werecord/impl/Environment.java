@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Process;
-import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -82,6 +81,32 @@ public class Environment implements Serializable, LifecycleOwner {
     private SQLiteDatabase mDatabaseOfCurUser;
     private User mCurrentUser;
     private DatabaseModifier mModifier;
+    private static final String DEF_IMEI = "1234567890ABCDEF";
+
+    public static final class InitializationException extends Exception {
+        public int reasonCode;
+        /**
+         * 找不到KeyInfo
+         */
+        public static final int REASON_NO_KEY_INFO = 0;
+        /**
+         * 有KeyInfo但是里面没有IMEI
+         */
+        public static final int REASON_NULL_IMEI = 1;
+        /**
+         * 找不到UIN，既没有last login uin也没有uin set
+         */
+        public static final int REASON_NO_UIN = 2;
+        /**
+         * 有uin，但是找不到任何匹配的数据库文件
+         */
+        public static final int REASON_NO_DB_FILE_MATCHES_UIN = 3;
+
+        private InitializationException(int reasonCode) {
+            super("Initiate failed: " + reasonCode);
+            this.reasonCode = reasonCode;
+        }
+    }
 
     /**
      * @return 当前工作数据库
@@ -264,21 +289,36 @@ public class Environment implements Serializable, LifecycleOwner {
     }
 
 
-    private void loadUins() throws ShellUtils.ShellException {
-        //String out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "app_brand_global_sp.xml");
-        // /data/user/0/com.tencent.mm/shared_prefs/app_brand_global_sp.xml
-        //mUinList = Utils.extract(out, ">(.+?)<");
-      /*  if (mUinList.isEmpty()) {
-            LogUtils.debug("No uin set found");
-        }*/
-        // /data/user/0/com.tencent.mm/shared_prefs/com.tencent.mm_preferences.xml
-        String out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "com.tencent.mm_preferences.xml");
-        mLastLoginUin = Utils.extractFirst(out, "last_login_uin\">(.+?)<");
-        //out = ShellUtils.cat(mVictimSharedPrefsPath + separator + "system_config_prefs.xml", "initUins,2");
-        if (TextUtils.isEmpty(mLastLoginUin)) {
-            throw new RuntimeException("No last login uin found");
+    private void loadUins() throws ShellUtils.ShellException, InitializationException {
+        String lastLoginUin = null;
+        ///data/user/0/com.tencent.mm/shared_prefs/com.tencent.mm_preferences.xml
+        String lastLoginUinFilePath = mVictimSharedPrefsPath + separator + "com.tencent.mm_preferences.xml";
+        if (ShellUtils.isFileExists(lastLoginUinFilePath)) {
+            lastLoginUin = Utils.extractFirst(ShellUtils.cat(lastLoginUinFilePath), "last_login_uin\">(.+?)<");
         }
-        mCurrentUser = new User(mLastLoginUin);
+        ///data/user/0/com.tencent.mm/shared_prefs/app_brand_global_sp.xml
+        String uinSetFilePath = mVictimSharedPrefsPath + separator + "app_brand_global_sp.xml";
+        if (ShellUtils.isFileExists(uinSetFilePath)) {
+            mUinList = Utils.extract(ShellUtils.cat(uinSetFilePath), ">(.+?)<");
+        }
+        User tempUser = new User(lastLoginUin);
+        if (lastLoginUin != null && ShellUtils.isFileExists(tempUser.originalDatabaseFilePath)) {
+            mCurrentUser = tempUser;
+            mCurrentUser.isLastLogin = true;
+        } else {
+            if (mUinList == null || mUinList.isEmpty()) {
+                throw new InitializationException(InitializationException.REASON_NO_UIN);
+            } else {
+                for (String uin : mUinList) {
+                    User user = new User(uin);
+                    if (ShellUtils.isFileExists(user.originalDatabaseFilePath)) {
+                        mCurrentUser = user;
+                        return;
+                    }
+                    throw new InitializationException(InitializationException.REASON_NO_DB_FILE_MATCHES_UIN);
+                }
+            }
+        }
     }
 
     /**
@@ -317,7 +357,7 @@ public class Environment implements Serializable, LifecycleOwner {
         }
     }
 
-    private void readImei() throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, ShellUtils.ShellException, InvalidKeyException {
+    private void readImei() throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, ShellUtils.ShellException, InvalidKeyException, InitializationException {
         App.SharedPrefsManager spm = App.getSharedPrefsManager();
         //先从缓存读取
         if (spm.isAppIntroDone() && (mImei = spm.getImei()) != null) {
@@ -325,6 +365,13 @@ public class Environment implements Serializable, LifecycleOwner {
         }
         //否则从文件读取
         String keyInfoPath = mVictimDataPath + separator + "files" + separator + "KeyInfo.bin";
+        if (!ShellUtils.isFileExists(keyInfoPath)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                mImei = DEF_IMEI;
+            } else {
+                throw new InitializationException(InitializationException.REASON_NO_KEY_INFO);
+            }
+        }
         SecretKeySpec secretKeySpec = new SecretKeySpec(new byte[]{95, 119, 69, 99, 72, 65, 84, 95}, "RC4");
         Cipher cipher = Cipher.getInstance("RC4");
         cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
@@ -334,6 +381,9 @@ public class Environment implements Serializable, LifecycleOwner {
         mImei = reader.readLine();
         reader.close();
         IoUtils.deleteFile(tempFile);
+        if (mImei == null) {
+            throw new InitializationException(InitializationException.REASON_NULL_IMEI);
+        }
     }
 
     private static final SQLiteDatabaseHook COMPATIBILITY_HOOK = new SQLiteDatabaseHook() {
