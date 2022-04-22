@@ -56,10 +56,10 @@ public class MessageExportActivity extends ExporterActivity {
             MasterToast.shortToast(R.string.no_data);
             return;
         }
-        if (mExporter.getExportFormat() == Exporter.Format.HTML) {
-            UiUtils.createAlert(this, R.string.under_construction).setPositiveButton(android.R.string.ok, null).show();
-            return;
-        }
+//        if (mExporter.getExportFormat() == Exporter.Format.HTML) {
+//            UiUtils.createAlert(this, R.string.under_construction).setPositiveButton(android.R.string.ok, null).show();
+//            return;
+//        }
         try {
             ProgressDialog progress = ProgressDialog.build(this).setTitle(R.string.exporting);
             mExporter.exportToAsync(createTempOutputFile("message"), new Exporter.OnProgressListener() {

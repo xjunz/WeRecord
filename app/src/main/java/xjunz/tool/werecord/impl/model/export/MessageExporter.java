@@ -4,6 +4,7 @@
 package xjunz.tool.werecord.impl.model.export;
 
 import android.content.ContentValues;
+import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.Observable;
@@ -38,9 +39,11 @@ import xjunz.tool.werecord.impl.model.account.Talker;
 import xjunz.tool.werecord.impl.model.message.Message;
 import xjunz.tool.werecord.impl.repo.MessageRepository;
 import xjunz.tool.werecord.impl.repo.RepositoryFactory;
+import xjunz.tool.werecord.impl.repo.AvatarRepository;
 import xjunz.tool.werecord.util.DbUtils;
 import xjunz.tool.werecord.util.IoUtils;
 import xjunz.tool.werecord.util.RxJavaUtils;
+import xjunz.tool.werecord.util.UiUtils;
 import xjunz.tool.werecord.util.Utils;
 
 import static xjunz.tool.werecord.util.DbUtils.buildValuesFromCursorReuse;
@@ -207,7 +210,37 @@ public class MessageExporter extends Exporter {
                     }).doFinally(() -> IoUtils.deleteFile(dbFile));
                 }).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
             case HTML:
-                break;
+                if (mTalkers.size() == 1) {
+                    Talker talker = mTalkers.get(0);
+                    return RxJavaUtils.complete(() -> {
+                        OutputStream outputStream = new FileOutputStream(outputFile);
+                        String sql = String.format("talker='%s'", talker.id) + clause;
+                        List<Message> messages = repository.rawQueryMessageByTalker(sql);
+                        if (!messages.isEmpty()) {
+                            listener.onGetTotalProgress(messages.size());
+                            String header = String.format("%s;var msgData=\"[{\\\"ExportTime\\\":\\\"%s\\\"," +
+                                    "\\\"Source\\\":\\\"%s\\\"," +
+                                    "\\\"MsgSize\\\":\\\"%s\\\"},",
+                                    IoUtils.readAssetAsString("exportHtmlTemplate.txt"),
+                                    Utils.formatDate(System.currentTimeMillis()),
+                                    talker.getIdentifier(),
+                                    messages.size());
+                            outputStream.write(header.getBytes());
+                            for (int i = 0; i < messages.size(); i++) {
+                                Message message = messages.get(i);
+                                listener.onProgressUpdate(i + 1);
+                                outputStream.write((message.exportAsHtml() + ((i != messages.size() - 1) ? "," : "")).getBytes());
+                            }
+                            String footer = "]\";" + IoUtils.readAssetAsString("exportJsTemplate.txt") + "</script></body></html>";
+                            outputStream.write(footer.getBytes());
+
+                            outputStream.flush();
+                            outputStream.close();
+                        }
+                    });
+                } else {
+                    break;
+                }
         }
         return null;
     }
@@ -234,6 +267,11 @@ public class MessageExporter extends Exporter {
                 }
                 //[文本]导出的聊天记录(2021-2-8 21_00_00).zip
                 return App.getStringOf(R.string.format_export_name, format.getName(), getExportableName(), getCurrentDate()) + ".zip";
+            case HTML:
+                if (isSingleSource()) {
+                    //[聊天记录]XJUNZ(2021-2-8 21_00_21).html
+                    return String.format("[%s]", getExportableName()) + mTalkers.get(0).getName() + String.format("(%s)", getCurrentDate()) + format.getExportSuffix();
+                }
         }
         throw new IllegalArgumentException("Unsupported format: " + format.getName());
     }

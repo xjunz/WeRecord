@@ -6,6 +6,7 @@ package xjunz.tool.werecord.impl.repo;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.util.LruCache;
 
 import androidx.annotation.NonNull;
@@ -13,6 +14,7 @@ import androidx.annotation.Nullable;
 
 import org.apaches.commons.codec.digest.DigestUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -100,6 +102,19 @@ public class AvatarRepository extends LifecyclePerceptiveRepository {
         } else {
             return cache;
         }
+    }
+
+    /**
+     * 转码指定微信头像
+     *
+     * @param AvatarBitmap 头像图片
+     * @return 该微信账号的头像的Base64
+     */
+    public String BitmapToBase64(@NonNull Bitmap AvatarBitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        AvatarBitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        return "data:image/png;base64,"+Base64.encodeToString(byteArray, Base64.NO_WRAP);
     }
 
 }

@@ -12,6 +12,10 @@ import androidx.core.text.HtmlCompat;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
+import xjunz.tool.werecord.impl.repo.AvatarRepository;
+import xjunz.tool.werecord.impl.repo.RepositoryFactory;
 import xjunz.tool.werecord.util.Utils;
 
 /**
@@ -85,5 +89,31 @@ public class PlainMessage extends Message {
                 requireSenderName(),
                 Utils.formatDateLocally(getCreateTimeStamp()),
                 getParsedContent());
+    }
+
+    @Override
+    public String exportAsHtml() {
+        AvatarRepository repository =  RepositoryFactory.get(AvatarRepository.class);
+        String EscapeContent = getParsedContent();
+        EscapeContent = EscapeContent.replace("\"", "\\\"");
+        EscapeContent = EscapeContent.replace("\n", "\\\\n");
+        EscapeContent = EscapeContent.replace("\b", "\\\b");
+        EscapeContent = EscapeContent.replace("\f", "\\\f");
+        EscapeContent = EscapeContent.replace("\t", "\\\t");
+        EscapeContent = EscapeContent.replace("\r", "\\\r");
+        EscapeContent = EscapeContent.replace("\\u", "\\\\u");
+        if (EscapeContent.isEmpty()) EscapeContent = getType().getCaption();
+        return  String.format("{\\\"time\\\":\\\"%s\\\"," +
+                "\\\"sender\\\":\\\"%s\\\"," +
+                "\\\"faceImg\\\":\\\"%s\\\"," +
+                "\\\"msgType\\\":\\\"%s\\\"," +
+                "\\\"msgContent\\\":\\\"%s\\\"," +
+                "\\\"isMe\\\":%s}",
+                getCreateTimeStamp(),
+                requireSenderName(),//sender
+                repository.BitmapToBase64(Objects.requireNonNull(repository.getAvatar(getSenderId()))),//faceImgUrl
+                getType(),//msgType
+                EscapeContent,//msgContent
+                isSend());//isMe
     }
 }
